@@ -1,0 +1,11 @@
+; Replace the name and email below with your real identity.
+[user]
+    name = Orhun Gença
+    email = orhungenca@hotmail.com
+
+; To use this as your global config, copy this file to your home directory:
+;   Copy-Item .gitconfig $HOME\.gitconfig -Force
+
+; Or set values directly:
+;   git config --global user.name "Your Name"
+;   git config --global user.email "you@example.com"

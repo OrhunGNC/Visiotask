@@ -1,0 +1,1 @@
+python -m PyInstaller --onefile --noconsole --name "Visiotask" macro_gui_auto.py
