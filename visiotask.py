@@ -707,6 +707,7 @@ class MacroApp:
         tk.Label(header_frame, text="Macro Sequence", font=("Segoe UI", 24, "bold"), bg=self.BG, fg=self.TEXT).pack(anchor="w")
         tk.Label(header_frame, text="Arrange image checks, wait times, and conditions.", font=("Segoe UI", 12), bg=self.BG, fg=self.TEXT_SEC).pack(anchor="w")
         tk.Label(header_frame, text="* Setting Wait to 0.0 forces the macro to search infinitely until the next image is found.", font=("Segoe UI", 10, "italic"), bg=self.BG, fg="#8E96A4").pack(anchor="w", pady=(4, 0))
+        tk.Label(header_frame, text="* Skip Next forces the macro to skip the next image if the selected one is not found.", font=("Segoe UI", 10, "italic"), bg=self.BG, fg="#8E96A4").pack(anchor="w", pady=(2, 0))
 
         # Fixed Column Headers
         list_header_row = tk.Frame(view, bg=self.BG, pady=4, padx=16)
@@ -722,10 +723,10 @@ class MacroApp:
         hd_trash.pack_propagate(False)
         hd_trash.pack(side=tk.RIGHT)
 
-        hd_skip = tk.Frame(headers_right, bg=self.BG, width=60, height=20)
+        hd_skip = tk.Frame(headers_right, bg=self.BG, width=80, height=20)
         hd_skip.pack_propagate(False)
         hd_skip.pack(side=tk.RIGHT, padx=10)
-        tk.Label(hd_skip, text="Skip", font=("Segoe UI", 10, "bold"), bg=self.BG, fg=self.TEXT_SEC).pack(expand=True)
+        tk.Label(hd_skip, text="Skip Next", font=("Segoe UI", 10, "bold"), bg=self.BG, fg=self.TEXT_SEC).pack(expand=True)
 
         hd_dc = tk.Frame(headers_right, bg=self.BG, width=70, height=20)
         hd_dc.pack_propagate(False)
@@ -832,7 +833,7 @@ class MacroApp:
             del_btn.bind("<Leave>", lambda e, btn=del_btn, c=card: [c.configure(bg=self.CARD), btn.configure(bg=self.CARD)])
 
             # 2. Skip Toggle
-            skip_frame = tk.Frame(actions, bg=self.CARD, width=60)
+            skip_frame = tk.Frame(actions, bg=self.CARD, width=80)
             skip_frame.pack_propagate(False)
             skip_frame.pack(side=tk.RIGHT, padx=10, fill=tk.Y)
             skip_frame.bind("<Enter>", on_enter)
