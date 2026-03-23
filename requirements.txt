@@ -4,3 +4,4 @@ mss
 pyautogui
 keyboard
 Pillow
+windnd

@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import messagebox, filedialog
 from tkinter import ttk
 from PIL import Image, ImageTk
+import windnd
 
 import cv2
 import numpy as np
@@ -55,7 +56,7 @@ IMAGE_FILES, MACRO_SEQUENCE = load_config()
 
 
 # --- Macro Logic ---
-def find_and_click(image_file, name, confidence=0.75, region=None, log=None):
+def find_and_click(image_file, name, confidence=0.75, region=None, log=None, double_click=False):
     image_path = os.path.join(IMAGE_DIR, image_file)
     template = cv2.imread(image_path, cv2.IMREAD_COLOR)
     if template is None:
@@ -78,9 +79,18 @@ def find_and_click(image_file, name, confidence=0.75, region=None, log=None):
         h, w = template.shape[:2]
         center_x = max_loc[0] + w // 2 + (region[0] if region else 0)
         center_y = max_loc[1] + h // 2 + (region[1] if region else 0)
-        pyautogui.click(center_x, center_y)
+        
+        if double_click:
+            pyautogui.click(center_x, center_y)
+            time.sleep(0.1)
+            pyautogui.click(center_x, center_y)
+            action_name = "double-clicked"
+        else:
+            pyautogui.click(center_x, center_y)
+            action_name = "clicked"
+            
         if log:
-            log(f"[+] {name} clicked ({max_val:.2f} @{center_x},{center_y})")
+            log(f"[+] {name} {action_name} ({max_val:.2f} @{center_x},{center_y})")
         return True
     return False
 
@@ -111,6 +121,7 @@ def run_macro(stop_event, log, screen_ratio, scan_side):
             break
 
         skip_next = False
+        block_next = False
         
         for idx, step in enumerate(MACRO_SEQUENCE):
             if stop_event.is_set() or keyboard.is_pressed('q'):
@@ -119,17 +130,43 @@ def run_macro(stop_event, log, screen_ratio, scan_side):
             if skip_next:
                 log(f"[~] Skipping {step['name']} due to previous condition.")
                 skip_next = False
+                # If we skipped an item, we should cancel the block or carry it over? 
+                # Preserving it is usually safer, but let's reset it to be consistent with normal flow.
+                block_next = False
                 continue
 
             img_name = step["name"]
-            wait_time = step["wait"]
+            try:
+                wait_time = float(step.get("wait", 0))
+            except ValueError:
+                wait_time = 0
 
-            found = find_and_click(img_name, img_name.upper(), 0.75, search_region, log)
-            if found:
-                time.sleep(wait_time)
+            double_click = step.get("double_click", False)
+
+            if block_next:
+                # Blocking step: keep searching until found
+                found = False
+                while not stop_event.is_set():
+                    if keyboard.is_pressed('q'):
+                        break
+                    found = find_and_click(img_name, img_name.upper(), 0.75, search_region, log, double_click)
+                    if found:
+                        break
+                    time.sleep(0.1)
+                
+                if found and wait_time > 0:
+                    time.sleep(wait_time)
             else:
-                if step.get("skip_next", False):
-                    skip_next = True
+                # Normal behavior
+                found = find_and_click(img_name, img_name.upper(), 0.75, search_region, log, double_click)
+                if found:
+                    if wait_time > 0:
+                        time.sleep(wait_time)
+                else:
+                    if step.get("skip_next", False):
+                        skip_next = True
+
+            block_next = (wait_time == 0)
                     
         time.sleep(0.1)
 
@@ -207,21 +244,34 @@ class RoundedButton(tk.Canvas):
         self.create_text(w/2, h/2, text=self.text, fill=self.fg_color, font=self.font)
 
 class ToggleSwitch(tk.Canvas):
-    def __init__(self, parent, variable, width=44, height=24, **kwargs):
+    def __init__(self, parent, variable, width=50, height=26, **kwargs):
         super().__init__(parent, bg=parent["bg"], highlightthickness=0, width=width, height=height, cursor="hand2", **kwargs)
         self.variable = variable
         self.w = width
         self.h = height
-        self.active_color = "#FF7A18"
-        self.inactive_color = "#2A2F3A"
-        self.thumb_color = "#E5E7EB"
+        self.active_bg = "#FF7A18"       # Bright orange indicator
+        self.active_hover = "#FFA559"
+        self.inactive_bg = "#4B5563"     # More distinct dark gray off state
+        self.inactive_hover = "#6B7280"
+        self.thumb_color = "#FFFFFF"
+        self._is_hovered = False
         
         self.bind("<Button-1>", self._toggle)
+        self.bind("<Enter>", self._on_enter)
+        self.bind("<Leave>", self._on_leave)
         self.variable.trace_add("write", self._update_draw)
         self._draw()
         
     def _toggle(self, event):
         self.variable.set(not self.variable.get())
+        
+    def _on_enter(self, event):
+        self._is_hovered = True
+        self._draw()
+        
+    def _on_leave(self, event):
+        self._is_hovered = False
+        self._draw()
         
     def _update_draw(self, *args):
         self._draw()
@@ -229,18 +279,87 @@ class ToggleSwitch(tk.Canvas):
     def _draw(self):
         self.delete("all")
         state = self.variable.get()
-        bg = self.active_color if state else self.inactive_color
+        if state:
+            bg = self.active_hover if self._is_hovered else self.active_bg
+        else:
+            bg = self.inactive_hover if self._is_hovered else self.inactive_bg
+            
         r = self.h / 2
-        w, h = self.w-1, self.h-1
-        pts = [r, 0, w-r, 0, w, 0, w, r, w, h-r, w, h, w-r, h, r, h, 0, h, 0, h-r, 0, r, 0, 0, r, 0]
-        self.create_polygon(pts, fill=bg, outline=bg, smooth=True)
+        w, h = self.w, self.h
         
-        thumb_r = r - 2
+        # Draw standard rounded box using precise coordinates
+        self.create_arc(0, 0, self.h, self.h, start=90, extent=180, fill=bg, outline=bg)
+        self.create_arc(self.w - self.h, 0, self.w, self.h, start=270, extent=180, fill=bg, outline=bg)
+        self.create_rectangle(self.h/2, 0, self.w - self.h/2, self.h, fill=bg, outline=bg)
+        
+        thumb_r = r - 3
         cx = self.w - r if state else r
+        
+        # Slight shadow/outline for thumb to pop it out
+        self.create_oval(cx-thumb_r, r-thumb_r+1, cx+thumb_r, r+thumb_r+1, fill="#1E2530", outline="")
+        # Main thumb
         self.create_oval(cx-thumb_r, r-thumb_r, cx+thumb_r, r+thumb_r, fill=self.thumb_color, outline=self.thumb_color)
 
+class SmoothScrollbar(tk.Canvas):
+    def __init__(self, parent, target_canvas, width=8, **kwargs):
+        super().__init__(parent, bg="#0F172A", highlightthickness=0, width=width, **kwargs)
+        self.target = target_canvas
+        self.thumb_color = "#2A3441"
+        self.hover_color = "#3B4756"
+        self.thumb_id = self.create_rectangle(0, 0, width, 0, fill=self.thumb_color, outline="")
+        self.first = 0.0
+        self.last = 1.0
+        self._drag_y = 0
+        self._drag_start_first = 0.0
+        self._hovered = False
+
+        self.bind("<ButtonPress-1>", self._on_click)
+        self.bind("<B1-Motion>", self._on_drag)
+        self.bind("<Enter>", self._on_enter)
+        self.bind("<Leave>", self._on_leave)
+        self.bind("<Configure>", lambda e: self._redraw())
+        
+        self.target.configure(yscrollcommand=self.set)
+
+    def set(self, first, last):
+        self.first = float(first)
+        self.last = float(last)
+        if self.last - self.first >= 1.0:
+            self.itemconfig(self.thumb_id, state="hidden")
+        else:
+            self.itemconfig(self.thumb_id, state="normal")
+            self._redraw()
+
+    def _redraw(self):
+        h = self.winfo_height()
+        w = self.winfo_width()
+        self.coords(self.thumb_id, 0, h * self.first, w, h * self.last)
+
+    def _on_enter(self, e):
+        self._hovered = True
+        self.itemconfig(self.thumb_id, fill=self.hover_color)
+
+    def _on_leave(self, e):
+        self._hovered = False
+        self.itemconfig(self.thumb_id, fill=self.thumb_color)
+
+    def _on_click(self, e):
+        h = self.winfo_height()
+        if h == 0: return
+        fraction = e.y / h
+        if fraction < self.first or fraction > self.last:
+            self.target.yview_moveto(fraction - (self.last - self.first) / 2)
+        self._drag_y = e.y
+        self._drag_start_first = float(self.first)
+
+    def _on_drag(self, e):
+        h = self.winfo_height()
+        if h == 0: return
+        dy = e.y - self._drag_y
+        self.target.yview_moveto(self._drag_start_first + (dy / h))
+
 class CustomInputDialog(tk.Toplevel):
-    def __init__(self, parent, title_text, label_text):
+    def __init__(self, parent, title_text, label_text, ok_text="Add Image", default_value=""):
         super().__init__(parent)
         self.result = None
         self.overrideredirect(True)
@@ -285,20 +404,28 @@ class CustomInputDialog(tk.Toplevel):
         input_frame = tk.Frame(main_frame, bg="#0F1117", highlightthickness=1, highlightbackground="#2A2F3A")
         input_frame.pack(fill=tk.X, padx=30, pady=(8, 4))
         
-        self.entry_var = tk.StringVar()
+        self.entry_var = tk.StringVar(value=default_value)
         self.entry = tk.Entry(input_frame, textvariable=self.entry_var, font=("Segoe UI", 12), bg="#0F1117", fg="#E5E7EB", insertbackground="#E5E7EB", bd=0)
         self.entry.pack(fill=tk.X, padx=12, pady=10)
         self.entry.bind("<Return>", lambda e: self._on_submit())
         
-        # Ensure entry gets the focus
-        self.after(100, self.entry.focus_force)
+        # Ensure entry gets the focus and selects text
+        def _focus_and_select():
+            self.entry.focus_force()
+            if default_value:
+                idx = default_value.rfind('.')
+                if idx > 0:
+                    self.entry.select_range(0, idx)
+                else:
+                    self.entry.select_range(0, tk.END)
+        self.after(100, _focus_and_select)
         
         tk.Label(main_frame, text="e.g. icon.png", font=("Segoe UI", 10), bg="#1A1D26", fg="#9CA3AF").pack(anchor="w", padx=30)
         
         btn_frame = tk.Frame(main_frame, bg="#1A1D26")
         btn_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=30, pady=(10, 24))
         
-        self.btn_submit = RoundedButton(btn_frame, "Add Image", bg_color="#FF7A18", fg_color="#FFFFFF", hover_color="#FF8C36", command=self._on_submit, width=120, height=44, font=("Segoe UI", 11, "bold"))
+        self.btn_submit = RoundedButton(btn_frame, ok_text, bg_color="#FF7A18", fg_color="#FFFFFF", hover_color="#FF8C36", command=self._on_submit, width=120, height=44, font=("Segoe UI", 11, "bold"))
         self.btn_submit.pack(side=tk.RIGHT)
         
         self.btn_cancel = RoundedButton(btn_frame, "Cancel", bg_color="#1A1D26", fg_color="#E5E7EB", hover_color="#2A2F3A", outline_color="#2A2F3A", command=self._on_cancel, width=100, height=44, font=("Segoe UI", 11))
@@ -308,13 +435,16 @@ class CustomInputDialog(tk.Toplevel):
         self.wait_window(self)
 
     def _on_submit(self):
-        val = self.entry_var.get().strip()
-        if val:
-            self.result = val
+        self.result = self.entry_var.get().strip()
         self.destroy()
 
     def _on_cancel(self):
         self.destroy()
+
+def _bind_mousewheel(canvas, widget):
+    widget.bind("<MouseWheel>", lambda e: canvas.yview_scroll(int(-1 * (e.delta / 120)), "units"))
+    for child in widget.winfo_children():
+        _bind_mousewheel(canvas, child)
 
 # --- GUI ---
 class MacroApp:
@@ -346,8 +476,17 @@ class MacroApp:
             self.root.update_idletasks()
             hwnd = ctypes.windll.user32.GetParent(self.root.winfo_id())
             ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, 20, ctypes.byref(ctypes.c_int(2)), 4)
+            # Allow drag & drop bypassing UIPI if running in elevated mode
+            ctypes.windll.user32.ChangeWindowMessageFilterEx(hwnd, 0x0233, 1, None) # WM_DROPFILES
+            ctypes.windll.user32.ChangeWindowMessageFilterEx(hwnd, 0x0049, 1, None) # WM_COPYGLOBALDATA
         except Exception:
             pass
+
+        # Hook drag and drop
+        try:
+            windnd.hook_dropfiles(self.root, func=self._on_drop)
+        except Exception as e:
+            print("Drag and Drop hook failed:", e)
 
         self.stop_event = threading.Event()
         self.macro_thread = None
@@ -563,19 +702,64 @@ class MacroApp:
         view = tk.Frame(self.main_content, bg=self.BG)
         self.views["Macro Sequence"] = view
         
-        tk.Label(view, text="Macro Sequence", font=("Segoe UI", 24, "bold"), bg=self.BG, fg=self.TEXT).pack(anchor="w")
-        tk.Label(view, text="Arrange image checks, wait times, and conditions.", font=("Segoe UI", 12), bg=self.BG, fg=self.TEXT_SEC).pack(anchor="w", pady=(0, 24))
+        header_frame = tk.Frame(view, bg=self.BG)
+        header_frame.pack(fill=tk.X, pady=(0, 24))
+        tk.Label(header_frame, text="Macro Sequence", font=("Segoe UI", 24, "bold"), bg=self.BG, fg=self.TEXT).pack(anchor="w")
+        tk.Label(header_frame, text="Arrange image checks, wait times, and conditions.", font=("Segoe UI", 12), bg=self.BG, fg=self.TEXT_SEC).pack(anchor="w")
+        tk.Label(header_frame, text="* Setting Wait to 0.0 forces the macro to search infinitely until the next image is found.", font=("Segoe UI", 10, "italic"), bg=self.BG, fg="#8E96A4").pack(anchor="w", pady=(4, 0))
 
-        self.seq_canvas = tk.Canvas(view, bg=self.BG, highlightthickness=0)
-        scrollbar = tk.Scrollbar(view, orient="vertical", command=self.seq_canvas.yview)
-        self.seq_scroll_frame = tk.Frame(self.seq_canvas, bg=self.BG)
-
-        self.seq_scroll_frame.bind("<Configure>", lambda e: self.seq_canvas.configure(scrollregion=self.seq_canvas.bbox("all")))
-        self.seq_canvas.bind("<Configure>", lambda e: self.seq_canvas.itemconfig(self.seq_canvas_window, width=e.width))
-        self.seq_canvas_window = self.seq_canvas.create_window((0, 0), window=self.seq_scroll_frame, anchor="nw")
+        # Fixed Column Headers
+        list_header_row = tk.Frame(view, bg=self.BG, pady=4, padx=16)
+        list_header_row.pack(fill=tk.X, padx=(0, 8))
         
-        self.seq_canvas.configure(yscrollcommand=scrollbar.set)
+        tk.Label(list_header_row, text="", bg=self.BG, width=3).pack(side=tk.LEFT)
+        tk.Label(list_header_row, text="Image", font=("Segoe UI", 10, "bold"), bg=self.BG, fg=self.TEXT_SEC, width=15, anchor="w").pack(side=tk.LEFT, padx=(50, 10))
+        
+        headers_right = tk.Frame(list_header_row, bg=self.BG)
+        headers_right.pack(side=tk.RIGHT)
+        
+        hd_trash = tk.Frame(headers_right, bg=self.BG, width=40, height=20)
+        hd_trash.pack_propagate(False)
+        hd_trash.pack(side=tk.RIGHT)
+
+        hd_skip = tk.Frame(headers_right, bg=self.BG, width=60, height=20)
+        hd_skip.pack_propagate(False)
+        hd_skip.pack(side=tk.RIGHT, padx=10)
+        tk.Label(hd_skip, text="Skip", font=("Segoe UI", 10, "bold"), bg=self.BG, fg=self.TEXT_SEC).pack(expand=True)
+
+        hd_dc = tk.Frame(headers_right, bg=self.BG, width=70, height=20)
+        hd_dc.pack_propagate(False)
+        hd_dc.pack(side=tk.RIGHT, padx=10)
+        tk.Label(hd_dc, text="Double", font=("Segoe UI", 10, "bold"), bg=self.BG, fg=self.TEXT_SEC).pack(expand=True)
+
+        hd_wait = tk.Frame(headers_right, bg=self.BG, width=80, height=20)
+        hd_wait.pack_propagate(False)
+        hd_wait.pack(side=tk.RIGHT, padx=(10, 14))
+        tk.Label(hd_wait, text="Wait (s)", font=("Segoe UI", 10, "bold"), bg=self.BG, fg=self.TEXT_SEC).pack(expand=True)
+
+        # Subtle separator
+        tk.Frame(view, bg="#1E2530", height=1).pack(fill=tk.X, pady=0)
+
+        list_container = tk.Frame(view, bg=self.BG)
+        list_container.pack(fill=tk.BOTH, expand=True)
+
+        self.seq_canvas = tk.Canvas(list_container, bg=self.BG, highlightthickness=0, bd=0)
+        scrollbar = SmoothScrollbar(list_container, target_canvas=self.seq_canvas)
+        
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.seq_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        self.seq_scroll_frame = tk.Frame(self.seq_canvas, bg=self.BG, bd=0)
+
+        def _update_seq_scrollregion(e=None):
+            w = self.seq_scroll_frame.winfo_width()
+            h = self.seq_scroll_frame.winfo_height()
+            ch = self.seq_canvas.winfo_height()
+            self.seq_canvas.configure(scrollregion=(0, 0, w, max(h, ch)))
+
+        self.seq_scroll_frame.bind("<Configure>", _update_seq_scrollregion)
+        self.seq_canvas.bind("<Configure>", lambda e: [self.seq_canvas.itemconfig(self.seq_canvas_window, width=e.width), _update_seq_scrollregion()])
+        self.seq_canvas_window = self.seq_canvas.create_window((0, 0), window=self.seq_scroll_frame, anchor="nw")
 
     def _refresh_sequence_list(self):
         for widget in self.seq_scroll_frame.winfo_children(): widget.destroy()
@@ -583,60 +767,128 @@ class MacroApp:
         if not hasattr(self, '_seq_images'): self._seq_images = []
         self._seq_images.clear()
         self.seq_skip_vars = []
+        self.seq_dc_vars = []
 
         if not MACRO_SEQUENCE:
             tk.Label(self.seq_scroll_frame, text="No sequence steps.", font=("Segoe UI", 12), bg=self.BG, fg=self.TEXT_SEC).pack(pady=40)
             return
 
         for i, step in enumerate(MACRO_SEQUENCE):
-            card = tk.Frame(self.seq_scroll_frame, bg=self.CARD, pady=12, padx=16)
-            card.pack(fill=tk.X, pady=(0, 10))
+            card = tk.Frame(self.seq_scroll_frame, bg=self.CARD, pady=8, padx=16)
+            if i > 0:
+                card.pack(fill=tk.X, pady=(6, 0))
+            else:
+                card.pack(fill=tk.X, pady=0)
+            
+            # Hover effect
+            def on_enter(e, c=card): c.configure(bg="#212631")
+            def on_leave(e, c=card): c.configure(bg=self.CARD)
+            card.bind("<Enter>", on_enter)
+            card.bind("<Leave>", on_leave)
             
             reorder_frame = tk.Frame(card, bg=self.CARD)
-            reorder_frame.pack(side=tk.LEFT, padx=(0, 12))
+            reorder_frame.pack(side=tk.LEFT)
+            reorder_frame.bind("<Enter>", on_enter)
+            reorder_frame.bind("<Leave>", on_leave)
             tk.Button(reorder_frame, text="▲", font=("Segoe UI", 8), bg=self.CARD, fg=self.TEXT_SEC, bd=0, cursor="hand2", command=lambda idx=i: self._move_seq(idx, -1), state=tk.NORMAL if i > 0 else tk.DISABLED).pack()
             tk.Button(reorder_frame, text="▼", font=("Segoe UI", 8), bg=self.CARD, fg=self.TEXT_SEC, bd=0, cursor="hand2", command=lambda idx=i: self._move_seq(idx, 1), state=tk.NORMAL if i < len(MACRO_SEQUENCE)-1 else tk.DISABLED).pack()
 
             img_path = os.path.join(IMAGE_DIR, step["name"])
-            lbl_preview = tk.Label(card, bg=self.BORDER, width=40, height=40)
+            lbl_preview = tk.Label(card, bg=self.BORDER, width=32, height=32)
             if os.path.isfile(img_path):
                 try:
                     pil_img = Image.open(img_path)
-                    pil_img.thumbnail((40, 40))
+                    pil_img.thumbnail((32, 32))
                     tk_img = ImageTk.PhotoImage(pil_img)
                     self._seq_images.append(tk_img)
                     lbl_preview.config(image=tk_img, width=0, height=0)
                 except Exception: lbl_preview.config(text="Err", fg=self.ERROR)
-            lbl_preview.pack(side=tk.LEFT, padx=(0, 16))
+            lbl_preview.pack(side=tk.LEFT, padx=(12, 12))
+            lbl_preview.bind("<Enter>", on_enter)
+            lbl_preview.bind("<Leave>", on_leave)
 
-            details = tk.Frame(card, bg=self.CARD)
-            details.pack(side=tk.LEFT, fill=tk.Y)
-            tk.Label(details, text=step["name"], font=("Segoe UI", 12, "bold"), bg=self.CARD, fg=self.TEXT).pack(anchor="w")
+            name_lbl = tk.Label(card, text=step["name"], font=("Segoe UI", 11, "bold"), bg=self.CARD, fg=self.TEXT, width=16, anchor="w")
+            name_lbl.pack(side=tk.LEFT)
+            name_lbl.bind("<Enter>", on_enter)
+            name_lbl.bind("<Leave>", on_leave)
 
             actions = tk.Frame(card, bg=self.CARD)
             actions.pack(side=tk.RIGHT, fill=tk.Y)
+            actions.bind("<Enter>", on_enter)
+            actions.bind("<Leave>", on_leave)
 
-            tk.Button(actions, text="🗑", font=("Segoe UI Symbol", 14), bg=self.CARD, fg=self.ERROR, bd=0, cursor="hand2", command=lambda n=step["name"]: self._delete_image(n)).pack(side=tk.RIGHT, padx=(16, 0))
+            # Controls aligned exactly under headers
+            
+            # 1. Delete button (far right)
+            btn_frame = tk.Frame(actions, bg=self.CARD, width=40)
+            btn_frame.pack_propagate(False)
+            btn_frame.pack(side=tk.RIGHT, fill=tk.Y)
+            btn_frame.bind("<Enter>", on_enter)
+            btn_frame.bind("<Leave>", on_leave)
+            
+            del_btn = tk.Button(btn_frame, text="🗑", font=("Segoe UI Symbol", 12), bg=self.CARD, fg=self.ERROR, bd=0, cursor="hand2", command=lambda n=step["name"]: self._delete_image(n))
+            del_btn.pack(expand=True)
+            del_btn.bind("<Enter>", lambda e, btn=del_btn, c=card: [c.configure(bg="#212631"), btn.configure(bg="#212631")])
+            del_btn.bind("<Leave>", lambda e, btn=del_btn, c=card: [c.configure(bg=self.CARD), btn.configure(bg=self.CARD)])
 
-            skip_frame = tk.Frame(actions, bg=self.CARD)
-            skip_frame.pack(side=tk.RIGHT, padx=16)
-            tk.Label(skip_frame, text="Skip if missing", font=("Segoe UI", 10), bg=self.CARD, fg=self.TEXT_SEC).pack(side=tk.LEFT, padx=(0, 8))
+            # 2. Skip Toggle
+            skip_frame = tk.Frame(actions, bg=self.CARD, width=60)
+            skip_frame.pack_propagate(False)
+            skip_frame.pack(side=tk.RIGHT, padx=10, fill=tk.Y)
+            skip_frame.bind("<Enter>", on_enter)
+            skip_frame.bind("<Leave>", on_leave)
             skip_var = tk.BooleanVar(value=step.get("skip_next", False))
             self.seq_skip_vars.append(skip_var)
             sw = ToggleSwitch(skip_frame, skip_var)
-            sw.pack(side=tk.LEFT)
+            sw.pack(expand=True)
             skip_var.trace_add("write", lambda *args, idx=i, v=skip_var: self._update_seq_skip(idx, v))
 
-            wait_frame = tk.Frame(actions, bg=self.CARD)
-            wait_frame.pack(side=tk.RIGHT, padx=16)
-            tk.Label(wait_frame, text="Wait (s):", font=("Segoe UI", 10), bg=self.CARD, fg=self.TEXT_SEC).pack(side=tk.LEFT, padx=(0, 8))
+            # 3. Double Click Toggle
+            dc_frame = tk.Frame(actions, bg=self.CARD, width=70)
+            dc_frame.pack_propagate(False)
+            dc_frame.pack(side=tk.RIGHT, padx=10, fill=tk.Y)
+            dc_frame.bind("<Enter>", on_enter)
+            dc_frame.bind("<Leave>", on_leave)
+            dc_var = tk.BooleanVar(value=step.get("double_click", False))
+            if not hasattr(self, "seq_dc_vars"): self.seq_dc_vars = []
+            self.seq_dc_vars.append(dc_var)
+            sw_dc = ToggleSwitch(dc_frame, dc_var)
+            sw_dc.pack(expand=True)
+            dc_var.trace_add("write", lambda *args, idx=i, v=dc_var: self._update_seq_dc(idx, v))
+
+            # 4. Wait Entry
+            wait_frame = tk.Frame(actions, bg=self.CARD, width=80)
+            wait_frame.pack_propagate(False)
+            wait_frame.pack(side=tk.RIGHT, padx=(10, 14), fill=tk.Y)
+            wait_frame.bind("<Enter>", on_enter)
+            wait_frame.bind("<Leave>", on_leave)
             
             wait_var = tk.StringVar(value=str(step.get("wait", 0)))
-            entry_frame = tk.Frame(wait_frame, bg=self.BG, highlightbackground=self.BORDER, highlightthickness=1)
-            entry_frame.pack(side=tk.LEFT)
-            wait_entry = tk.Entry(entry_frame, textvariable=wait_var, width=5, font=("Segoe UI", 10), bg=self.BG, fg=self.TEXT, insertbackground=self.TEXT, bd=0)
-            wait_entry.pack(padx=4, pady=2)
+            
+            border_frame = tk.Frame(wait_frame, bg="#4B5563") # clear visible border
+            border_frame.pack(expand=True, pady=4)
+            
+            entry_frame = tk.Frame(border_frame, bg="#1E2530")
+            entry_frame.pack(padx=1, pady=1, fill=tk.BOTH, expand=True) # 1px simulated geometric border
+            
+            wait_entry = tk.Entry(entry_frame, textvariable=wait_var, width=5, font=("Segoe UI", 11, "bold"), bg="#1E2530", fg="#FFFFFF", insertbackground="#FFFFFF", bd=0, justify="center")
+            wait_entry.pack(padx=4, pady=4)
             wait_var.trace_add("write", lambda *args, idx=i, v=wait_var: self._update_seq_wait(idx, v))
+            
+            # Allow focus events to cascade entry frame styling correctly
+            def _on_focus_in(e, bf=border_frame, ef=entry_frame, we=wait_entry): 
+                bf.configure(bg="#FF7A18")
+                ef.configure(bg="#2A2F3A")
+                we.configure(bg="#2A2F3A")
+            def _on_focus_out(e, bf=border_frame, ef=entry_frame, we=wait_entry): 
+                bf.configure(bg="#4B5563")
+                ef.configure(bg="#1E2530")
+                we.configure(bg="#1E2530")
+            wait_entry.bind("<FocusIn>", _on_focus_in)
+            wait_entry.bind("<FocusOut>", _on_focus_out)
+
+        _bind_mousewheel(self.seq_canvas, self.seq_scroll_frame)
+        self.seq_canvas.bind("<MouseWheel>", lambda e: self.seq_canvas.yview_scroll(int(-1 * (e.delta / 120)), "units"))
 
     def _build_images_view(self):
         view = tk.Frame(self.main_content, bg=self.BG)
@@ -652,15 +904,24 @@ class MacroApp:
 
         RoundedButton(header, text="Add New Image", bg_color=self.PRIMARY, fg_color="#FFF", hover_color=self.PRIMARY_HOVER, command=self._add_new_image, width=140, height=40).pack(side=tk.RIGHT)
 
-        self.img_canvas = tk.Canvas(view, bg=self.BG, highlightthickness=0)
-        scrollbar = tk.Scrollbar(view, orient="vertical", command=self.img_canvas.yview)
-        self.img_scroll_frame = tk.Frame(self.img_canvas, bg=self.BG)
+        list_container = tk.Frame(view, bg=self.BG)
+        list_container.pack(fill=tk.BOTH, expand=True)
 
-        self.img_scroll_frame.bind("<Configure>", lambda e: self.img_canvas.configure(scrollregion=self.img_canvas.bbox("all")))
-        self.img_canvas.bind("<Configure>", lambda e: self.img_canvas.itemconfig(self.img_canvas_window, width=e.width))
+        self.img_canvas = tk.Canvas(list_container, bg=self.BG, highlightthickness=0, bd=0)
+        scrollbar = SmoothScrollbar(list_container, target_canvas=self.img_canvas)
+        self.img_scroll_frame = tk.Frame(self.img_canvas, bg=self.BG, bd=0)
+
+        def _update_img_scrollregion(e=None):
+            w = self.img_scroll_frame.winfo_width()
+            h = self.img_scroll_frame.winfo_height()
+            ch = self.img_canvas.winfo_height()
+            self.img_canvas.configure(scrollregion=(0, 0, w, max(h, ch)))
+
+        self.img_scroll_frame.bind("<Configure>", _update_img_scrollregion)
+        self.img_canvas.bind("<Configure>", lambda e: [self.img_canvas.itemconfig(self.img_canvas_window, width=e.width), _update_img_scrollregion()])
         self.img_canvas_window = self.img_canvas.create_window((0, 0), window=self.img_scroll_frame, anchor="nw")
         
-        self.img_canvas.configure(yscrollcommand=scrollbar.set)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.img_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         self.image_status_labels = {}
@@ -672,9 +933,19 @@ class MacroApp:
         if not hasattr(self, '_grid_images'): self._grid_images = []
         self._grid_images.clear()
 
-        for img_name in IMAGE_FILES:
+        def create_action_btn(parent, text, default_fg, hover_fg, command, px):
+            btn = tk.Button(parent, text=text, font=("Segoe UI", 10), bg=self.CARD, fg=default_fg, activebackground=self.CARD, activeforeground=hover_fg, bd=0, cursor="hand2", command=command)
+            btn.bind("<Enter>", lambda e, b=btn, c=hover_fg: b.config(fg=c))
+            btn.bind("<Leave>", lambda e, b=btn, c=default_fg: b.config(fg=c))
+            btn.pack(side=tk.LEFT, padx=px)
+            return btn
+
+        for i, img_name in enumerate(IMAGE_FILES):
             card = tk.Frame(self.img_scroll_frame, bg=self.CARD, pady=12, padx=16)
-            card.pack(fill=tk.X, pady=(0, 10))
+            if i > 0:
+                card.pack(fill=tk.X, pady=(10, 0))
+            else:
+                card.pack(fill=tk.X, pady=0)
             
             img_path = os.path.join(IMAGE_DIR, img_name)
             lbl_preview = tk.Label(card, bg=self.BORDER, width=40, height=40)
@@ -702,10 +973,14 @@ class MacroApp:
 
             actions = tk.Frame(card, bg=self.CARD)
             actions.pack(side=tk.RIGHT, fill=tk.Y)
-            tk.Button(actions, text="Replace", font=("Segoe UI", 10, "bold"), bg=self.CARD, fg=self.PRIMARY, bd=0, cursor="hand2", command=lambda n=img_name: self._upload_image(n)).pack(side=tk.LEFT, padx=10)
-            tk.Button(actions, text="Delete", font=("Segoe UI", 10), bg=self.CARD, fg=self.ERROR, bd=0, cursor="hand2", command=lambda n=img_name: self._delete_image(n)).pack(side=tk.LEFT, padx=10)
+            create_action_btn(actions, "✏ Rename", "#AAB4C3", "#D1D5DB", lambda n=img_name: self._rename_image(n), (0, 16))
+            create_action_btn(actions, "🔄 Replace", "#FF8A3D", "#FF9D5C", lambda n=img_name: self._upload_image(n), (0, 16))
+            create_action_btn(actions, "🗑 Delete", "#E05252", "#EF4444", lambda n=img_name: self._delete_image(n), (0, 5))
 
         self._update_image_statuses()
+        
+        _bind_mousewheel(self.img_canvas, self.img_scroll_frame)
+        self.img_canvas.bind("<MouseWheel>", lambda e: self.img_canvas.yview_scroll(int(-1 * (e.delta / 120)), "units"))
 
     def _close_window(self):
         self.stop_event.set()
@@ -814,25 +1089,89 @@ class MacroApp:
         self.stop_event.set()
         self._log("[i] Stopping...")
 
-    def _add_new_image(self):
-        dialog = CustomInputDialog(self.root, "Add New Image", "Filename:")
-        new_name = dialog.result
-        if not new_name: return
-        if not new_name.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')): new_name += ".png"
-        if new_name in IMAGE_FILES: return messagebox.showinfo("Exists", "Already exists.")
+    def _on_drop(self, files):
+        if not files:
+            return
             
-        path = filedialog.askopenfilename(filetypes=[("Image files", "*.png *.jpg *.jpeg *.bmp")])
-        if path:
+        for file_item in files:
+            # Handle different formats returned by windnd (bytes vs str)
+            try:
+                path = file_item if isinstance(file_item, str) else file_item.decode('utf-8')
+            except UnicodeDecodeError:
+                path = file_item.decode('gbk', errors='ignore')
+                
+            path = os.path.normpath(path)
+                
+            if not os.path.isfile(path): continue
+            
+            ext = os.path.splitext(path)[1].lower()
+            if ext not in ['.png', '.jpg', '.jpeg', '.bmp']:
+                self._log(f"[-] Dropped file is not a supported image: {path}")
+                continue
+                
+            original_filename = os.path.basename(path)
+            
+            # Show dialog prefilled with original filename
+            dialog = CustomInputDialog(self.root, "Add Dropped Image", "Filename:", ok_text="Add", default_value=original_filename)
+            new_name = dialog.result
+            
+            if not new_name:
+                continue
+                
+            if not new_name.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')): 
+                new_name += ext if ext else ".png"
+                
+            if new_name in IMAGE_FILES:
+                messagebox.showinfo("Exists", f"Image '{new_name}' already exists.")
+                continue
+                
             try:
                 shutil.copy(path, os.path.join(IMAGE_DIR, new_name))
                 IMAGE_FILES.append(new_name)
-                MACRO_SEQUENCE.append({"name": new_name, "wait": 0.5, "skip_next": False})
+                MACRO_SEQUENCE.append({"name": new_name, "wait": 0.5, "skip_next": False, "double_click": False})
                 save_config()
-                self._log(f"[+] Added target: {new_name}")
+                self._log(f"[+] Added target via drop: {new_name}")
                 if self.current_view in ["Manage Images", "Macro Sequence"]:
                     self._refresh_image_list()
+                    if self.current_view == "Macro Sequence":
+                        self._refresh_sequence_list()
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
+
+    def _add_new_image(self):
+        dialog = CustomInputDialog(self.root, "Add New Image", "Filename (Optional):")
+        
+        if dialog.result is None:
+            return  # User clicked Cancel or closed the popup
+            
+        new_name = dialog.result
+            
+        path = filedialog.askopenfilename(filetypes=[("Image files", "*.png *.jpg *.jpeg *.bmp")])
+        if not path:
+            return
+            
+        if not new_name:
+            new_name = os.path.basename(path)
+            
+        if not new_name.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
+            ext = os.path.splitext(path)[1].lower()
+            new_name += ext if ext else ".png"
+
+        if new_name in IMAGE_FILES: 
+            return messagebox.showinfo("Exists", "Already exists.")
+            
+        try:
+            shutil.copy(path, os.path.join(IMAGE_DIR, new_name))
+            IMAGE_FILES.append(new_name)
+            MACRO_SEQUENCE.append({"name": new_name, "wait": 0.5, "skip_next": False, "double_click": False})
+            save_config()
+            self._log(f"[+] Added target: {new_name}")
+            if self.current_view in ["Manage Images", "Macro Sequence"]:
+                self._refresh_image_list()
+                if self.current_view == "Macro Sequence":
                     self._refresh_sequence_list()
-            except Exception as e: messagebox.showerror("Error", str(e))
+        except Exception as e: 
+            messagebox.showerror("Error", str(e))
 
     def _update_image_statuses(self):
         for img_name, (indicator, label) in self.image_status_labels.items():
@@ -854,6 +1193,45 @@ class MacroApp:
                     self._refresh_image_list()
                     self._refresh_sequence_list()
             except Exception as e: messagebox.showerror("Error", str(e))
+
+    def _rename_image(self, target):
+        dialog = CustomInputDialog(self.root, "Rename Image", "New Filename:", ok_text="Save", default_value=target)
+        new_name = dialog.result
+        if not new_name: return
+        
+        ext = os.path.splitext(target)[1]
+        if not new_name.lower().endswith(tuple(['.png', '.jpg', '.jpeg', '.bmp'])):
+            new_name += ext if ext else ".png"
+
+        if new_name == target:
+            return
+
+        if new_name in IMAGE_FILES:
+            return messagebox.showinfo("Exists", "An image with that name already exists.")
+
+        old_path = os.path.join(IMAGE_DIR, target)
+        new_path = os.path.join(IMAGE_DIR, new_name)
+        
+        try:
+            if os.path.exists(old_path):
+                os.rename(old_path, new_path)
+                
+            idx = IMAGE_FILES.index(target)
+            IMAGE_FILES[idx] = new_name
+            
+            for step in MACRO_SEQUENCE:
+                if step["name"] == target:
+                    step["name"] = new_name
+            
+            save_config()
+            self._log(f"[+] Renamed {target} to {new_name}")
+            
+            if self.current_view in ["Manage Images", "Macro Sequence"]:
+                self._refresh_image_list()
+                if self.current_view == "Macro Sequence":
+                    self._refresh_sequence_list()
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to rename: {e}")
 
     def _delete_image(self, target):
         try:
@@ -883,6 +1261,10 @@ class MacroApp:
 
     def _update_seq_skip(self, idx, var):
         MACRO_SEQUENCE[idx]["skip_next"] = var.get()
+        save_config()
+
+    def _update_seq_dc(self, idx, var):
+        MACRO_SEQUENCE[idx]["double_click"] = var.get()
         save_config()
 
 def main():
