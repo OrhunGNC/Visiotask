@@ -40,19 +40,29 @@ def load_config():
         try:
             with open(CONFIG_FILE, "r") as f:
                 data = json.load(f)
-                return data.get("IMAGE_FILES", []), data.get("MACRO_SEQUENCE", [])
+                return (
+                    data.get("IMAGE_FILES", []),
+                    data.get("MACRO_SEQUENCE", []),
+                    data.get("SCREEN_RATIO", "16:9"),
+                    data.get("SCAN_AREA", "all")
+                )
         except Exception:
             pass
-    return [], []
+    return [], [], "16:9", "all"
 
 def save_config():
     try:
         with open(CONFIG_FILE, "w") as f:
-            json.dump({"IMAGE_FILES": IMAGE_FILES, "MACRO_SEQUENCE": MACRO_SEQUENCE}, f, indent=4)
+            json.dump({
+                "IMAGE_FILES": IMAGE_FILES,
+                "MACRO_SEQUENCE": MACRO_SEQUENCE,
+                "SCREEN_RATIO": SCREEN_RATIO,
+                "SCAN_AREA": SCAN_AREA
+            }, f, indent=4)
     except Exception:
         pass
 
-IMAGE_FILES, MACRO_SEQUENCE = load_config()
+IMAGE_FILES, MACRO_SEQUENCE, SCREEN_RATIO, SCAN_AREA = load_config()
 
 
 # --- Macro Logic ---
@@ -464,7 +474,7 @@ class MacroApp:
         self.root.title("Visiotask")
         self.root.configure(bg=self.BG)
         self.root.geometry("1000x700")
-        self.root.minsize(800, 600)
+        self.root.minsize(1000, 700)
         
         icon_path = os.path.join(RESOURCE_DIR, "icon.ico")
         if os.path.exists(icon_path):
@@ -492,8 +502,17 @@ class MacroApp:
         self.macro_thread = None
         self.timer_val = 0
         self.remaining_time = 0
-        self.screen_ratio_var = tk.StringVar(value="32:9")
-        self.scan_area_var = tk.StringVar(value="left")
+        self.screen_ratio_var = tk.StringVar(value=SCREEN_RATIO)
+        self.scan_area_var = tk.StringVar(value=SCAN_AREA)
+
+        def _on_settings_change(*args):
+            global SCREEN_RATIO, SCAN_AREA
+            SCREEN_RATIO = self.screen_ratio_var.get()
+            SCAN_AREA = self.scan_area_var.get()
+            save_config()
+
+        self.screen_ratio_var.trace_add("write", _on_settings_change)
+        self.scan_area_var.trace_add("write", _on_settings_change)
         
         self.style = ttk.Style()
         self.style.theme_use("clam")

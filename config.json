@@ -1,4 +1,6 @@
 {
     "IMAGE_FILES": [],
-    "MACRO_SEQUENCE": []
+    "MACRO_SEQUENCE": [],
+    "SCREEN_RATIO": "16:9",
+    "SCAN_AREA": "all"
 }
