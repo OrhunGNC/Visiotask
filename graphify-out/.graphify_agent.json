@@ -1,0 +1,40 @@
+{
+  "nodes": [
+    {"id": "src/main.py", "label": "main.py", "file_type": "code"},
+    {"id": "src/__init__.py", "label": "src/__init__.py", "file_type": "code"},
+    {"id": "src/engine/macro.py", "label": "macro.py", "file_type": "code"},
+    {"id": "src/engine/__init__.py", "label": "engine/__init__.py", "file_type": "code"},
+    {"id": "src/gui/app.py", "label": "app.py", "file_type": "code"},
+    {"id": "src/gui/components.py", "label": "components.py", "file_type": "code"},
+    {"id": "src/gui/overlay.py", "label": "overlay.py", "file_type": "code"},
+    {"id": "src/gui/__init__.py", "label": "gui/__init__.py", "file_type": "code"},
+    {"id": "src/image/vision.py", "label": "vision.py", "file_type": "code"},
+    {"id": "src/image/__init__.py", "label": "image/__init__.py", "file_type": "code"},
+    {"id": "src/utils/config.py", "label": "config.py", "file_type": "code"},
+    {"id": "src/utils/state.py", "label": "state.py", "file_type": "code"},
+    {"id": "src/utils/__init__.py", "label": "utils/__init__.py", "file_type": "code"},
+    {"id": "createexe.txt", "label": "createexe.txt", "file_type": "document"},
+    {"id": "PROJECT_CONTEXT.md", "label": "PROJECT_CONTEXT.md", "file_type": "document"},
+    {"id": "README.md", "label": "README.md", "file_type": "document"},
+    {"id": "requirements.txt", "label": "requirements.txt", "file_type": "document"}
+  ],
+  "edges": [
+    {"source": "src/main.py", "target": "src/gui/app.py", "relation": "imports MacroApp", "confidence": "EXTRACTED"},
+    {"source": "src/gui/app.py", "target": "src/utils/config.py", "relation": "imports RESOURCE_DIR, IMAGE_DIR", "confidence": "EXTRACTED"},
+    {"source": "src/gui/app.py", "target": "src/utils/state.py", "relation": "imports state", "confidence": "EXTRACTED"},
+    {"source": "src/gui/app.py", "target": "src/gui/components.py", "relation": "imports custom UI components", "confidence": "EXTRACTED"},
+    {"source": "src/gui/app.py", "target": "src/gui/overlay.py", "relation": "imports RegionSelectorOverlay", "confidence": "EXTRACTED"},
+    {"source": "src/gui/app.py", "target": "src/engine/macro.py", "relation": "imports run_macro", "confidence": "EXTRACTED"},
+    {"source": "src/engine/macro.py", "target": "src/image/vision.py", "relation": "imports find_and_click", "confidence": "EXTRACTED"},
+    {"source": "src/engine/macro.py", "target": "src/utils/state.py", "relation": "imports state", "confidence": "EXTRACTED"},
+    {"source": "src/image/vision.py", "target": "src/utils/config.py", "relation": "imports IMAGE_DIR", "confidence": "EXTRACTED"},
+    {"source": "src/utils/state.py", "target": "src/utils/config.py", "relation": "imports CONFIG_FILE", "confidence": "EXTRACTED"},
+    {"source": "PROJECT_CONTEXT.md", "target": "src/main.py", "relation": "documents architecture of", "confidence": "EXTRACTED"},
+    {"source": "PROJECT_CONTEXT.md", "target": "src/gui/app.py", "relation": "documents architecture of", "confidence": "EXTRACTED"},
+    {"source": "PROJECT_CONTEXT.md", "target": "src/engine/macro.py", "relation": "documents architecture of", "confidence": "EXTRACTED"},
+    {"source": "PROJECT_CONTEXT.md", "target": "src/image/vision.py", "relation": "documents architecture of", "confidence": "EXTRACTED"},
+    {"source": "PROJECT_CONTEXT.md", "target": "src/utils/state.py", "relation": "documents architecture of", "confidence": "EXTRACTED"},
+    {"source": "README.md", "target": "requirements.txt", "relation": "references dependencies in", "confidence": "EXTRACTED"}
+  ],
+  "hyperedges": []
+}

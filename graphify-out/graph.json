@@ -1,0 +1,2733 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "main.py",
+      "file_type": "code",
+      "source_file": "src\\main.py",
+      "source_location": "L1",
+      "id": "src_main_py"
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "src\\main.py",
+      "source_location": "L8",
+      "id": "main_main"
+    },
+    {
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "src\\__init__.py",
+      "source_location": "L1",
+      "id": "src_init_py"
+    },
+    {
+      "label": "macro.py",
+      "file_type": "code",
+      "source_file": "src\\engine\\macro.py",
+      "source_location": "L1",
+      "id": "src_engine_macro_py"
+    },
+    {
+      "label": "run_macro()",
+      "file_type": "code",
+      "source_file": "src\\engine\\macro.py",
+      "source_location": "L7",
+      "id": "macro_run_macro"
+    },
+    {
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "src\\engine\\__init__.py",
+      "source_location": "L1",
+      "id": "src_engine_init_py"
+    },
+    {
+      "label": "app.py",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L1",
+      "id": "src_gui_app_py"
+    },
+    {
+      "label": "MacroApp",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L15",
+      "id": "app_macroapp"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L27",
+      "id": "app_macroapp_init"
+    },
+    {
+      "label": "._build_ui()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L92",
+      "id": "app_macroapp_build_ui"
+    },
+    {
+      "label": "._create_sidebar_btn()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L124",
+      "id": "app_macroapp_create_sidebar_btn"
+    },
+    {
+      "label": "._show_view()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L155",
+      "id": "app_macroapp_show_view"
+    },
+    {
+      "label": "._build_run_macro_view()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L174",
+      "id": "app_macroapp_build_run_macro_view"
+    },
+    {
+      "label": "._open_region_selector()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L283",
+      "id": "app_macroapp_open_region_selector"
+    },
+    {
+      "label": "._build_sequence_view()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L299",
+      "id": "app_macroapp_build_sequence_view"
+    },
+    {
+      "label": "._refresh_sequence_list()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L363",
+      "id": "app_macroapp_refresh_sequence_list"
+    },
+    {
+      "label": "._build_images_view()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L492",
+      "id": "app_macroapp_build_images_view"
+    },
+    {
+      "label": "._refresh_image_list()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L528",
+      "id": "app_macroapp_refresh_image_list"
+    },
+    {
+      "label": "._close_window()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L584",
+      "id": "app_macroapp_close_window"
+    },
+    {
+      "label": "._check_images()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L588",
+      "id": "app_macroapp_check_images"
+    },
+    {
+      "label": "._log()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L593",
+      "id": "app_macroapp_log"
+    },
+    {
+      "label": "._clear_log()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L611",
+      "id": "app_macroapp_clear_log"
+    },
+    {
+      "label": "._start()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L616",
+      "id": "app_macroapp_start"
+    },
+    {
+      "label": "._update_timer()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L647",
+      "id": "app_macroapp_update_timer"
+    },
+    {
+      "label": "._macro_worker()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L661",
+      "id": "app_macroapp_macro_worker"
+    },
+    {
+      "label": "._update_hint_state()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L665",
+      "id": "app_macroapp_update_hint_state"
+    },
+    {
+      "label": "._on_macro_done()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L680",
+      "id": "app_macroapp_on_macro_done"
+    },
+    {
+      "label": "._stop()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L687",
+      "id": "app_macroapp_stop"
+    },
+    {
+      "label": "._on_drop()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L691",
+      "id": "app_macroapp_on_drop"
+    },
+    {
+      "label": "._add_new_image()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L740",
+      "id": "app_macroapp_add_new_image"
+    },
+    {
+      "label": "._update_image_statuses()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L775",
+      "id": "app_macroapp_update_image_statuses"
+    },
+    {
+      "label": "._upload_image()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L784",
+      "id": "app_macroapp_upload_image"
+    },
+    {
+      "label": "._rename_image()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L796",
+      "id": "app_macroapp_rename_image"
+    },
+    {
+      "label": "._delete_image()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L835",
+      "id": "app_macroapp_delete_image"
+    },
+    {
+      "label": "._move_seq()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L848",
+      "id": "app_macroapp_move_seq"
+    },
+    {
+      "label": "._update_seq_wait()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L855",
+      "id": "app_macroapp_update_seq_wait"
+    },
+    {
+      "label": "._update_seq_skip()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L861",
+      "id": "app_macroapp_update_seq_skip"
+    },
+    {
+      "label": "._update_seq_dc()",
+      "file_type": "code",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L865",
+      "id": "app_macroapp_update_seq_dc"
+    },
+    {
+      "label": "components.py",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L1",
+      "id": "src_gui_components_py"
+    },
+    {
+      "label": "RoundedButton",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L3",
+      "id": "components_roundedbutton"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L4",
+      "id": "components_roundedbutton_init"
+    },
+    {
+      "label": ".set_state()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L24",
+      "id": "components_roundedbutton_set_state"
+    },
+    {
+      "label": "._draw()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L29",
+      "id": "components_roundedbutton_draw"
+    },
+    {
+      "label": "._get_points()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L42",
+      "id": "components_roundedbutton_get_points"
+    },
+    {
+      "label": "._on_enter()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L46",
+      "id": "components_roundedbutton_on_enter"
+    },
+    {
+      "label": "._on_leave()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L50",
+      "id": "components_roundedbutton_on_leave"
+    },
+    {
+      "label": "._on_press()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L54",
+      "id": "components_roundedbutton_on_press"
+    },
+    {
+      "label": "._on_release()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L58",
+      "id": "components_roundedbutton_on_release"
+    },
+    {
+      "label": "._draw_state()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L64",
+      "id": "components_roundedbutton_draw_state"
+    },
+    {
+      "label": "ToggleSwitch",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L72",
+      "id": "components_toggleswitch"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L73",
+      "id": "components_toggleswitch_init"
+    },
+    {
+      "label": "._toggle()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L91",
+      "id": "components_toggleswitch_toggle"
+    },
+    {
+      "label": "._on_enter()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L94",
+      "id": "components_toggleswitch_on_enter"
+    },
+    {
+      "label": "._on_leave()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L98",
+      "id": "components_toggleswitch_on_leave"
+    },
+    {
+      "label": "._update_draw()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L102",
+      "id": "components_toggleswitch_update_draw"
+    },
+    {
+      "label": "._draw()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L105",
+      "id": "components_toggleswitch_draw"
+    },
+    {
+      "label": "SmoothScrollbar",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L126",
+      "id": "components_smoothscrollbar"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L127",
+      "id": "components_smoothscrollbar_init"
+    },
+    {
+      "label": ".set()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L147",
+      "id": "components_smoothscrollbar_set"
+    },
+    {
+      "label": "._redraw()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L156",
+      "id": "components_smoothscrollbar_redraw"
+    },
+    {
+      "label": "._on_enter()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L161",
+      "id": "components_smoothscrollbar_on_enter"
+    },
+    {
+      "label": "._on_leave()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L165",
+      "id": "components_smoothscrollbar_on_leave"
+    },
+    {
+      "label": "._on_click()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L169",
+      "id": "components_smoothscrollbar_on_click"
+    },
+    {
+      "label": "._on_drag()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L178",
+      "id": "components_smoothscrollbar_on_drag"
+    },
+    {
+      "label": "CustomInputDialog",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L184",
+      "id": "components_custominputdialog"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L185",
+      "id": "components_custominputdialog_init"
+    },
+    {
+      "label": "._on_submit()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L256",
+      "id": "components_custominputdialog_on_submit"
+    },
+    {
+      "label": "._on_cancel()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L260",
+      "id": "components_custominputdialog_on_cancel"
+    },
+    {
+      "label": "_bind_mousewheel()",
+      "file_type": "code",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L263",
+      "id": "components_bind_mousewheel"
+    },
+    {
+      "label": "overlay.py",
+      "file_type": "code",
+      "source_file": "src\\gui\\overlay.py",
+      "source_location": "L1",
+      "id": "src_gui_overlay_py"
+    },
+    {
+      "label": "RegionSelectorOverlay",
+      "file_type": "code",
+      "source_file": "src\\gui\\overlay.py",
+      "source_location": "L5",
+      "id": "overlay_regionselectoroverlay"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "src\\gui\\overlay.py",
+      "source_location": "L6",
+      "id": "overlay_regionselectoroverlay_init"
+    },
+    {
+      "label": ".on_press()",
+      "file_type": "code",
+      "source_file": "src\\gui\\overlay.py",
+      "source_location": "L50",
+      "id": "overlay_regionselectoroverlay_on_press"
+    },
+    {
+      "label": ".on_drag()",
+      "file_type": "code",
+      "source_file": "src\\gui\\overlay.py",
+      "source_location": "L60",
+      "id": "overlay_regionselectoroverlay_on_drag"
+    },
+    {
+      "label": ".on_release()",
+      "file_type": "code",
+      "source_file": "src\\gui\\overlay.py",
+      "source_location": "L84",
+      "id": "overlay_regionselectoroverlay_on_release"
+    },
+    {
+      "label": "._cancel()",
+      "file_type": "code",
+      "source_file": "src\\gui\\overlay.py",
+      "source_location": "L95",
+      "id": "overlay_regionselectoroverlay_cancel"
+    },
+    {
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "src\\gui\\__init__.py",
+      "source_location": "L1",
+      "id": "src_gui_init_py"
+    },
+    {
+      "label": "vision.py",
+      "file_type": "code",
+      "source_file": "src\\image\\vision.py",
+      "source_location": "L1",
+      "id": "src_image_vision_py"
+    },
+    {
+      "label": "find_and_click()",
+      "file_type": "code",
+      "source_file": "src\\image\\vision.py",
+      "source_location": "L9",
+      "id": "vision_find_and_click"
+    },
+    {
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "src\\image\\__init__.py",
+      "source_location": "L1",
+      "id": "src_image_init_py"
+    },
+    {
+      "label": "config.py",
+      "file_type": "code",
+      "source_file": "src\\utils\\config.py",
+      "source_location": "L1",
+      "id": "src_utils_config_py"
+    },
+    {
+      "label": "state.py",
+      "file_type": "code",
+      "source_file": "src\\utils\\state.py",
+      "source_location": "L1",
+      "id": "src_utils_state_py"
+    },
+    {
+      "label": "AppState",
+      "file_type": "code",
+      "source_file": "src\\utils\\state.py",
+      "source_location": "L5",
+      "id": "state_appstate"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "src\\utils\\state.py",
+      "source_location": "L6",
+      "id": "state_appstate_init"
+    },
+    {
+      "label": ".load_config()",
+      "file_type": "code",
+      "source_file": "src\\utils\\state.py",
+      "source_location": "L16",
+      "id": "state_appstate_load_config"
+    },
+    {
+      "label": ".save_config()",
+      "file_type": "code",
+      "source_file": "src\\utils\\state.py",
+      "source_location": "L31",
+      "id": "state_appstate_save_config"
+    },
+    {
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "src\\utils\\__init__.py",
+      "source_location": "L1",
+      "id": "src_utils_init_py"
+    },
+    {
+      "label": "main.py",
+      "file_type": "code",
+      "id": "src/main.py"
+    },
+    {
+      "label": "src/__init__.py",
+      "file_type": "code",
+      "id": "src/__init__.py"
+    },
+    {
+      "label": "macro.py",
+      "file_type": "code",
+      "id": "src/engine/macro.py"
+    },
+    {
+      "label": "engine/__init__.py",
+      "file_type": "code",
+      "id": "src/engine/__init__.py"
+    },
+    {
+      "label": "app.py",
+      "file_type": "code",
+      "id": "src/gui/app.py"
+    },
+    {
+      "label": "components.py",
+      "file_type": "code",
+      "id": "src/gui/components.py"
+    },
+    {
+      "label": "overlay.py",
+      "file_type": "code",
+      "id": "src/gui/overlay.py"
+    },
+    {
+      "label": "gui/__init__.py",
+      "file_type": "code",
+      "id": "src/gui/__init__.py"
+    },
+    {
+      "label": "vision.py",
+      "file_type": "code",
+      "id": "src/image/vision.py"
+    },
+    {
+      "label": "image/__init__.py",
+      "file_type": "code",
+      "id": "src/image/__init__.py"
+    },
+    {
+      "label": "config.py",
+      "file_type": "code",
+      "id": "src/utils/config.py"
+    },
+    {
+      "label": "state.py",
+      "file_type": "code",
+      "id": "src/utils/state.py"
+    },
+    {
+      "label": "utils/__init__.py",
+      "file_type": "code",
+      "id": "src/utils/__init__.py"
+    },
+    {
+      "label": "createexe.txt",
+      "file_type": "document",
+      "id": "createexe.txt"
+    },
+    {
+      "label": "PROJECT_CONTEXT.md",
+      "file_type": "document",
+      "id": "PROJECT_CONTEXT.md"
+    },
+    {
+      "label": "README.md",
+      "file_type": "document",
+      "id": "README.md"
+    },
+    {
+      "label": "requirements.txt",
+      "file_type": "document",
+      "id": "requirements.txt"
+    }
+  ],
+  "edges": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\main.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_src": "src_main_py",
+      "_tgt": "main_main",
+      "source": "src_main_py",
+      "target": "main_main"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\main.py",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_src": "main_main",
+      "_tgt": "app_macroapp",
+      "source": "main_main",
+      "target": "app_macroapp"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\engine\\macro.py",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_src": "src_engine_macro_py",
+      "_tgt": "macro_run_macro",
+      "source": "src_engine_macro_py",
+      "target": "macro_run_macro"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\engine\\macro.py",
+      "source_location": "L33",
+      "weight": 1.0,
+      "_src": "macro_run_macro",
+      "_tgt": "components_smoothscrollbar_set",
+      "source": "macro_run_macro",
+      "target": "components_smoothscrollbar_set"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\engine\\macro.py",
+      "source_location": "L62",
+      "weight": 1.0,
+      "_src": "macro_run_macro",
+      "_tgt": "vision_find_and_click",
+      "source": "macro_run_macro",
+      "target": "vision_find_and_click"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L662",
+      "weight": 1.0,
+      "_src": "app_macroapp_macro_worker",
+      "_tgt": "macro_run_macro",
+      "source": "macro_run_macro",
+      "target": "app_macroapp_macro_worker"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_src": "src_gui_app_py",
+      "_tgt": "app_macroapp",
+      "source": "src_gui_app_py",
+      "target": "app_macroapp"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L27",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_init",
+      "source": "app_macroapp",
+      "target": "app_macroapp_init"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L92",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_build_ui",
+      "source": "app_macroapp",
+      "target": "app_macroapp_build_ui"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L124",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_create_sidebar_btn",
+      "source": "app_macroapp",
+      "target": "app_macroapp_create_sidebar_btn"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L155",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_show_view",
+      "source": "app_macroapp",
+      "target": "app_macroapp_show_view"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L174",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_build_run_macro_view",
+      "source": "app_macroapp",
+      "target": "app_macroapp_build_run_macro_view"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L283",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_open_region_selector",
+      "source": "app_macroapp",
+      "target": "app_macroapp_open_region_selector"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L299",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_build_sequence_view",
+      "source": "app_macroapp",
+      "target": "app_macroapp_build_sequence_view"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L363",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_refresh_sequence_list",
+      "source": "app_macroapp",
+      "target": "app_macroapp_refresh_sequence_list"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L492",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_build_images_view",
+      "source": "app_macroapp",
+      "target": "app_macroapp_build_images_view"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L528",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_refresh_image_list",
+      "source": "app_macroapp",
+      "target": "app_macroapp_refresh_image_list"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L584",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_close_window",
+      "source": "app_macroapp",
+      "target": "app_macroapp_close_window"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L588",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_check_images",
+      "source": "app_macroapp",
+      "target": "app_macroapp_check_images"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L593",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_log",
+      "source": "app_macroapp",
+      "target": "app_macroapp_log"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L611",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_clear_log",
+      "source": "app_macroapp",
+      "target": "app_macroapp_clear_log"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L616",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_start",
+      "source": "app_macroapp",
+      "target": "app_macroapp_start"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L647",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_update_timer",
+      "source": "app_macroapp",
+      "target": "app_macroapp_update_timer"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L661",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_macro_worker",
+      "source": "app_macroapp",
+      "target": "app_macroapp_macro_worker"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L665",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_update_hint_state",
+      "source": "app_macroapp",
+      "target": "app_macroapp_update_hint_state"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L680",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_on_macro_done",
+      "source": "app_macroapp",
+      "target": "app_macroapp_on_macro_done"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L687",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_stop",
+      "source": "app_macroapp",
+      "target": "app_macroapp_stop"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L691",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_on_drop",
+      "source": "app_macroapp",
+      "target": "app_macroapp_on_drop"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L740",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_add_new_image",
+      "source": "app_macroapp",
+      "target": "app_macroapp_add_new_image"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L775",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_update_image_statuses",
+      "source": "app_macroapp",
+      "target": "app_macroapp_update_image_statuses"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L784",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_upload_image",
+      "source": "app_macroapp",
+      "target": "app_macroapp_upload_image"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L796",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_rename_image",
+      "source": "app_macroapp",
+      "target": "app_macroapp_rename_image"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L835",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_delete_image",
+      "source": "app_macroapp",
+      "target": "app_macroapp_delete_image"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L848",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_move_seq",
+      "source": "app_macroapp",
+      "target": "app_macroapp_move_seq"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L855",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_update_seq_wait",
+      "source": "app_macroapp",
+      "target": "app_macroapp_update_seq_wait"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L861",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_update_seq_skip",
+      "source": "app_macroapp",
+      "target": "app_macroapp_update_seq_skip"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L865",
+      "weight": 1.0,
+      "_src": "app_macroapp",
+      "_tgt": "app_macroapp_update_seq_dc",
+      "source": "app_macroapp",
+      "target": "app_macroapp_update_seq_dc"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L11",
+      "weight": 0.8,
+      "_src": "app_macroapp",
+      "_tgt": "components_roundedbutton",
+      "source": "app_macroapp",
+      "target": "components_roundedbutton"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L11",
+      "weight": 0.8,
+      "_src": "app_macroapp",
+      "_tgt": "components_toggleswitch",
+      "source": "app_macroapp",
+      "target": "components_toggleswitch"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L11",
+      "weight": 0.8,
+      "_src": "app_macroapp",
+      "_tgt": "components_smoothscrollbar",
+      "source": "app_macroapp",
+      "target": "components_smoothscrollbar"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L11",
+      "weight": 0.8,
+      "_src": "app_macroapp",
+      "_tgt": "components_custominputdialog",
+      "source": "app_macroapp",
+      "target": "components_custominputdialog"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L284",
+      "weight": 0.8,
+      "_src": "app_macroapp",
+      "_tgt": "overlay_regionselectoroverlay",
+      "source": "app_macroapp",
+      "target": "overlay_regionselectoroverlay"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L88",
+      "weight": 1.0,
+      "_src": "app_macroapp_init",
+      "_tgt": "app_macroapp_build_ui",
+      "source": "app_macroapp_init",
+      "target": "app_macroapp_build_ui"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L89",
+      "weight": 1.0,
+      "_src": "app_macroapp_init",
+      "_tgt": "app_macroapp_check_images",
+      "source": "app_macroapp_init",
+      "target": "app_macroapp_check_images"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L90",
+      "weight": 1.0,
+      "_src": "app_macroapp_init",
+      "_tgt": "app_macroapp_close_window",
+      "source": "app_macroapp_init",
+      "target": "app_macroapp_close_window"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L71",
+      "weight": 1.0,
+      "_src": "app_macroapp_init",
+      "_tgt": "state_appstate_save_config",
+      "source": "app_macroapp_init",
+      "target": "state_appstate_save_config"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L116",
+      "weight": 1.0,
+      "_src": "app_macroapp_build_ui",
+      "_tgt": "app_macroapp_create_sidebar_btn",
+      "source": "app_macroapp_build_ui",
+      "target": "app_macroapp_create_sidebar_btn"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L118",
+      "weight": 1.0,
+      "_src": "app_macroapp_build_ui",
+      "_tgt": "app_macroapp_build_run_macro_view",
+      "source": "app_macroapp_build_ui",
+      "target": "app_macroapp_build_run_macro_view"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L119",
+      "weight": 1.0,
+      "_src": "app_macroapp_build_ui",
+      "_tgt": "app_macroapp_build_sequence_view",
+      "source": "app_macroapp_build_ui",
+      "target": "app_macroapp_build_sequence_view"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L120",
+      "weight": 1.0,
+      "_src": "app_macroapp_build_ui",
+      "_tgt": "app_macroapp_build_images_view",
+      "source": "app_macroapp_build_ui",
+      "target": "app_macroapp_build_images_view"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L122",
+      "weight": 1.0,
+      "_src": "app_macroapp_build_ui",
+      "_tgt": "app_macroapp_show_view",
+      "source": "app_macroapp_build_ui",
+      "target": "app_macroapp_show_view"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L171",
+      "weight": 1.0,
+      "_src": "app_macroapp_show_view",
+      "_tgt": "app_macroapp_refresh_sequence_list",
+      "source": "app_macroapp_show_view",
+      "target": "app_macroapp_refresh_sequence_list"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L172",
+      "weight": 1.0,
+      "_src": "app_macroapp_show_view",
+      "_tgt": "app_macroapp_refresh_image_list",
+      "source": "app_macroapp_show_view",
+      "target": "app_macroapp_refresh_image_list"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L231",
+      "weight": 1.0,
+      "_src": "app_macroapp_build_run_macro_view",
+      "_tgt": "components_roundedbutton",
+      "source": "app_macroapp_build_run_macro_view",
+      "target": "components_roundedbutton"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L236",
+      "weight": 1.0,
+      "_src": "app_macroapp_build_run_macro_view",
+      "_tgt": "components_roundedbutton_set_state",
+      "source": "app_macroapp_build_run_macro_view",
+      "target": "components_roundedbutton_set_state"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L297",
+      "weight": 1.0,
+      "_src": "app_macroapp_open_region_selector",
+      "_tgt": "overlay_regionselectoroverlay",
+      "source": "app_macroapp_open_region_selector",
+      "target": "overlay_regionselectoroverlay"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L346",
+      "weight": 1.0,
+      "_src": "app_macroapp_build_sequence_view",
+      "_tgt": "components_smoothscrollbar",
+      "source": "app_macroapp_build_sequence_view",
+      "target": "components_smoothscrollbar"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L853",
+      "weight": 1.0,
+      "_src": "app_macroapp_move_seq",
+      "_tgt": "app_macroapp_refresh_sequence_list",
+      "source": "app_macroapp_refresh_sequence_list",
+      "target": "app_macroapp_move_seq"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L845",
+      "weight": 1.0,
+      "_src": "app_macroapp_delete_image",
+      "_tgt": "app_macroapp_refresh_sequence_list",
+      "source": "app_macroapp_refresh_sequence_list",
+      "target": "app_macroapp_delete_image"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L443",
+      "weight": 1.0,
+      "_src": "app_macroapp_refresh_sequence_list",
+      "_tgt": "app_macroapp_update_seq_skip",
+      "source": "app_macroapp_refresh_sequence_list",
+      "target": "app_macroapp_update_seq_skip"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L456",
+      "weight": 1.0,
+      "_src": "app_macroapp_refresh_sequence_list",
+      "_tgt": "app_macroapp_update_seq_dc",
+      "source": "app_macroapp_refresh_sequence_list",
+      "target": "app_macroapp_update_seq_dc"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L475",
+      "weight": 1.0,
+      "_src": "app_macroapp_refresh_sequence_list",
+      "_tgt": "app_macroapp_update_seq_wait",
+      "source": "app_macroapp_refresh_sequence_list",
+      "target": "app_macroapp_update_seq_wait"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L736",
+      "weight": 1.0,
+      "_src": "app_macroapp_on_drop",
+      "_tgt": "app_macroapp_refresh_sequence_list",
+      "source": "app_macroapp_refresh_sequence_list",
+      "target": "app_macroapp_on_drop"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L771",
+      "weight": 1.0,
+      "_src": "app_macroapp_add_new_image",
+      "_tgt": "app_macroapp_refresh_sequence_list",
+      "source": "app_macroapp_refresh_sequence_list",
+      "target": "app_macroapp_add_new_image"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L793",
+      "weight": 1.0,
+      "_src": "app_macroapp_upload_image",
+      "_tgt": "app_macroapp_refresh_sequence_list",
+      "source": "app_macroapp_refresh_sequence_list",
+      "target": "app_macroapp_upload_image"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L831",
+      "weight": 1.0,
+      "_src": "app_macroapp_rename_image",
+      "_tgt": "app_macroapp_refresh_sequence_list",
+      "source": "app_macroapp_refresh_sequence_list",
+      "target": "app_macroapp_rename_image"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L441",
+      "weight": 1.0,
+      "_src": "app_macroapp_refresh_sequence_list",
+      "_tgt": "components_toggleswitch",
+      "source": "app_macroapp_refresh_sequence_list",
+      "target": "components_toggleswitch"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L489",
+      "weight": 1.0,
+      "_src": "app_macroapp_refresh_sequence_list",
+      "_tgt": "components_bind_mousewheel",
+      "source": "app_macroapp_refresh_sequence_list",
+      "target": "components_bind_mousewheel"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L504",
+      "weight": 1.0,
+      "_src": "app_macroapp_build_images_view",
+      "_tgt": "components_roundedbutton",
+      "source": "app_macroapp_build_images_view",
+      "target": "components_roundedbutton"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L510",
+      "weight": 1.0,
+      "_src": "app_macroapp_build_images_view",
+      "_tgt": "components_smoothscrollbar",
+      "source": "app_macroapp_build_images_view",
+      "target": "components_smoothscrollbar"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L829",
+      "weight": 1.0,
+      "_src": "app_macroapp_rename_image",
+      "_tgt": "app_macroapp_refresh_image_list",
+      "source": "app_macroapp_refresh_image_list",
+      "target": "app_macroapp_rename_image"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L792",
+      "weight": 1.0,
+      "_src": "app_macroapp_upload_image",
+      "_tgt": "app_macroapp_refresh_image_list",
+      "source": "app_macroapp_refresh_image_list",
+      "target": "app_macroapp_upload_image"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L844",
+      "weight": 1.0,
+      "_src": "app_macroapp_delete_image",
+      "_tgt": "app_macroapp_refresh_image_list",
+      "source": "app_macroapp_refresh_image_list",
+      "target": "app_macroapp_delete_image"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L579",
+      "weight": 1.0,
+      "_src": "app_macroapp_refresh_image_list",
+      "_tgt": "app_macroapp_update_image_statuses",
+      "source": "app_macroapp_refresh_image_list",
+      "target": "app_macroapp_update_image_statuses"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L734",
+      "weight": 1.0,
+      "_src": "app_macroapp_on_drop",
+      "_tgt": "app_macroapp_refresh_image_list",
+      "source": "app_macroapp_refresh_image_list",
+      "target": "app_macroapp_on_drop"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L769",
+      "weight": 1.0,
+      "_src": "app_macroapp_add_new_image",
+      "_tgt": "app_macroapp_refresh_image_list",
+      "source": "app_macroapp_refresh_image_list",
+      "target": "app_macroapp_add_new_image"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L581",
+      "weight": 1.0,
+      "_src": "app_macroapp_refresh_image_list",
+      "_tgt": "components_bind_mousewheel",
+      "source": "app_macroapp_refresh_image_list",
+      "target": "components_bind_mousewheel"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L585",
+      "weight": 1.0,
+      "_src": "app_macroapp_close_window",
+      "_tgt": "components_smoothscrollbar_set",
+      "source": "app_macroapp_close_window",
+      "target": "components_smoothscrollbar_set"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L590",
+      "weight": 1.0,
+      "_src": "app_macroapp_check_images",
+      "_tgt": "app_macroapp_log",
+      "source": "app_macroapp_check_images",
+      "target": "app_macroapp_log"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L652",
+      "weight": 1.0,
+      "_src": "app_macroapp_update_timer",
+      "_tgt": "app_macroapp_log",
+      "source": "app_macroapp_log",
+      "target": "app_macroapp_update_timer"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L689",
+      "weight": 1.0,
+      "_src": "app_macroapp_stop",
+      "_tgt": "app_macroapp_log",
+      "source": "app_macroapp_log",
+      "target": "app_macroapp_stop"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L708",
+      "weight": 1.0,
+      "_src": "app_macroapp_on_drop",
+      "_tgt": "app_macroapp_log",
+      "source": "app_macroapp_log",
+      "target": "app_macroapp_on_drop"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L767",
+      "weight": 1.0,
+      "_src": "app_macroapp_add_new_image",
+      "_tgt": "app_macroapp_log",
+      "source": "app_macroapp_log",
+      "target": "app_macroapp_add_new_image"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L789",
+      "weight": 1.0,
+      "_src": "app_macroapp_upload_image",
+      "_tgt": "app_macroapp_log",
+      "source": "app_macroapp_log",
+      "target": "app_macroapp_upload_image"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L826",
+      "weight": 1.0,
+      "_src": "app_macroapp_rename_image",
+      "_tgt": "app_macroapp_log",
+      "source": "app_macroapp_log",
+      "target": "app_macroapp_rename_image"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L842",
+      "weight": 1.0,
+      "_src": "app_macroapp_delete_image",
+      "_tgt": "app_macroapp_log",
+      "source": "app_macroapp_log",
+      "target": "app_macroapp_delete_image"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L637",
+      "weight": 1.0,
+      "_src": "app_macroapp_start",
+      "_tgt": "app_macroapp_update_hint_state",
+      "source": "app_macroapp_start",
+      "target": "app_macroapp_update_hint_state"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L642",
+      "weight": 1.0,
+      "_src": "app_macroapp_start",
+      "_tgt": "app_macroapp_update_timer",
+      "source": "app_macroapp_start",
+      "target": "app_macroapp_update_timer"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L633",
+      "weight": 1.0,
+      "_src": "app_macroapp_start",
+      "_tgt": "components_roundedbutton_set_state",
+      "source": "app_macroapp_start",
+      "target": "components_roundedbutton_set_state"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L635",
+      "weight": 1.0,
+      "_src": "app_macroapp_start",
+      "_tgt": "components_smoothscrollbar_set",
+      "source": "app_macroapp_start",
+      "target": "components_smoothscrollbar_set"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L649",
+      "weight": 1.0,
+      "_src": "app_macroapp_update_timer",
+      "_tgt": "components_smoothscrollbar_set",
+      "source": "app_macroapp_update_timer",
+      "target": "components_smoothscrollbar_set"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L685",
+      "weight": 1.0,
+      "_src": "app_macroapp_on_macro_done",
+      "_tgt": "app_macroapp_update_hint_state",
+      "source": "app_macroapp_update_hint_state",
+      "target": "app_macroapp_on_macro_done"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L681",
+      "weight": 1.0,
+      "_src": "app_macroapp_on_macro_done",
+      "_tgt": "components_roundedbutton_set_state",
+      "source": "app_macroapp_on_macro_done",
+      "target": "components_roundedbutton_set_state"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L683",
+      "weight": 1.0,
+      "_src": "app_macroapp_on_macro_done",
+      "_tgt": "components_smoothscrollbar_set",
+      "source": "app_macroapp_on_macro_done",
+      "target": "components_smoothscrollbar_set"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L688",
+      "weight": 1.0,
+      "_src": "app_macroapp_stop",
+      "_tgt": "components_smoothscrollbar_set",
+      "source": "app_macroapp_stop",
+      "target": "components_smoothscrollbar_set"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L714",
+      "weight": 1.0,
+      "_src": "app_macroapp_on_drop",
+      "_tgt": "components_custominputdialog",
+      "source": "app_macroapp_on_drop",
+      "target": "components_custominputdialog"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L731",
+      "weight": 1.0,
+      "_src": "app_macroapp_on_drop",
+      "_tgt": "state_appstate_save_config",
+      "source": "app_macroapp_on_drop",
+      "target": "state_appstate_save_config"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L741",
+      "weight": 1.0,
+      "_src": "app_macroapp_add_new_image",
+      "_tgt": "components_custominputdialog",
+      "source": "app_macroapp_add_new_image",
+      "target": "components_custominputdialog"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L766",
+      "weight": 1.0,
+      "_src": "app_macroapp_add_new_image",
+      "_tgt": "state_appstate_save_config",
+      "source": "app_macroapp_add_new_image",
+      "target": "state_appstate_save_config"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L790",
+      "weight": 1.0,
+      "_src": "app_macroapp_upload_image",
+      "_tgt": "app_macroapp_update_image_statuses",
+      "source": "app_macroapp_update_image_statuses",
+      "target": "app_macroapp_upload_image"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L797",
+      "weight": 1.0,
+      "_src": "app_macroapp_rename_image",
+      "_tgt": "components_custominputdialog",
+      "source": "app_macroapp_rename_image",
+      "target": "components_custominputdialog"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L825",
+      "weight": 1.0,
+      "_src": "app_macroapp_rename_image",
+      "_tgt": "state_appstate_save_config",
+      "source": "app_macroapp_rename_image",
+      "target": "state_appstate_save_config"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L841",
+      "weight": 1.0,
+      "_src": "app_macroapp_delete_image",
+      "_tgt": "state_appstate_save_config",
+      "source": "app_macroapp_delete_image",
+      "target": "state_appstate_save_config"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L852",
+      "weight": 1.0,
+      "_src": "app_macroapp_move_seq",
+      "_tgt": "state_appstate_save_config",
+      "source": "app_macroapp_move_seq",
+      "target": "state_appstate_save_config"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L858",
+      "weight": 1.0,
+      "_src": "app_macroapp_update_seq_wait",
+      "_tgt": "state_appstate_save_config",
+      "source": "app_macroapp_update_seq_wait",
+      "target": "state_appstate_save_config"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L863",
+      "weight": 1.0,
+      "_src": "app_macroapp_update_seq_skip",
+      "_tgt": "state_appstate_save_config",
+      "source": "app_macroapp_update_seq_skip",
+      "target": "state_appstate_save_config"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src\\gui\\app.py",
+      "source_location": "L867",
+      "weight": 1.0,
+      "_src": "app_macroapp_update_seq_dc",
+      "_tgt": "state_appstate_save_config",
+      "source": "app_macroapp_update_seq_dc",
+      "target": "state_appstate_save_config"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_src": "src_gui_components_py",
+      "_tgt": "components_roundedbutton",
+      "source": "src_gui_components_py",
+      "target": "components_roundedbutton"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L72",
+      "weight": 1.0,
+      "_src": "src_gui_components_py",
+      "_tgt": "components_toggleswitch",
+      "source": "src_gui_components_py",
+      "target": "components_toggleswitch"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L126",
+      "weight": 1.0,
+      "_src": "src_gui_components_py",
+      "_tgt": "components_smoothscrollbar",
+      "source": "src_gui_components_py",
+      "target": "components_smoothscrollbar"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L184",
+      "weight": 1.0,
+      "_src": "src_gui_components_py",
+      "_tgt": "components_custominputdialog",
+      "source": "src_gui_components_py",
+      "target": "components_custominputdialog"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L263",
+      "weight": 1.0,
+      "_src": "src_gui_components_py",
+      "_tgt": "components_bind_mousewheel",
+      "source": "src_gui_components_py",
+      "target": "components_bind_mousewheel"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_src": "components_roundedbutton",
+      "_tgt": "components_roundedbutton_init",
+      "source": "components_roundedbutton",
+      "target": "components_roundedbutton_init"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_src": "components_roundedbutton",
+      "_tgt": "components_roundedbutton_set_state",
+      "source": "components_roundedbutton",
+      "target": "components_roundedbutton_set_state"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_src": "components_roundedbutton",
+      "_tgt": "components_roundedbutton_draw",
+      "source": "components_roundedbutton",
+      "target": "components_roundedbutton_draw"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L42",
+      "weight": 1.0,
+      "_src": "components_roundedbutton",
+      "_tgt": "components_roundedbutton_get_points",
+      "source": "components_roundedbutton",
+      "target": "components_roundedbutton_get_points"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L46",
+      "weight": 1.0,
+      "_src": "components_roundedbutton",
+      "_tgt": "components_roundedbutton_on_enter",
+      "source": "components_roundedbutton",
+      "target": "components_roundedbutton_on_enter"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L50",
+      "weight": 1.0,
+      "_src": "components_roundedbutton",
+      "_tgt": "components_roundedbutton_on_leave",
+      "source": "components_roundedbutton",
+      "target": "components_roundedbutton_on_leave"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L54",
+      "weight": 1.0,
+      "_src": "components_roundedbutton",
+      "_tgt": "components_roundedbutton_on_press",
+      "source": "components_roundedbutton",
+      "target": "components_roundedbutton_on_press"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L58",
+      "weight": 1.0,
+      "_src": "components_roundedbutton",
+      "_tgt": "components_roundedbutton_on_release",
+      "source": "components_roundedbutton",
+      "target": "components_roundedbutton_on_release"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L64",
+      "weight": 1.0,
+      "_src": "components_roundedbutton",
+      "_tgt": "components_roundedbutton_draw_state",
+      "source": "components_roundedbutton",
+      "target": "components_roundedbutton_draw_state"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L247",
+      "weight": 1.0,
+      "_src": "components_custominputdialog_init",
+      "_tgt": "components_roundedbutton",
+      "source": "components_roundedbutton",
+      "target": "components_custominputdialog_init"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_src": "components_roundedbutton_init",
+      "_tgt": "components_custominputdialog_init",
+      "source": "components_roundedbutton_init",
+      "target": "components_custominputdialog_init"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L27",
+      "weight": 1.0,
+      "_src": "components_roundedbutton_set_state",
+      "_tgt": "components_toggleswitch_draw",
+      "source": "components_roundedbutton_set_state",
+      "target": "components_toggleswitch_draw"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L38",
+      "weight": 1.0,
+      "_src": "components_roundedbutton_draw",
+      "_tgt": "components_roundedbutton_get_points",
+      "source": "components_roundedbutton_draw",
+      "target": "components_roundedbutton_get_points"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L69",
+      "weight": 1.0,
+      "_src": "components_roundedbutton_draw_state",
+      "_tgt": "components_roundedbutton_get_points",
+      "source": "components_roundedbutton_get_points",
+      "target": "components_roundedbutton_draw_state"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L48",
+      "weight": 1.0,
+      "_src": "components_roundedbutton_on_enter",
+      "_tgt": "components_roundedbutton_draw_state",
+      "source": "components_roundedbutton_on_enter",
+      "target": "components_roundedbutton_draw_state"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L52",
+      "weight": 1.0,
+      "_src": "components_roundedbutton_on_leave",
+      "_tgt": "components_roundedbutton_draw_state",
+      "source": "components_roundedbutton_on_leave",
+      "target": "components_roundedbutton_draw_state"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L56",
+      "weight": 1.0,
+      "_src": "components_roundedbutton_on_press",
+      "_tgt": "components_roundedbutton_draw_state",
+      "source": "components_roundedbutton_on_press",
+      "target": "components_roundedbutton_draw_state"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L60",
+      "weight": 1.0,
+      "_src": "components_roundedbutton_on_release",
+      "_tgt": "components_roundedbutton_draw_state",
+      "source": "components_roundedbutton_on_release",
+      "target": "components_roundedbutton_draw_state"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L73",
+      "weight": 1.0,
+      "_src": "components_toggleswitch",
+      "_tgt": "components_toggleswitch_init",
+      "source": "components_toggleswitch",
+      "target": "components_toggleswitch_init"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L91",
+      "weight": 1.0,
+      "_src": "components_toggleswitch",
+      "_tgt": "components_toggleswitch_toggle",
+      "source": "components_toggleswitch",
+      "target": "components_toggleswitch_toggle"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L94",
+      "weight": 1.0,
+      "_src": "components_toggleswitch",
+      "_tgt": "components_toggleswitch_on_enter",
+      "source": "components_toggleswitch",
+      "target": "components_toggleswitch_on_enter"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L98",
+      "weight": 1.0,
+      "_src": "components_toggleswitch",
+      "_tgt": "components_toggleswitch_on_leave",
+      "source": "components_toggleswitch",
+      "target": "components_toggleswitch_on_leave"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L102",
+      "weight": 1.0,
+      "_src": "components_toggleswitch",
+      "_tgt": "components_toggleswitch_update_draw",
+      "source": "components_toggleswitch",
+      "target": "components_toggleswitch_update_draw"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L105",
+      "weight": 1.0,
+      "_src": "components_toggleswitch",
+      "_tgt": "components_toggleswitch_draw",
+      "source": "components_toggleswitch",
+      "target": "components_toggleswitch_draw"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L74",
+      "weight": 1.0,
+      "_src": "components_toggleswitch_init",
+      "_tgt": "components_custominputdialog_init",
+      "source": "components_toggleswitch_init",
+      "target": "components_custominputdialog_init"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L89",
+      "weight": 1.0,
+      "_src": "components_toggleswitch_init",
+      "_tgt": "components_toggleswitch_draw",
+      "source": "components_toggleswitch_init",
+      "target": "components_toggleswitch_draw"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L92",
+      "weight": 1.0,
+      "_src": "components_toggleswitch_toggle",
+      "_tgt": "components_smoothscrollbar_set",
+      "source": "components_toggleswitch_toggle",
+      "target": "components_smoothscrollbar_set"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L96",
+      "weight": 1.0,
+      "_src": "components_toggleswitch_on_enter",
+      "_tgt": "components_toggleswitch_draw",
+      "source": "components_toggleswitch_on_enter",
+      "target": "components_toggleswitch_draw"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L100",
+      "weight": 1.0,
+      "_src": "components_toggleswitch_on_leave",
+      "_tgt": "components_toggleswitch_draw",
+      "source": "components_toggleswitch_on_leave",
+      "target": "components_toggleswitch_draw"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L103",
+      "weight": 1.0,
+      "_src": "components_toggleswitch_update_draw",
+      "_tgt": "components_toggleswitch_draw",
+      "source": "components_toggleswitch_update_draw",
+      "target": "components_toggleswitch_draw"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L127",
+      "weight": 1.0,
+      "_src": "components_smoothscrollbar",
+      "_tgt": "components_smoothscrollbar_init",
+      "source": "components_smoothscrollbar",
+      "target": "components_smoothscrollbar_init"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L147",
+      "weight": 1.0,
+      "_src": "components_smoothscrollbar",
+      "_tgt": "components_smoothscrollbar_set",
+      "source": "components_smoothscrollbar",
+      "target": "components_smoothscrollbar_set"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L156",
+      "weight": 1.0,
+      "_src": "components_smoothscrollbar",
+      "_tgt": "components_smoothscrollbar_redraw",
+      "source": "components_smoothscrollbar",
+      "target": "components_smoothscrollbar_redraw"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L161",
+      "weight": 1.0,
+      "_src": "components_smoothscrollbar",
+      "_tgt": "components_smoothscrollbar_on_enter",
+      "source": "components_smoothscrollbar",
+      "target": "components_smoothscrollbar_on_enter"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L165",
+      "weight": 1.0,
+      "_src": "components_smoothscrollbar",
+      "_tgt": "components_smoothscrollbar_on_leave",
+      "source": "components_smoothscrollbar",
+      "target": "components_smoothscrollbar_on_leave"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L169",
+      "weight": 1.0,
+      "_src": "components_smoothscrollbar",
+      "_tgt": "components_smoothscrollbar_on_click",
+      "source": "components_smoothscrollbar",
+      "target": "components_smoothscrollbar_on_click"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L178",
+      "weight": 1.0,
+      "_src": "components_smoothscrollbar",
+      "_tgt": "components_smoothscrollbar_on_drag",
+      "source": "components_smoothscrollbar",
+      "target": "components_smoothscrollbar_on_drag"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L128",
+      "weight": 1.0,
+      "_src": "components_smoothscrollbar_init",
+      "_tgt": "components_custominputdialog_init",
+      "source": "components_smoothscrollbar_init",
+      "target": "components_custominputdialog_init"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L143",
+      "weight": 1.0,
+      "_src": "components_smoothscrollbar_init",
+      "_tgt": "components_smoothscrollbar_redraw",
+      "source": "components_smoothscrollbar_init",
+      "target": "components_smoothscrollbar_redraw"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L154",
+      "weight": 1.0,
+      "_src": "components_smoothscrollbar_set",
+      "_tgt": "components_smoothscrollbar_redraw",
+      "source": "components_smoothscrollbar_set",
+      "target": "components_smoothscrollbar_redraw"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L185",
+      "weight": 1.0,
+      "_src": "components_custominputdialog",
+      "_tgt": "components_custominputdialog_init",
+      "source": "components_custominputdialog",
+      "target": "components_custominputdialog_init"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L256",
+      "weight": 1.0,
+      "_src": "components_custominputdialog",
+      "_tgt": "components_custominputdialog_on_submit",
+      "source": "components_custominputdialog",
+      "target": "components_custominputdialog_on_submit"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L260",
+      "weight": 1.0,
+      "_src": "components_custominputdialog",
+      "_tgt": "components_custominputdialog_on_cancel",
+      "source": "components_custominputdialog",
+      "target": "components_custominputdialog_on_cancel"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\components.py",
+      "source_location": "L230",
+      "weight": 1.0,
+      "_src": "components_custominputdialog_init",
+      "_tgt": "components_custominputdialog_on_submit",
+      "source": "components_custominputdialog_init",
+      "target": "components_custominputdialog_on_submit"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\overlay.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_src": "src_gui_overlay_py",
+      "_tgt": "overlay_regionselectoroverlay",
+      "source": "src_gui_overlay_py",
+      "target": "overlay_regionselectoroverlay"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\overlay.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "overlay_regionselectoroverlay",
+      "_tgt": "overlay_regionselectoroverlay_init",
+      "source": "overlay_regionselectoroverlay",
+      "target": "overlay_regionselectoroverlay_init"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\overlay.py",
+      "source_location": "L50",
+      "weight": 1.0,
+      "_src": "overlay_regionselectoroverlay",
+      "_tgt": "overlay_regionselectoroverlay_on_press",
+      "source": "overlay_regionselectoroverlay",
+      "target": "overlay_regionselectoroverlay_on_press"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\overlay.py",
+      "source_location": "L60",
+      "weight": 1.0,
+      "_src": "overlay_regionselectoroverlay",
+      "_tgt": "overlay_regionselectoroverlay_on_drag",
+      "source": "overlay_regionselectoroverlay",
+      "target": "overlay_regionselectoroverlay_on_drag"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\overlay.py",
+      "source_location": "L84",
+      "weight": 1.0,
+      "_src": "overlay_regionselectoroverlay",
+      "_tgt": "overlay_regionselectoroverlay_on_release",
+      "source": "overlay_regionselectoroverlay",
+      "target": "overlay_regionselectoroverlay_on_release"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\overlay.py",
+      "source_location": "L95",
+      "weight": 1.0,
+      "_src": "overlay_regionselectoroverlay",
+      "_tgt": "overlay_regionselectoroverlay_cancel",
+      "source": "overlay_regionselectoroverlay",
+      "target": "overlay_regionselectoroverlay_cancel"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\overlay.py",
+      "source_location": "L48",
+      "weight": 1.0,
+      "_src": "overlay_regionselectoroverlay_init",
+      "_tgt": "overlay_regionselectoroverlay_cancel",
+      "source": "overlay_regionselectoroverlay_init",
+      "target": "overlay_regionselectoroverlay_cancel"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\gui\\overlay.py",
+      "source_location": "L92",
+      "weight": 1.0,
+      "_src": "overlay_regionselectoroverlay_on_release",
+      "_tgt": "overlay_regionselectoroverlay_cancel",
+      "source": "overlay_regionselectoroverlay_on_release",
+      "target": "overlay_regionselectoroverlay_cancel"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\image\\vision.py",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_src": "src_image_vision_py",
+      "_tgt": "vision_find_and_click",
+      "source": "src_image_vision_py",
+      "target": "vision_find_and_click"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\utils\\state.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_src": "src_utils_state_py",
+      "_tgt": "state_appstate",
+      "source": "src_utils_state_py",
+      "target": "state_appstate"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\utils\\state.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_src": "state_appstate",
+      "_tgt": "state_appstate_init",
+      "source": "state_appstate",
+      "target": "state_appstate_init"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\utils\\state.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_src": "state_appstate",
+      "_tgt": "state_appstate_load_config",
+      "source": "state_appstate",
+      "target": "state_appstate_load_config"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\utils\\state.py",
+      "source_location": "L31",
+      "weight": 1.0,
+      "_src": "state_appstate",
+      "_tgt": "state_appstate_save_config",
+      "source": "state_appstate",
+      "target": "state_appstate_save_config"
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\utils\\state.py",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_src": "state_appstate_init",
+      "_tgt": "state_appstate_load_config",
+      "source": "state_appstate_init",
+      "target": "state_appstate_load_config"
+    },
+    {
+      "relation": "imports MacroApp",
+      "confidence": "EXTRACTED",
+      "_src": "src/main.py",
+      "_tgt": "src/gui/app.py",
+      "source": "src/main.py",
+      "target": "src/gui/app.py"
+    },
+    {
+      "relation": "documents architecture of",
+      "confidence": "EXTRACTED",
+      "_src": "PROJECT_CONTEXT.md",
+      "_tgt": "src/main.py",
+      "source": "src/main.py",
+      "target": "PROJECT_CONTEXT.md"
+    },
+    {
+      "relation": "imports run_macro",
+      "confidence": "EXTRACTED",
+      "_src": "src/gui/app.py",
+      "_tgt": "src/engine/macro.py",
+      "source": "src/engine/macro.py",
+      "target": "src/gui/app.py"
+    },
+    {
+      "relation": "imports find_and_click",
+      "confidence": "EXTRACTED",
+      "_src": "src/engine/macro.py",
+      "_tgt": "src/image/vision.py",
+      "source": "src/engine/macro.py",
+      "target": "src/image/vision.py"
+    },
+    {
+      "relation": "imports state",
+      "confidence": "EXTRACTED",
+      "_src": "src/engine/macro.py",
+      "_tgt": "src/utils/state.py",
+      "source": "src/engine/macro.py",
+      "target": "src/utils/state.py"
+    },
+    {
+      "relation": "documents architecture of",
+      "confidence": "EXTRACTED",
+      "_src": "PROJECT_CONTEXT.md",
+      "_tgt": "src/engine/macro.py",
+      "source": "src/engine/macro.py",
+      "target": "PROJECT_CONTEXT.md"
+    },
+    {
+      "relation": "imports RESOURCE_DIR, IMAGE_DIR",
+      "confidence": "EXTRACTED",
+      "_src": "src/gui/app.py",
+      "_tgt": "src/utils/config.py",
+      "source": "src/gui/app.py",
+      "target": "src/utils/config.py"
+    },
+    {
+      "relation": "imports state",
+      "confidence": "EXTRACTED",
+      "_src": "src/gui/app.py",
+      "_tgt": "src/utils/state.py",
+      "source": "src/gui/app.py",
+      "target": "src/utils/state.py"
+    },
+    {
+      "relation": "imports custom UI components",
+      "confidence": "EXTRACTED",
+      "_src": "src/gui/app.py",
+      "_tgt": "src/gui/components.py",
+      "source": "src/gui/app.py",
+      "target": "src/gui/components.py"
+    },
+    {
+      "relation": "imports RegionSelectorOverlay",
+      "confidence": "EXTRACTED",
+      "_src": "src/gui/app.py",
+      "_tgt": "src/gui/overlay.py",
+      "source": "src/gui/app.py",
+      "target": "src/gui/overlay.py"
+    },
+    {
+      "relation": "documents architecture of",
+      "confidence": "EXTRACTED",
+      "_src": "PROJECT_CONTEXT.md",
+      "_tgt": "src/gui/app.py",
+      "source": "src/gui/app.py",
+      "target": "PROJECT_CONTEXT.md"
+    },
+    {
+      "relation": "imports IMAGE_DIR",
+      "confidence": "EXTRACTED",
+      "_src": "src/image/vision.py",
+      "_tgt": "src/utils/config.py",
+      "source": "src/image/vision.py",
+      "target": "src/utils/config.py"
+    },
+    {
+      "relation": "documents architecture of",
+      "confidence": "EXTRACTED",
+      "_src": "PROJECT_CONTEXT.md",
+      "_tgt": "src/image/vision.py",
+      "source": "src/image/vision.py",
+      "target": "PROJECT_CONTEXT.md"
+    },
+    {
+      "relation": "imports CONFIG_FILE",
+      "confidence": "EXTRACTED",
+      "_src": "src/utils/state.py",
+      "_tgt": "src/utils/config.py",
+      "source": "src/utils/config.py",
+      "target": "src/utils/state.py"
+    },
+    {
+      "relation": "documents architecture of",
+      "confidence": "EXTRACTED",
+      "_src": "PROJECT_CONTEXT.md",
+      "_tgt": "src/utils/state.py",
+      "source": "src/utils/state.py",
+      "target": "PROJECT_CONTEXT.md"
+    },
+    {
+      "relation": "references dependencies in",
+      "confidence": "EXTRACTED",
+      "_src": "README.md",
+      "_tgt": "requirements.txt",
+      "source": "README.md",
+      "target": "requirements.txt"
+    }
+  ]
+}

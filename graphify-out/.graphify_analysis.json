@@ -1,0 +1,262 @@
+{
+  "communities": {
+    "0": [
+      "app_macroapp_add_new_image",
+      "app_macroapp_delete_image",
+      "app_macroapp_log",
+      "app_macroapp_move_seq",
+      "app_macroapp_on_drop",
+      "app_macroapp_refresh_image_list",
+      "app_macroapp_refresh_sequence_list",
+      "app_macroapp_rename_image",
+      "app_macroapp_update_image_statuses",
+      "app_macroapp_update_seq_dc",
+      "app_macroapp_update_seq_skip",
+      "app_macroapp_update_seq_wait",
+      "app_macroapp_upload_image",
+      "components_bind_mousewheel",
+      "state_appstate_save_config"
+    ],
+    "1": [
+      "app_macroapp",
+      "app_macroapp_build_images_view",
+      "app_macroapp_build_run_macro_view",
+      "app_macroapp_build_sequence_view",
+      "app_macroapp_build_ui",
+      "app_macroapp_check_images",
+      "app_macroapp_clear_log",
+      "app_macroapp_close_window",
+      "app_macroapp_create_sidebar_btn",
+      "app_macroapp_init",
+      "app_macroapp_show_view",
+      "main_main",
+      "src_gui_app_py",
+      "src_main_py"
+    ],
+    "2": [
+      "components_custominputdialog",
+      "components_custominputdialog_init",
+      "components_custominputdialog_on_cancel",
+      "components_custominputdialog_on_submit",
+      "components_roundedbutton_init",
+      "components_smoothscrollbar",
+      "components_smoothscrollbar_init",
+      "components_smoothscrollbar_on_click",
+      "components_smoothscrollbar_on_drag",
+      "components_smoothscrollbar_on_enter",
+      "components_smoothscrollbar_on_leave",
+      "components_smoothscrollbar_redraw",
+      "src_gui_components_py"
+    ],
+    "3": [
+      "app_macroapp_macro_worker",
+      "app_macroapp_on_macro_done",
+      "app_macroapp_start",
+      "app_macroapp_stop",
+      "app_macroapp_update_hint_state",
+      "app_macroapp_update_timer",
+      "components_roundedbutton_set_state",
+      "components_smoothscrollbar_set",
+      "components_toggleswitch_toggle",
+      "macro_run_macro",
+      "src_engine_macro_py",
+      "src_image_vision_py",
+      "vision_find_and_click"
+    ],
+    "4": [
+      "PROJECT_CONTEXT.md",
+      "src/engine/macro.py",
+      "src/gui/app.py",
+      "src/gui/components.py",
+      "src/gui/overlay.py",
+      "src/image/vision.py",
+      "src/main.py",
+      "src/utils/config.py",
+      "src/utils/state.py"
+    ],
+    "5": [
+      "components_roundedbutton",
+      "components_roundedbutton_draw",
+      "components_roundedbutton_draw_state",
+      "components_roundedbutton_get_points",
+      "components_roundedbutton_on_enter",
+      "components_roundedbutton_on_leave",
+      "components_roundedbutton_on_press",
+      "components_roundedbutton_on_release"
+    ],
+    "6": [
+      "app_macroapp_open_region_selector",
+      "overlay_regionselectoroverlay",
+      "overlay_regionselectoroverlay_cancel",
+      "overlay_regionselectoroverlay_init",
+      "overlay_regionselectoroverlay_on_drag",
+      "overlay_regionselectoroverlay_on_press",
+      "overlay_regionselectoroverlay_on_release",
+      "src_gui_overlay_py"
+    ],
+    "7": [
+      "components_toggleswitch",
+      "components_toggleswitch_draw",
+      "components_toggleswitch_init",
+      "components_toggleswitch_on_enter",
+      "components_toggleswitch_on_leave",
+      "components_toggleswitch_update_draw"
+    ],
+    "8": [
+      "src_utils_state_py",
+      "state_appstate",
+      "state_appstate_init",
+      "state_appstate_load_config"
+    ],
+    "9": [
+      "README.md",
+      "requirements.txt"
+    ],
+    "10": [
+      "src_init_py"
+    ],
+    "11": [
+      "src_engine_init_py"
+    ],
+    "12": [
+      "src_gui_init_py"
+    ],
+    "13": [
+      "src_image_init_py"
+    ],
+    "14": [
+      "src_utils_config_py"
+    ],
+    "15": [
+      "src_utils_init_py"
+    ],
+    "16": [
+      "src/__init__.py"
+    ],
+    "17": [
+      "src/engine/__init__.py"
+    ],
+    "18": [
+      "src/gui/__init__.py"
+    ],
+    "19": [
+      "src/image/__init__.py"
+    ],
+    "20": [
+      "src/utils/__init__.py"
+    ],
+    "21": [
+      "createexe.txt"
+    ]
+  },
+  "cohesion": {},
+  "god_nodes": [
+    {
+      "id": "app_macroapp",
+      "label": "MacroApp",
+      "degree": 37
+    },
+    {
+      "id": "components_roundedbutton",
+      "label": "RoundedButton",
+      "degree": 14
+    },
+    {
+      "id": "components_smoothscrollbar",
+      "label": "SmoothScrollbar",
+      "degree": 11
+    },
+    {
+      "id": "components_toggleswitch",
+      "label": "ToggleSwitch",
+      "degree": 9
+    },
+    {
+      "id": "components_custominputdialog",
+      "label": "CustomInputDialog",
+      "degree": 8
+    },
+    {
+      "id": "overlay_regionselectoroverlay",
+      "label": "RegionSelectorOverlay",
+      "degree": 8
+    },
+    {
+      "id": "macro_run_macro",
+      "label": "run_macro()",
+      "degree": 4
+    },
+    {
+      "id": "state_appstate",
+      "label": "AppState",
+      "degree": 4
+    },
+    {
+      "id": "components_bind_mousewheel",
+      "label": "_bind_mousewheel()",
+      "degree": 3
+    },
+    {
+      "id": "main_main",
+      "label": "main()",
+      "degree": 2
+    }
+  ],
+  "surprises": [
+    {
+      "source": "main()",
+      "target": "MacroApp",
+      "source_files": [
+        "src\\main.py",
+        "src\\gui\\app.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; peripheral node `main()` unexpectedly reaches hub `MacroApp`"
+    },
+    {
+      "source": "MacroApp",
+      "target": "RoundedButton",
+      "source_files": [
+        "src\\gui\\app.py",
+        "src\\gui\\components.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "uses",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "MacroApp",
+      "target": "ToggleSwitch",
+      "source_files": [
+        "src\\gui\\app.py",
+        "src\\gui\\components.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "uses",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "MacroApp",
+      "target": "SmoothScrollbar",
+      "source_files": [
+        "src\\gui\\app.py",
+        "src\\gui\\components.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "uses",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "MacroApp",
+      "target": "CustomInputDialog",
+      "source_files": [
+        "src\\gui\\app.py",
+        "src\\gui\\components.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "uses",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
+    }
+  ]
+}

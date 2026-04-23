@@ -1,0 +1,34 @@
+{
+  "files": {
+    "code": [
+      "src\\main.py",
+      "src\\__init__.py",
+      "src\\engine\\macro.py",
+      "src\\engine\\__init__.py",
+      "src\\gui\\app.py",
+      "src\\gui\\components.py",
+      "src\\gui\\overlay.py",
+      "src\\gui\\__init__.py",
+      "src\\image\\vision.py",
+      "src\\image\\__init__.py",
+      "src\\utils\\config.py",
+      "src\\utils\\state.py",
+      "src\\utils\\__init__.py"
+    ],
+    "document": [
+      "createexe.txt",
+      "PROJECT_CONTEXT.md",
+      "README.md",
+      "requirements.txt"
+    ],
+    "paper": [],
+    "image": [],
+    "video": []
+  },
+  "total_files": 17,
+  "total_words": 5510,
+  "needs_graph": false,
+  "warning": "Corpus is ~5,510 words - fits in a single context window. You may not need a graph.",
+  "skipped_sensitive": [],
+  "graphifyignore_patterns": 0
+}

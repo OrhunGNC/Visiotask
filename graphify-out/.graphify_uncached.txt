@@ -1,0 +1,17 @@
+src\main.py
+src\__init__.py
+src\engine\macro.py
+src\engine\__init__.py
+src\gui\app.py
+src\gui\components.py
+src\gui\overlay.py
+src\gui\__init__.py
+src\image\vision.py
+src\image\__init__.py
+src\utils\config.py
+src\utils\state.py
+src\utils\__init__.py
+createexe.txt
+PROJECT_CONTEXT.md
+README.md
+requirements.txt
