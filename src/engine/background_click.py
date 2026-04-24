@@ -23,9 +23,25 @@ MK_LBUTTON      = 0x0001
 
 PW_RENDERFULLCONTENT = 0x00000002   # Windows 8.1+  — captures DX/GL content
 
-user32  = ctypes.windll.user32
-gdi32   = ctypes.windll.gdi32
-kernel32 = ctypes.windll.kernel32
+# ── Lazy Win32 API access ─────────────────────────────────────────
+# Do NOT call ctypes.windll at module level — it crashes in packaged
+# executables (PyInstaller / cx_Freeze).  Instead, resolve each DLL
+# lazily on first use so the import always succeeds.
+
+_user32 = None
+_gdi32  = None
+
+def _get_user32():
+    global _user32
+    if _user32 is None:
+        _user32 = ctypes.windll.user32
+    return _user32
+
+def _get_gdi32():
+    global _gdi32
+    if _gdi32 is None:
+        _gdi32 = ctypes.windll.gdi32
+    return _gdi32
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -38,9 +54,10 @@ _enum_callback_t = ctypes.WINFUNCTYPE(
     ctypes.wintypes.LPARAM,
 )
 
-_visible_windows_cache: list[tuple[int, str]] = []   # [(hwnd, title), ...]
+_visible_windows_cache: list = []   # [(hwnd, title), ...]
 
 def _enum_callback(hwnd, _lparam):
+    user32 = _get_user32()
     if user32.IsWindowVisible(hwnd) and user32.GetParent(hwnd) == 0:
         length = user32.GetWindowTextLengthW(hwnd)
         if length > 0:
@@ -52,17 +69,16 @@ def _enum_callback(hwnd, _lparam):
     return True
 
 
-def enumerate_windows() -> list[tuple[int, str]]:
+def enumerate_windows() -> list:
     """Return a list of (hwnd, title) for all visible top-level windows."""
     global _visible_windows_cache
     _visible_windows_cache = []
-    user32.EnumWindows(_enum_callback_t(_enum_callback), 0)
-    # Sort by title for a nice dropdown
+    _get_user32().EnumWindows(_enum_callback_t(_enum_callback), 0)
     _visible_windows_cache.sort(key=lambda x: x[1].lower())
     return list(_visible_windows_cache)
 
 
-def find_window_by_title(title: str) -> int | None:
+def find_window_by_title(title: str):
     """Find a window by exact title. Returns HWND or None."""
     windows = enumerate_windows()
     for hwnd, t in windows:
@@ -77,6 +93,7 @@ def find_window_by_title(title: str) -> int | None:
 
 def get_window_title(hwnd: int) -> str:
     """Get the title of a window by its HWND."""
+    user32 = _get_user32()
     length = user32.GetWindowTextLengthW(hwnd)
     if length == 0:
         return ""
@@ -96,7 +113,23 @@ class RECT(ctypes.Structure):
                 ("bottom", ctypes.wintypes.LONG)]
 
 
-def capture_window(hwnd: int) -> tuple | None:
+class BITMAPINFOHEADER(ctypes.Structure):
+    _fields_ = [
+        ("biSize",          ctypes.wintypes.DWORD),
+        ("biWidth",         ctypes.wintypes.LONG),
+        ("biHeight",        ctypes.wintypes.LONG),
+        ("biPlanes",        ctypes.wintypes.WORD),
+        ("biBitCount",      ctypes.wintypes.WORD),
+        ("biCompression",   ctypes.wintypes.DWORD),
+        ("biSizeImage",     ctypes.wintypes.DWORD),
+        ("biXPelsPerMeter", ctypes.wintypes.LONG),
+        ("biYPelsPerMeter", ctypes.wintypes.LONG),
+        ("biClrUsed",       ctypes.wintypes.DWORD),
+        ("biClrImportant",  ctypes.wintypes.DWORD),
+    ]
+
+
+def capture_window(hwnd: int):
     """
     Capture a window's client area as a numpy BGR array (OpenCV-compatible),
     even when the window is behind other windows.
@@ -106,6 +139,9 @@ def capture_window(hwnd: int) -> tuple | None:
     should be restored or normal.
     """
     import numpy as np
+
+    user32 = _get_user32()
+    gdi32  = _get_gdi32()
 
     # Get client area dimensions
     rect = RECT()
@@ -142,22 +178,6 @@ def capture_window(hwnd: int) -> tuple | None:
         # Fallback: try without PW_RENDERFULLCONTENT (older Windows versions)
         result = user32.PrintWindow(hwnd, hdc_mem, 0)
 
-    # Define BITMAPINFOHEADER for GetDIBits
-    class BITMAPINFOHEADER(ctypes.Structure):
-        _fields_ = [
-            ("biSize",      ctypes.wintypes.DWORD),
-            ("biWidth",     ctypes.wintypes.LONG),
-            ("biHeight",    ctypes.wintypes.LONG),
-            ("biPlanes",    ctypes.wintypes.WORD),
-            ("biBitCount",  ctypes.wintypes.WORD),
-            ("biCompression", ctypes.wintypes.DWORD),
-            ("biSizeImage", ctypes.wintypes.DWORD),
-            ("biXPelsPerMeter", ctypes.wintypes.LONG),
-            ("biYPelsPerMeter", ctypes.wintypes.LONG),
-            ("biClrUsed",   ctypes.wintypes.DWORD),
-            ("biClrImportant", ctypes.wintypes.DWORD),
-        ]
-
     bmi = BITMAPINFOHEADER()
     bmi.biSize = ctypes.sizeof(BITMAPINFOHEADER)
     bmi.biWidth = w
@@ -188,7 +208,7 @@ def capture_window(hwnd: int) -> tuple | None:
 
 def is_window_valid(hwnd: int) -> bool:
     """Check if a window handle is still valid (window still exists)."""
-    return bool(user32.IsWindow(hwnd))
+    return bool(_get_user32().IsWindow(hwnd))
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -197,7 +217,7 @@ def is_window_valid(hwnd: int) -> bool:
 
 def _window_from_point(x: int, y: int) -> int:
     """Return the HWND of the topmost window at (x, y) in screen coords."""
-    return user32.WindowFromPoint(ctypes.wintypes.POINT(x, y))
+    return _get_user32().WindowFromPoint(ctypes.wintypes.POINT(x, y))
 
 
 def background_click(x: int, y: int, double_click: bool = False) -> bool:
@@ -211,6 +231,7 @@ def background_click(x: int, y: int, double_click: bool = False) -> bool:
     if not hwnd:
         return False
 
+    user32 = _get_user32()
     point = ctypes.wintypes.POINT(x, y)
     user32.ScreenToClient(hwnd, ctypes.byref(point))
     lparam = (point.y << 16) | (point.x & 0xFFFF)
@@ -239,6 +260,7 @@ def window_click(hwnd: int, client_x: int, client_y: int, double_click: bool = F
     if not is_window_valid(hwnd):
         return False
 
+    user32 = _get_user32()
     lparam = (client_y << 16) | (client_x & 0xFFFF)
 
     def _click():

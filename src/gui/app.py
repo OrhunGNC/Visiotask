@@ -230,7 +230,10 @@ class MacroApp:
         # Place in grid but initially hidden; will be shown when mode == "window"
         self.window_select_frame.grid(row=3, column=0, columnspan=3, sticky="w", padx=(0, 16), pady=4)
         self._on_click_mode_change()  # set initial visibility
-        self._refresh_windows()        # populate window list
+        try:
+            self._refresh_windows()        # populate window list
+        except Exception:
+            pass  # Win32 APIs may not be available in all environments
 
         # Status Card
         status_card = tk.Frame(top_panels, bg=self.CARD, bd=0)
