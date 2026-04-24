@@ -1,10 +1,11 @@
 import os
-import time
 import cv2
 import numpy as np
 import mss
-import pyautogui
 from src.utils.config import IMAGE_DIR
+from src.utils.state import state
+from src.engine.background_click import background_click, foreground_click
+
 
 def find_and_click(image_file, name, confidence=0.75, region=None, log=None, double_click=False):
     image_path = os.path.join(IMAGE_DIR, image_file)
@@ -29,16 +30,19 @@ def find_and_click(image_file, name, confidence=0.75, region=None, log=None, dou
         h, w = template.shape[:2]
         center_x = max_loc[0] + w // 2 + (region[0] if region else 0)
         center_y = max_loc[1] + h // 2 + (region[1] if region else 0)
-        
-        if double_click:
-            pyautogui.click(center_x, center_y)
-            time.sleep(0.1)
-            pyautogui.click(center_x, center_y)
-            action_name = "double-clicked"
+
+        # Use background or foreground click based on user setting
+        click_mode = getattr(state, "CLICK_MODE", "background")
+        if click_mode == "background":
+            success = background_click(center_x, center_y, double_click=double_click)
+            if not success:
+                # Fallback to foreground click if background click fails
+                foreground_click(center_x, center_y, double_click=double_click)
+            action_name = "clicked (bg)" if not double_click else "double-clicked (bg)"
         else:
-            pyautogui.click(center_x, center_y)
-            action_name = "clicked"
-            
+            foreground_click(center_x, center_y, double_click=double_click)
+            action_name = "double-clicked" if double_click else "clicked"
+
         if log:
             log(f"[+] {name} {action_name} ({max_val:.2f} @{center_x},{center_y})")
         return True
