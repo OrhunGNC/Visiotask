@@ -181,7 +181,7 @@ class ScreenshotOverlay(tk.Toplevel):
         if self.rect_id:
             self.canvas.coords(self.rect_id, x0, y0, x1, y1)
         else:
-            self.rect_id = self.canvas.create_rectangle(x0, y0, x1, y1, outline="#FF7A18", width=2)
+            self.rect_id = self.canvas.create_rectangle(x0, y0, x1, y1, outline="#6C5CE7", width=2)
 
         if self.rect_id:
             self.canvas.tag_raise(self.rect_id)
