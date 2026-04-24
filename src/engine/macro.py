@@ -1,14 +1,11 @@
 import time
 import keyboard
-import pyautogui
 from src.image.vision import find_and_click
 from src.utils.state import state
 
-# Disable PyAutoGUI's failsafe which crashes the thread when the mouse touches screen corners
-pyautogui.FAILSAFE = False
 
 def run_macro(stop_event, log, screen_ratio, scan_side):
-    screen_width, screen_height = pyautogui.size()
+    screen_width, screen_height = _screen_size()
     half_width = screen_width // 2
 
     if scan_side == "left":
@@ -26,6 +23,7 @@ def run_macro(stop_event, log, screen_ratio, scan_side):
 
     log("[i] --- Macro running (press Q to stop) ---")
     log(f"[i] Screen: {screen_width}x{screen_height} | ratio: {screen_ratio} | scanning: {search_label}")
+    log(f"[i] Click mode: {getattr(state, 'CLICK_MODE', 'background')}")
 
     if not state.MACRO_SEQUENCE:
         log("[!] Macro sequence is empty. Please add images first.")
@@ -80,13 +78,22 @@ def run_macro(stop_event, log, screen_ratio, scan_side):
                             skip_next = True
 
                 block_next = (wait_time == 0)
-                        
+                    
             time.sleep(0.1)
 
-    except pyautogui.FailSafeException:
-        log("[!] PyAutoGUI FailSafe triggered (Mouse mapped to corner). Stopping.")
     except Exception as e:
         log(f"[!] An error occurred during execution: {e}")
     finally:
         stop_event.set()
         log("[i] --- Macro stopped ---")
+
+
+def _screen_size():
+    """Return screen dimensions — uses Win32 API to avoid any pyautogui import."""
+    try:
+        import ctypes
+        user32 = ctypes.windll.user32
+        return user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
+    except Exception:
+        import pyautogui
+        return pyautogui.size()

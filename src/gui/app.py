@@ -58,6 +58,7 @@ class MacroApp:
         self.timer_val = 0
         self.remaining_time = 0
         self.scan_area_var = tk.StringVar(value=state.SCAN_AREA)
+        self.click_mode_var = tk.StringVar(value=getattr(state, "CLICK_MODE", "background"))
 
         # Perform automatic screen resolution/ratio detection quietly
         w = self.root.winfo_screenwidth()
@@ -72,9 +73,11 @@ class MacroApp:
 
         def _on_settings_change(*args):
             state.SCAN_AREA = self.scan_area_var.get()
+            state.CLICK_MODE = self.click_mode_var.get()
             state.save_config()
 
         self.scan_area_var.trace_add("write", _on_settings_change)
+        self.click_mode_var.trace_add("write", _on_settings_change)
         
         self.style = ttk.Style()
         self.style.theme_use("clam")
@@ -207,6 +210,11 @@ class MacroApp:
         timer_frame.grid(row=1, column=1, sticky="w", padx=16, pady=8)
         tk.Label(grid, text="Stop after", font=("Segoe UI", 11), bg=self.CARD, fg=self.TEXT_SEC).grid(row=1, column=0, sticky="w")
         
+        # Click Mode: background (default) lets user keep using the mouse
+        # foreground moves the physical cursor (original behaviour)
+        ttk.Combobox(grid, textvariable=self.click_mode_var, values=("background", "foreground"), state="readonly", width=12, font=("Segoe UI", 10)).grid(row=2, column=1, sticky="w", padx=16, pady=8)
+        tk.Label(grid, text="Click mode", font=("Segoe UI", 11), bg=self.CARD, fg=self.TEXT_SEC).grid(row=2, column=0, sticky="w")
+        
         # Status Card
         status_card = tk.Frame(top_panels, bg=self.CARD, bd=0)
         status_card.grid(row=0, column=1, sticky="nsew", padx=(12, 0))
@@ -254,7 +262,7 @@ class MacroApp:
         self.hint_badge_lbl = tk.Label(self.hint_badge, text="Q", font=("Segoe UI", 8, "bold"), bg="#1f2430", fg="#E5E7EB", pady=1, padx=4)
         self.hint_badge_lbl.pack()
         
-        self.hint_text2 = tk.Label(hint_inner, text="to stop the macro anytime", font=("Segoe UI", 10), bg=self.BG, fg="#9aa4b2")
+        self.hint_text2 = tk.Label(hint_inner, text="to stop the macro anytime  |  Background mode: your mouse is free", font=("Segoe UI", 10), bg=self.BG, fg="#9aa4b2")
         self.hint_text2.pack(side=tk.LEFT)
 
         # Log Panel

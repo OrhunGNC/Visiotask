@@ -8,7 +8,9 @@ Visiotask is an image-based screen automation and macro execution tool. It uses 
 
 ### Image-Based Macro Execution
 - **Template Matching:** Utilizes OpenCV (`cv2.matchTemplate`) and `mss` for high-performance, real-time screen grabbing and image recognition to find visual targets on the screen.
-- **Automated Clicking:** Uses `pyautogui` to perform precise mouse clicks on the center of the recognized image targets once they are found with a specified confidence threshold.
+- **Automated Clicking:** Supports two click modes:
+  - **Background mode (default):** Sends click events directly to the target window via Win32 `SendMessage` — the physical mouse cursor is **not** moved, so you can keep using your computer while the macro runs.
+  - **Foreground mode:** Falls back to `pyautogui.click()` which physically moves the cursor (original behaviour).
 - **Customizable Macro Sequence:** Executes a sequence of image searches with individual customizable properties:
   - **Wait Times:** Set delays between clicks. A wait time of `0.0` turns the step into a *blocking search* (the macro will infinitely search until the image appears).
   - **Double Click:** Toggle whether the action requires a single or double-click.
@@ -29,7 +31,11 @@ Visiotask is an image-based screen automation and macro execution tool. It uses 
 
 ### Fail-Safes and Hotkeys
 - **Instant Kill Switch:** The macro runs in a separate background thread. You can instantly stop the macro execution at any time by pressing the `Q` key on your keyboard.
-- **PyAutoGUI Failsafe:** Built-in failsafe is enabled so you can throw your mouse cursor to the corners of the screen to abort operations if needed.
+- **PyAutoGUI Failsafe:** Available in foreground mode. In background mode, the failsafe is not needed since the cursor is never moved.
+
+### Click Modes
+- **Background (default):** Clicks are sent as Win32 messages (`WM_LBUTTONDOWN` / `WM_LBUTTONUP`) directly to the target window. Your physical mouse cursor stays wherever you left it — you can browse, type, and work while the macro runs uninterrupted.
+- **Foreground:** Restores the original `pyautogui` behaviour — the cursor physically moves to the target and clicks. Use this if background mode doesn't work with a specific application (some apps ignore synthetic messages).
 
 ## Setup & Execution
 

@@ -11,6 +11,7 @@ class AppState:
         self.SCREEN_HEIGHT = 1080
         self.SCAN_AREA = "all"
         self.CUSTOM_REGION = None
+        self.CLICK_MODE = "background"  # "background" or "foreground"
         self.load_config()
 
     def load_config(self):
@@ -25,6 +26,7 @@ class AppState:
                     self.SCREEN_HEIGHT = data.get("SCREEN_HEIGHT", 1080)
                     self.SCAN_AREA = data.get("SCAN_AREA", "all")
                     self.CUSTOM_REGION = data.get("CUSTOM_REGION", None)
+                    self.CLICK_MODE = data.get("CLICK_MODE", "background")
             except Exception:
                 pass
 
@@ -38,7 +40,8 @@ class AppState:
                     "SCREEN_WIDTH": self.SCREEN_WIDTH,
                     "SCREEN_HEIGHT": self.SCREEN_HEIGHT,
                     "SCAN_AREA": self.SCAN_AREA,
-                    "CUSTOM_REGION": self.CUSTOM_REGION
+                    "CUSTOM_REGION": self.CUSTOM_REGION,
+                    "CLICK_MODE": self.CLICK_MODE
                 }, f, indent=4)
         except Exception:
             pass
