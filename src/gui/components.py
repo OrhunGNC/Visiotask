@@ -264,3 +264,27 @@ def _bind_mousewheel(canvas, widget):
     widget.bind("<MouseWheel>", lambda e: canvas.yview_scroll(int(-1 * (e.delta / 120)), "units"))
     for child in widget.winfo_children():
         _bind_mousewheel(canvas, child)
+
+
+class ShadowCard(tk.Frame):
+    """A card with a subtle shadow effect using an offset border frame."""
+    def __init__(self, parent, bg="#FFFFFF", shadow_color="#E2E4EA", **kwargs):
+        # Outer shadow frame
+        self.shadow = tk.Frame(parent, bg=shadow_color, **kwargs)
+        super().__init__(self.shadow, bg=bg)
+        # Inner content frame exposed as self.inner
+        self.inner = tk.Frame(self, bg=bg)
+        self.inner.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
+        super().pack(in_=self.shadow, fill=tk.BOTH, expand=True, padx=(0, 2), pady=(0, 2))
+
+    def pack(self, **kwargs):
+        self.shadow.pack(**kwargs)
+
+    def pack_forget(self):
+        self.shadow.pack_forget()
+
+    def grid(self, **kwargs):
+        self.shadow.grid(**kwargs)
+
+    def grid_forget(self):
+        self.shadow.grid_forget()
