@@ -22,6 +22,12 @@ WM_LBUTTONDBLCLK = 0x0203
 MK_LBUTTON      = 0x0001
 
 PW_RENDERFULLCONTENT = 0x00000002   # Windows 8.1+  — captures DX/GL content
+GA_ROOT = 2                          # GetAncestor — get root owner
+
+# Minimum client-area size for a window to be considered a valid target.
+# Filters out tooltips, tray icons, and other tiny sub-windows.
+MIN_WINDOW_WIDTH = 64
+MIN_WINDOW_HEIGHT = 48
 
 # ── Lazy Win32 API access ─────────────────────────────────────────
 # Do NOT call ctypes.windll at module level — it crashes in packaged
@@ -65,21 +71,62 @@ def _enum_callback(hwnd, _lparam):
             user32.GetWindowTextW(hwnd, buf, length + 1)
             title = buf.value.strip()
             if title:
+                # Walk up to root owner — some apps have child top-level
+                # windows (like toolbars) that are tiny.  We want the
+                # main application window.
+                root = user32.GetAncestor(hwnd, GA_ROOT)
+                if root and root != hwnd:
+                    # Use the root owner's dimensions instead
+                    client_rect = RECT()
+                    if user32.GetClientRect(root, ctypes.byref(client_rect)):
+                        cw = client_rect.right - client_rect.left
+                        ch = client_rect.bottom - client_rect.top
+                        # If the root is also tiny, skip this window entirely
+                        if cw < MIN_WINDOW_WIDTH or ch < MIN_WINDOW_HEIGHT:
+                            return True
                 _visible_windows_cache.append((hwnd, title))
     return True
 
 
+def _client_area_size(hwnd) -> tuple:
+    """Return (width, height) of a window's client area."""
+    user32 = _get_user32()
+    rect = RECT()
+    if user32.GetClientRect(hwnd, ctypes.byref(rect)):
+        return (rect.right - rect.left, rect.bottom - rect.top)
+    return (0, 0)
+
+
 def enumerate_windows() -> list:
-    """Return a list of (hwnd, title) for all visible top-level windows."""
+    """Return a list of (hwnd, title) for usable visible top-level windows.
+
+    Filters out windows with a client area smaller than MIN_WINDOW_WIDTH x
+    MIN_WINDOW_HEIGHT to avoid listing tooltips, tray icons, and other
+    tiny sub-windows that would be useless as macro targets.
+    """
     global _visible_windows_cache
     _visible_windows_cache = []
     _get_user32().EnumWindows(_enum_callback_t(_enum_callback), 0)
-    _visible_windows_cache.sort(key=lambda x: x[1].lower())
-    return list(_visible_windows_cache)
+
+    # Second pass: filter out windows with tiny client areas
+    filtered = []
+    for hwnd, title in _visible_windows_cache:
+        # Walk to root owner for size check
+        user32 = _get_user32()
+        root = user32.GetAncestor(hwnd, GA_ROOT)
+        check_hwnd = root if root else hwnd
+        cw, ch = _client_area_size(check_hwnd)
+        if cw >= MIN_WINDOW_WIDTH and ch >= MIN_WINDOW_HEIGHT:
+            # Store the root owner as the target — this ensures we always
+            # capture and click the main application window, not a sub-window
+            filtered.append((check_hwnd, title))
+
+    filtered.sort(key=lambda x: x[1].lower())
+    return filtered
 
 
 def find_window_by_title(title: str):
-    """Find a window by exact title. Returns HWND or None."""
+    """Find a window by exact title. Returns the root-owner HWND or None."""
     windows = enumerate_windows()
     for hwnd, t in windows:
         if t == title:
@@ -129,10 +176,24 @@ class BITMAPINFOHEADER(ctypes.Structure):
     ]
 
 
+def _walk_to_root(hwnd: int) -> int:
+    """Walk up from hWnd to its root owner window using GetAncestor(GA_ROOT).
+
+    This ensures we always capture the main application window, not a
+    tiny child or owner-drawn control that happens to have its own HWND.
+    """
+    user32 = _get_user32()
+    root = user32.GetAncestor(hwnd, GA_ROOT)
+    return root if root else hwnd
+
+
 def capture_window(hwnd: int):
     """
     Capture a window's client area as a numpy BGR array (OpenCV-compatible),
     even when the window is behind other windows.
+
+    If the given HWND has a tiny client area (e.g. a sub-control), this
+    function walks up to the root owner window and captures that instead.
 
     Returns (bgr_array, width, height) or None on failure.
     The window must NOT be minimized — it can be behind other windows but
@@ -143,40 +204,49 @@ def capture_window(hwnd: int):
     user32 = _get_user32()
     gdi32  = _get_gdi32()
 
+    # Walk up to root owner — if the user somehow selected a child window,
+    # we want to capture the main application window instead.
+    capture_hwnd = _walk_to_root(hwnd)
+
     # Get client area dimensions
     rect = RECT()
-    if not user32.GetClientRect(hwnd, ctypes.byref(rect)):
+    if not user32.GetClientRect(capture_hwnd, ctypes.byref(rect)):
         return None
     w = rect.right - rect.left
     h = rect.bottom - rect.top
     if w <= 0 or h <= 0:
         return None
 
+    # If the capture area is suspiciously small, log and return None
+    # This shouldn't happen after enumerate_windows filtering, but just in case
+    if w < MIN_WINDOW_WIDTH or h < MIN_WINDOW_HEIGHT:
+        return None
+
     # Create device contexts
-    hdc_window = user32.GetDC(hwnd)
+    hdc_window = user32.GetDC(capture_hwnd)
     if not hdc_window:
         return None
     hdc_mem = gdi32.CreateCompatibleDC(hdc_window)
     if not hdc_mem:
-        user32.ReleaseDC(hwnd, hdc_window)
+        user32.ReleaseDC(capture_hwnd, hdc_window)
         return None
 
     # Create bitmap
     h_bitmap = gdi32.CreateCompatibleBitmap(hdc_window, w, h)
     if not h_bitmap:
         gdi32.DeleteDC(hdc_mem)
-        user32.ReleaseDC(hwnd, hdc_window)
+        user32.ReleaseDC(capture_hwnd, hdc_window)
         return None
 
     old_bitmap = gdi32.SelectObject(hdc_mem, h_bitmap)
 
     # PrintWindow captures the window content even if occluded
     # PW_RENDERFULLCONTENT (0x02) captures DirectX / WebGL content
-    result = user32.PrintWindow(hwnd, hdc_mem, PW_RENDERFULLCONTENT)
+    result = user32.PrintWindow(capture_hwnd, hdc_mem, PW_RENDERFULLCONTENT)
 
     if not result:
         # Fallback: try without PW_RENDERFULLCONTENT (older Windows versions)
-        result = user32.PrintWindow(hwnd, hdc_mem, 0)
+        result = user32.PrintWindow(capture_hwnd, hdc_mem, 0)
 
     bmi = BITMAPINFOHEADER()
     bmi.biSize = ctypes.sizeof(BITMAPINFOHEADER)
@@ -194,7 +264,7 @@ def capture_window(hwnd: int):
     gdi32.SelectObject(hdc_mem, old_bitmap)
     gdi32.DeleteObject(h_bitmap)
     gdi32.DeleteDC(hdc_mem)
-    user32.ReleaseDC(hwnd, hdc_window)
+    user32.ReleaseDC(capture_hwnd, hdc_window)
 
     if not result and not buffer.raw:
         return None
@@ -254,23 +324,25 @@ def window_click(hwnd: int, client_x: int, client_y: int, double_click: bool = F
     specific window HWND, without moving the physical cursor or bringing
     the window to the foreground.
 
-    This is the core of "window mode" — the target window can be behind
-    other windows and your mouse stays wherever it is.
+    Walks up to the root owner window first — this ensures clicks go to
+    the main application window, not a tiny sub-control.
     """
-    if not is_window_valid(hwnd):
+    # Walk to root owner for click targeting too
+    target_hwnd = _walk_to_root(hwnd)
+    if not is_window_valid(target_hwnd):
         return False
 
     user32 = _get_user32()
     lparam = (client_y << 16) | (client_x & 0xFFFF)
 
     def _click():
-        user32.SendMessageW(hwnd, WM_LBUTTONDOWN, MK_LBUTTON, lparam)
-        user32.SendMessageW(hwnd, WM_LBUTTONUP, 0, lparam)
+        user32.SendMessageW(target_hwnd, WM_LBUTTONDOWN, MK_LBUTTON, lparam)
+        user32.SendMessageW(target_hwnd, WM_LBUTTONUP, 0, lparam)
 
     _click()
     if double_click:
         time.sleep(0.05)
-        user32.SendMessageW(hwnd, WM_LBUTTONDBLCLK, MK_LBUTTON, lparam)
+        user32.SendMessageW(target_hwnd, WM_LBUTTONDBLCLK, MK_LBUTTON, lparam)
 
     return True
 
