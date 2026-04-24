@@ -11,7 +11,10 @@ class AppState:
         self.SCREEN_HEIGHT = 1080
         self.SCAN_AREA = "all"
         self.CUSTOM_REGION = None
-        self.CLICK_MODE = "background"  # "background" or "foreground"
+        self.CLICK_MODE = "background"  # "foreground", "background", or "window"
+        # Window targeting — run-time only (not persisted because HWNDs change)
+        self.TARGET_WINDOW_TITLE = ""    # persisted label so it survives restarts
+        self.TARGET_HWND = None          # resolved at macro start
         self.load_config()
 
     def load_config(self):
@@ -27,6 +30,7 @@ class AppState:
                     self.SCAN_AREA = data.get("SCAN_AREA", "all")
                     self.CUSTOM_REGION = data.get("CUSTOM_REGION", None)
                     self.CLICK_MODE = data.get("CLICK_MODE", "background")
+                    self.TARGET_WINDOW_TITLE = data.get("TARGET_WINDOW_TITLE", "")
             except Exception:
                 pass
 
@@ -41,7 +45,8 @@ class AppState:
                     "SCREEN_HEIGHT": self.SCREEN_HEIGHT,
                     "SCAN_AREA": self.SCAN_AREA,
                     "CUSTOM_REGION": self.CUSTOM_REGION,
-                    "CLICK_MODE": self.CLICK_MODE
+                    "CLICK_MODE": self.CLICK_MODE,
+                    "TARGET_WINDOW_TITLE": self.TARGET_WINDOW_TITLE
                 }, f, indent=4)
         except Exception:
             pass

@@ -74,6 +74,9 @@ class MacroApp:
         def _on_settings_change(*args):
             state.SCAN_AREA = self.scan_area_var.get()
             state.CLICK_MODE = self.click_mode_var.get()
+            # Reset HWND when switching away from window mode
+            if state.CLICK_MODE != "window":
+                state.TARGET_HWND = None
             state.save_config()
 
         self.scan_area_var.trace_add("write", _on_settings_change)
@@ -210,11 +213,25 @@ class MacroApp:
         timer_frame.grid(row=1, column=1, sticky="w", padx=16, pady=8)
         tk.Label(grid, text="Stop after", font=("Segoe UI", 11), bg=self.CARD, fg=self.TEXT_SEC).grid(row=1, column=0, sticky="w")
         
-        # Click Mode: background (default) lets user keep using the mouse
-        # foreground moves the physical cursor (original behaviour)
-        ttk.Combobox(grid, textvariable=self.click_mode_var, values=("background", "foreground"), state="readonly", width=12, font=("Segoe UI", 10)).grid(row=2, column=1, sticky="w", padx=16, pady=8)
+        # Click Mode: background = no cursor move, foreground = move cursor, window = target specific app
+        ttk.Combobox(grid, textvariable=self.click_mode_var, values=("background", "foreground", "window"), state="readonly", width=12, font=("Segoe UI", 10)).grid(row=2, column=1, sticky="w", padx=16, pady=8)
         tk.Label(grid, text="Click mode", font=("Segoe UI", 11), bg=self.CARD, fg=self.TEXT_SEC).grid(row=2, column=0, sticky="w")
-        
+
+        # Target Window selector — only visible when click_mode == "window"
+        self.window_select_frame = tk.Frame(grid, bg=self.CARD)
+        tk.Label(self.window_select_frame, text="Target win", font=("Segoe UI", 11), bg=self.CARD, fg=self.TEXT_SEC).pack(side=tk.LEFT)
+        self.window_var = tk.StringVar(value=state.TARGET_WINDOW_TITLE)
+        self.window_combo = ttk.Combobox(self.window_select_frame, textvariable=self.window_var, state="readonly", width=24, font=("Segoe UI", 10))
+        self.window_combo.pack(side=tk.LEFT, padx=(8, 4))
+        self.btn_refresh_windows = tk.Button(self.window_select_frame, text="↻", font=("Segoe UI", 10), bg=self.BORDER, fg=self.TEXT, bd=0, cursor="hand2", width=3, command=self._refresh_windows)
+        self.btn_refresh_windows.pack(side=tk.LEFT, padx=(0, 4))
+        self.window_var.trace_add("write", self._on_window_change)
+        self.click_mode_var.trace_add("write", self._on_click_mode_change)
+        # Place in grid but initially hidden; will be shown when mode == "window"
+        self.window_select_frame.grid(row=3, column=0, columnspan=3, sticky="w", padx=(0, 16), pady=4)
+        self._on_click_mode_change()  # set initial visibility
+        self._refresh_windows()        # populate window list
+
         # Status Card
         status_card = tk.Frame(top_panels, bg=self.CARD, bd=0)
         status_card.grid(row=0, column=1, sticky="nsew", padx=(12, 0))
@@ -262,7 +279,7 @@ class MacroApp:
         self.hint_badge_lbl = tk.Label(self.hint_badge, text="Q", font=("Segoe UI", 8, "bold"), bg="#1f2430", fg="#E5E7EB", pady=1, padx=4)
         self.hint_badge_lbl.pack()
         
-        self.hint_text2 = tk.Label(hint_inner, text="to stop the macro anytime  |  Background mode: your mouse is free", font=("Segoe UI", 10), bg=self.BG, fg="#9aa4b2")
+        self.hint_text2 = tk.Label(hint_inner, text="to stop the macro  |  Window mode: works behind other apps", font=("Segoe UI", 10), bg=self.BG, fg="#9aa4b2")
         self.hint_text2.pack(side=tk.LEFT)
 
         # Log Panel
@@ -621,8 +638,49 @@ class MacroApp:
         self.log_text.delete(1.0, tk.END)
         self.log_text.configure(state=tk.DISABLED)
 
+    def _on_click_mode_change(self, *args):
+        """Show/hide the Target Window selector based on click mode."""
+        if self.click_mode_var.get() == "window":
+            self.window_select_frame.grid()
+        else:
+            self.window_select_frame.grid_remove()
+
+    def _on_window_change(self, *args):
+        """Persist the selected window title to state."""
+        state.TARGET_WINDOW_TITLE = self.window_var.get()
+        state.save_config()
+
+    def _refresh_windows(self):
+        """Populate the target window dropdown with currently visible windows."""
+        from src.engine.background_click import enumerate_windows
+        try:
+            windows = enumerate_windows()
+            titles = [t for _, t in windows]
+            self.window_combo["values"] = titles
+            # Preserve current selection if still valid
+            if self.window_var.get() not in titles and titles:
+                self.window_var.set("")
+        except Exception:
+            self.window_combo["values"] = []
+
     def _start(self):
         if self.macro_thread and self.macro_thread.is_alive(): return
+
+        # Resolve target window HWND when click_mode == "window"
+        if state.CLICK_MODE == "window" and state.TARGET_WINDOW_TITLE:
+            from src.engine.background_click import find_window_by_title
+            hwnd = find_window_by_title(state.TARGET_WINDOW_TITLE)
+            if hwnd:
+                state.TARGET_HWND = hwnd
+                self._log(f"[+] Target window found: {state.TARGET_WINDOW_TITLE} (HWND {hwnd})")
+            else:
+                state.TARGET_HWND = None
+                self._log(f"[!] Could not find window: {state.TARGET_WINDOW_TITLE}")
+                return messagebox.showerror("Window Not Found",
+                    f"Could not find window \"{state.TARGET_WINDOW_TITLE}\".\n"
+                    f"Make sure the application is open, then click ↻ to refresh the list.")
+        else:
+            state.TARGET_HWND = None
 
         ratio = state.SCREEN_RATIO
         area = self.scan_area_var.get()
