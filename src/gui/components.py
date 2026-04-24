@@ -32,8 +32,8 @@ class RoundedButton(tk.Canvas):
         h = max(self.winfo_height(), self.req_height)
         if w < 10 or h < 10: return
         
-        color = "#2A2F3A" if self.disabled and not self.outline_color else self.bg_color
-        out_col = "#2A2F3A" if self.disabled else self.outline_color
+        color = "#D1D5DB" if self.disabled and not self.outline_color else self.bg_color
+        out_col = "#D1D5DB" if self.disabled else self.outline_color
         
         self.create_polygon(self._get_points(w, h, self.radius), fill=color, outline=out_col, smooth=True)
         fg = "#9CA3AF" if self.disabled else self.fg_color
@@ -75,10 +75,10 @@ class ToggleSwitch(tk.Canvas):
         self.variable = variable
         self.w = width
         self.h = height
-        self.active_bg = "#FF7A18"
-        self.active_hover = "#FFA559"
-        self.inactive_bg = "#4B5563"
-        self.inactive_hover = "#6B7280"
+        self.active_bg = "#6C5CE7"
+        self.active_hover = "#7C6FF0"
+        self.inactive_bg = "#D1D5DB"
+        self.inactive_hover = "#B0B8C4"
         self.thumb_color = "#FFFFFF"
         self._is_hovered = False
         
@@ -120,15 +120,15 @@ class ToggleSwitch(tk.Canvas):
         thumb_r = r - 3
         cx = self.w - r if state else r
         
-        self.create_oval(cx-thumb_r, r-thumb_r+1, cx+thumb_r, r+thumb_r+1, fill="#1E2530", outline="")
+        self.create_oval(cx-thumb_r, r-thumb_r+1, cx+thumb_r, r+thumb_r+1, fill="#E8E9ED", outline="")
         self.create_oval(cx-thumb_r, r-thumb_r, cx+thumb_r, r+thumb_r, fill=self.thumb_color, outline=self.thumb_color)
 
 class SmoothScrollbar(tk.Canvas):
     def __init__(self, parent, target_canvas, width=8, **kwargs):
-        super().__init__(parent, bg="#0F172A", highlightthickness=0, width=width, **kwargs)
+        super().__init__(parent, bg="#E8E9ED", highlightthickness=0, width=width, **kwargs)
         self.target = target_canvas
-        self.thumb_color = "#2A3441"
-        self.hover_color = "#3B4756"
+        self.thumb_color = "#C4C8D0"
+        self.hover_color = "#A0A6B2"
         self.thumb_id = self.create_rectangle(0, 0, width, 0, fill=self.thumb_color, outline="")
         self.first = 0.0
         self.last = 1.0
@@ -186,7 +186,7 @@ class CustomInputDialog(tk.Toplevel):
         super().__init__(parent)
         self.result = None
         self.overrideredirect(True)
-        self.configure(bg="#2A2F3A")
+        self.configure(bg="#E8E9ED")
         
         w, h = 460, 280
         x = parent.winfo_rootx() + (parent.winfo_width() // 2) - (w // 2)
@@ -198,7 +198,7 @@ class CustomInputDialog(tk.Toplevel):
         self.attributes("-topmost", True)
         self.focus_force()
         
-        main_frame = tk.Frame(self, bg="#1A1D26")
+        main_frame = tk.Frame(self, bg="#FFFFFF")
         main_frame.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
         
         self._drag_data = {"x": 0, "y": 0}
@@ -214,18 +214,18 @@ class CustomInputDialog(tk.Toplevel):
         main_frame.bind("<ButtonPress-1>", _on_drag_start)
         main_frame.bind("<B1-Motion>", _on_drag_motion)
         
-        lbl_title = tk.Label(main_frame, text=title_text, font=("Segoe UI", 18, "bold"), bg="#1A1D26", fg="#E5E7EB")
+        lbl_title = tk.Label(main_frame, text=title_text, font=("Segoe UI", 18, "bold"), bg="#FFFFFF", fg="#2D3436")
         lbl_title.pack(anchor="w", padx=30, pady=(24, 16))
         lbl_title.bind("<ButtonPress-1>", _on_drag_start)
         lbl_title.bind("<B1-Motion>", _on_drag_motion)
         
-        tk.Label(main_frame, text=label_text, font=("Segoe UI", 12), bg="#1A1D26", fg="#E5E7EB").pack(anchor="w", padx=30)
+        tk.Label(main_frame, text=label_text, font=("Segoe UI", 12), bg="#FFFFFF", fg="#636E72").pack(anchor="w", padx=30)
         
-        input_frame = tk.Frame(main_frame, bg="#0F1117", highlightthickness=1, highlightbackground="#2A2F3A")
+        input_frame = tk.Frame(main_frame, bg="#FFFFFF", highlightthickness=1, highlightbackground="#D1D5DB")
         input_frame.pack(fill=tk.X, padx=30, pady=(8, 4))
         
         self.entry_var = tk.StringVar(value=default_value)
-        self.entry = tk.Entry(input_frame, textvariable=self.entry_var, font=("Segoe UI", 12), bg="#0F1117", fg="#E5E7EB", insertbackground="#E5E7EB", bd=0)
+        self.entry = tk.Entry(input_frame, textvariable=self.entry_var, font=("Segoe UI", 12), bg="#FFFFFF", fg="#2D3436", insertbackground="#2D3436", bd=0)
         self.entry.pack(fill=tk.X, padx=12, pady=10)
         self.entry.bind("<Return>", lambda e: self._on_submit())
         
@@ -239,15 +239,15 @@ class CustomInputDialog(tk.Toplevel):
                     self.entry.select_range(0, tk.END)
         self.after(100, _focus_and_select)
         
-        tk.Label(main_frame, text="e.g. icon.png", font=("Segoe UI", 10), bg="#1A1D26", fg="#9CA3AF").pack(anchor="w", padx=30)
+        tk.Label(main_frame, text="e.g. icon.png", font=("Segoe UI", 10), bg="#FFFFFF", fg="#B2BEC3").pack(anchor="w", padx=30)
         
-        btn_frame = tk.Frame(main_frame, bg="#1A1D26")
+        btn_frame = tk.Frame(main_frame, bg="#FFFFFF")
         btn_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=30, pady=(10, 24))
         
-        self.btn_submit = RoundedButton(btn_frame, ok_text, bg_color="#FF7A18", fg_color="#FFFFFF", hover_color="#FF8C36", command=self._on_submit, width=120, height=44, font=("Segoe UI", 11, "bold"))
+        self.btn_submit = RoundedButton(btn_frame, ok_text, bg_color="#6C5CE7", fg_color="#FFFFFF", hover_color="#7C6FF0", command=self._on_submit, width=120, height=44, font=("Segoe UI", 11, "bold"))
         self.btn_submit.pack(side=tk.RIGHT)
         
-        self.btn_cancel = RoundedButton(btn_frame, "Cancel", bg_color="#1A1D26", fg_color="#E5E7EB", hover_color="#2A2F3A", outline_color="#2A2F3A", command=self._on_cancel, width=100, height=44, font=("Segoe UI", 11))
+        self.btn_cancel = RoundedButton(btn_frame, "Cancel", bg_color="#FFFFFF", fg_color="#636E72", hover_color="#F5F6FA", outline_color="#D1D5DB", command=self._on_cancel, width=100, height=44, font=("Segoe UI", 11))
         self.btn_cancel.pack(side=tk.RIGHT, padx=(0, 16))
 
         self.grab_set()

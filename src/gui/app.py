@@ -13,16 +13,23 @@ from src.engine.macro import run_macro
 
 
 class MacroApp:
-    BG = "#0F1117"
-    CARD = "#1A1D26"
-    BORDER = "#2A2F3A"
-    PRIMARY = "#FF7A18"
-    PRIMARY_HOVER = "#FF8C36"
-    SUCCESS = "#22C55E"
-    WARNING = "#FACC15"
-    ERROR = "#EF4444"
-    TEXT = "#E5E7EB"
-    TEXT_SEC = "#9CA3AF"
+    # Dark sidebar palette
+    SIDEBAR_BG = "#1E1E2D"
+    SIDEBAR_HOVER = "#2A2A3D"
+    SIDEBAR_ACTIVE_BG = "#2A2A3D"
+    # Light main content palette
+    BG = "#F5F6FA"
+    CARD = "#FFFFFF"
+    CARD_BORDER = "#E8E9ED"
+    BORDER = "#D1D5DB"
+    PRIMARY = "#6C5CE7"
+    PRIMARY_HOVER = "#7C6FF0"
+    SUCCESS = "#00B894"
+    WARNING = "#FDCB6E"
+    ERROR = "#E17055"
+    TEXT = "#2D3436"
+    TEXT_SEC = "#636E72"
+    TEXT_LIGHT = "#B2BEC3"
 
     def __init__(self, root):
         self.root = root
@@ -40,6 +47,7 @@ class MacroApp:
             import ctypes
             self.root.update_idletasks()
             hwnd = ctypes.windll.user32.GetParent(self.root.winfo_id())
+            # Use dark title bar to match the dark sidebar
             ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, 20, ctypes.byref(ctypes.c_int(2)), 4)
             # Allow drag & drop bypassing UIPI if running in elevated mode
             ctypes.windll.user32.ChangeWindowMessageFilterEx(hwnd, 0x0233, 1, None) # WM_DROPFILES
@@ -97,29 +105,29 @@ class MacroApp:
 
     def _build_ui(self):
         # Sidebar
-        self.sidebar = tk.Frame(self.root, bg=self.CARD, width=240)
+        self.sidebar = tk.Frame(self.root, bg=self.SIDEBAR_BG, width=220)
         self.sidebar.pack(side=tk.LEFT, fill=tk.Y)
         self.sidebar.pack_propagate(False)
         
-        brand_frame = tk.Frame(self.sidebar, bg=self.CARD)
-        brand_frame.pack(pady=(30, 40), padx=20, anchor="w", fill=tk.X)
+        brand_frame = tk.Frame(self.sidebar, bg=self.SIDEBAR_BG)
+        brand_frame.pack(pady=(24, 32), padx=20, anchor="w", fill=tk.X)
         
         icon_path = os.path.join(RESOURCE_DIR, "icon.ico")
         if os.path.exists(icon_path):
             try:
                 pil_icon = Image.open(icon_path).resize((28, 28))
                 self._sidebar_icon = ImageTk.PhotoImage(pil_icon)
-                tk.Label(brand_frame, image=self._sidebar_icon, bg=self.CARD).pack(side=tk.LEFT, padx=(0, 10))
+                tk.Label(brand_frame, image=self._sidebar_icon, bg=self.SIDEBAR_BG).pack(side=tk.LEFT, padx=(0, 10))
             except Exception: pass
             
-        tk.Label(brand_frame, text="Visiotask", font=("Segoe UI", 20, "bold"), bg=self.CARD, fg=self.PRIMARY).pack(side=tk.LEFT)
+        tk.Label(brand_frame, text="Visiotask", font=("Segoe UI", 18, "bold"), bg=self.SIDEBAR_BG, fg=self.PRIMARY).pack(side=tk.LEFT)
         
         # Main View
         self.main_content = tk.Frame(self.root, bg=self.BG)
         self.main_content.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
-        for name in ["Run Macro", "Macro Sequence", "Manage Images"]:
-            self._create_sidebar_btn(name)
+        for name, icon in [("Run Macro", "▶"), ("Macro Sequence", "☰"), ("Manage Images", "🖼")]:
+            self._create_sidebar_btn(name, icon)
 
         self._build_run_macro_view()
         self._build_sequence_view()
@@ -127,50 +135,63 @@ class MacroApp:
         
         self._show_view("Run Macro")
 
-    def _create_sidebar_btn(self, name):
-        btn = tk.Frame(self.sidebar, bg=self.CARD, cursor="hand2")
-        btn.pack(fill=tk.X, pady=2)
+    def _create_sidebar_btn(self, name, icon=""):
+        btn = tk.Frame(self.sidebar, bg=self.SIDEBAR_BG, cursor="hand2")
+        btn.pack(fill=tk.X, pady=1, padx=12)
         
-        indicator = tk.Frame(btn, bg=self.CARD, width=4)
-        indicator.pack(side=tk.LEFT, fill=tk.Y)
+        indicator = tk.Frame(btn, bg=self.SIDEBAR_BG, width=3)
+        indicator.pack(side=tk.LEFT, fill=tk.Y, pady=8)
         
-        lbl = tk.Label(btn, text=name, font=("Segoe UI", 12), bg=self.CARD, fg=self.TEXT_SEC, cursor="hand2")
-        lbl.pack(side=tk.LEFT, padx=16, pady=12)
+        if icon:
+            icon_lbl = tk.Label(btn, text=icon, font=("Segoe UI", 14), bg=self.SIDEBAR_BG, fg=self.TEXT_LIGHT, cursor="hand2")
+            icon_lbl.pack(side=tk.LEFT, padx=(12, 8), pady=10)
+        
+        lbl = tk.Label(btn, text=name, font=("Segoe UI", 12), bg=self.SIDEBAR_BG, fg=self.TEXT_LIGHT, cursor="hand2")
+        lbl.pack(side=tk.LEFT, padx=(0, 16), pady=10)
         
         def on_enter(e):
             if self.current_view != name:
-                btn.configure(bg=self.BORDER)
-                lbl.configure(bg=self.BORDER, fg=self.TEXT)
-                indicator.configure(bg=self.BORDER)
+                btn.configure(bg=self.SIDEBAR_HOVER)
+                lbl.configure(bg=self.SIDEBAR_HOVER, fg="#FFFFFF")
+                indicator.configure(bg=self.SIDEBAR_HOVER)
+                if icon: icon_lbl.configure(bg=self.SIDEBAR_HOVER)
                 
         def on_leave(e):
             if self.current_view != name:
-                btn.configure(bg=self.CARD)
-                lbl.configure(bg=self.CARD, fg=self.TEXT_SEC)
-                indicator.configure(bg=self.CARD)
+                btn.configure(bg=self.SIDEBAR_BG)
+                lbl.configure(bg=self.SIDEBAR_BG, fg=self.TEXT_LIGHT)
+                indicator.configure(bg=self.SIDEBAR_BG)
+                if icon: icon_lbl.configure(bg=self.SIDEBAR_BG)
                 
         def on_click(e): self._show_view(name)
             
-        for w in (btn, indicator, lbl):
+        widgets = [btn, indicator, lbl]
+        if icon: widgets.append(icon_lbl)
+        for w in widgets:
             w.bind("<Enter>", on_enter)
             w.bind("<Leave>", on_leave)
             w.bind("<Button-1>", on_click)
             
         self.sidebar_buttons[name] = {"frame": btn, "label": lbl, "indicator": indicator}
+        if icon:
+            self.sidebar_buttons[name]["icon"] = icon_lbl
 
     def _show_view(self, name):
         self.current_view = name
         for v in self.views.values(): v.pack_forget()
         
         for b_name, b_dict in self.sidebar_buttons.items():
+            icon_lbl = b_dict.get("icon")
             if b_name == name:
-                b_dict["frame"].configure(bg=self.BORDER)
-                b_dict["label"].configure(bg=self.BORDER, fg=self.TEXT, font=("Segoe UI", 12, "bold"))
+                b_dict["frame"].configure(bg=self.SIDEBAR_HOVER)
+                b_dict["label"].configure(bg=self.SIDEBAR_HOVER, fg="#FFFFFF", font=("Segoe UI", 12, "bold"))
                 b_dict["indicator"].configure(bg=self.PRIMARY)
+                if icon_lbl: icon_lbl.configure(bg=self.SIDEBAR_HOVER, fg="#FFFFFF")
             else:
-                b_dict["frame"].configure(bg=self.CARD)
-                b_dict["label"].configure(bg=self.CARD, fg=self.TEXT_SEC, font=("Segoe UI", 12))
-                b_dict["indicator"].configure(bg=self.CARD)
+                b_dict["frame"].configure(bg=self.SIDEBAR_BG)
+                b_dict["label"].configure(bg=self.SIDEBAR_BG, fg=self.TEXT_LIGHT, font=("Segoe UI", 12))
+                b_dict["indicator"].configure(bg=self.SIDEBAR_BG)
+                if icon_lbl: icon_lbl.configure(bg=self.SIDEBAR_BG)
                 
         if name in self.views:
             self.views[name].pack(fill=tk.BOTH, expand=True, padx=32, pady=32)
@@ -270,19 +291,19 @@ class MacroApp:
         hint_inner = tk.Frame(self.hint_frame, bg=self.BG)
         hint_inner.pack(anchor="center")
         
-        self.hint_icon = tk.Label(hint_inner, text="⌨", font=("Segoe UI", 12), bg=self.BG, fg="#9aa4b2")
+        self.hint_icon = tk.Label(hint_inner, text="⌨", font=("Segoe UI", 12), bg=self.BG, fg=self.TEXT_SEC)
         self.hint_icon.pack(side=tk.LEFT, padx=(4, 6))
         
-        self.hint_text1 = tk.Label(hint_inner, text="Press", font=("Segoe UI", 10), bg=self.BG, fg="#9aa4b2")
+        self.hint_text1 = tk.Label(hint_inner, text="Press", font=("Segoe UI", 10), bg=self.BG, fg=self.TEXT_SEC)
         self.hint_text1.pack(side=tk.LEFT)
         
         # Q Key Badge
-        self.hint_badge = tk.Frame(hint_inner, bg="#1f2430", highlightbackground="#2a2f3a", highlightthickness=1)
+        self.hint_badge = tk.Frame(hint_inner, bg=self.PRIMARY, highlightbackground=self.PRIMARY, highlightthickness=1)
         self.hint_badge.pack(side=tk.LEFT, padx=6)
-        self.hint_badge_lbl = tk.Label(self.hint_badge, text="Q", font=("Segoe UI", 8, "bold"), bg="#1f2430", fg="#E5E7EB", pady=1, padx=4)
+        self.hint_badge_lbl = tk.Label(self.hint_badge, text="Q", font=("Segoe UI", 8, "bold"), bg=self.PRIMARY, fg="#FFFFFF", pady=1, padx=4)
         self.hint_badge_lbl.pack()
         
-        self.hint_text2 = tk.Label(hint_inner, text="to stop the macro  |  Window mode: works behind other apps", font=("Segoe UI", 10), bg=self.BG, fg="#9aa4b2")
+        self.hint_text2 = tk.Label(hint_inner, text="to stop the macro  |  Window mode: works behind other apps", font=("Segoe UI", 10), bg=self.BG, fg=self.TEXT_SEC)
         self.hint_text2.pack(side=tk.LEFT)
 
         # Log Panel
@@ -292,13 +313,13 @@ class MacroApp:
         log_header = tk.Frame(log_card, bg=self.CARD)
         log_header.pack(fill=tk.X, padx=20, pady=(16, 8))
         tk.Label(log_header, text="Execution Log", font=("Segoe UI", 14, "bold"), bg=self.CARD, fg=self.TEXT).pack(side=tk.LEFT)
-        tk.Button(log_header, text="Clear", font=("Segoe UI", 10), fg=self.TEXT_SEC, bg=self.CARD, bd=0, activebackground=self.CARD, cursor="hand2", command=self._clear_log).pack(side=tk.RIGHT)
+        tk.Button(log_header, text="Clear", font=("Segoe UI", 10), fg=self.TEXT_SEC, bg=self.CARD, bd=0, activebackground=self.CARD, activeforeground=self.TEXT, cursor="hand2", command=self._clear_log).pack(side=tk.RIGHT)
 
         log_frame = tk.Frame(log_card, bg=self.BG)
         log_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=(0, 20))
         
         self.log_text = tk.Text(log_frame, font=("Segoe UI", 11), bg=self.BG, fg=self.TEXT, insertbackground=self.TEXT, bd=0, highlightthickness=0, state=tk.DISABLED, wrap=tk.WORD, padx=12, pady=12)
-        scrollbar = tk.Scrollbar(log_frame, command=self.log_text.yview, bg=self.BG, troughcolor=self.CARD, bd=0)
+        scrollbar = tk.Scrollbar(log_frame, command=self.log_text.yview, bg=self.BG, troughcolor=self.CARD, bd=0, highlightthickness=0)
         self.log_text.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -365,7 +386,7 @@ class MacroApp:
         tk.Label(hd_wait, text="Wait (s)", font=("Segoe UI", 10, "bold"), bg=self.BG, fg=self.TEXT_SEC).pack(expand=True)
 
         # Subtle separator
-        tk.Frame(view, bg="#1E2530", height=1).pack(fill=tk.X, pady=0)
+        tk.Frame(view, bg=self.CARD_BORDER, height=1).pack(fill=tk.X, pady=0)
 
         list_container = tk.Frame(view, bg=self.BG)
         list_container.pack(fill=tk.BOTH, expand=True)
@@ -408,7 +429,7 @@ class MacroApp:
                 card.pack(fill=tk.X, pady=0)
             
             # Hover effect
-            def on_enter(e, c=card): c.configure(bg="#212631")
+            def on_enter(e, c=card): c.configure(bg="#F0F1F5")
             def on_leave(e, c=card): c.configure(bg=self.CARD)
             card.bind("<Enter>", on_enter)
             card.bind("<Leave>", on_leave)
@@ -455,7 +476,7 @@ class MacroApp:
             
             del_btn = tk.Button(btn_frame, text="🗑", font=("Segoe UI Symbol", 12), bg=self.CARD, fg=self.ERROR, bd=0, cursor="hand2", command=lambda n=step["name"]: self._delete_image(n))
             del_btn.pack(expand=True)
-            del_btn.bind("<Enter>", lambda e, btn=del_btn, c=card: [c.configure(bg="#212631"), btn.configure(bg="#212631")])
+            del_btn.bind("<Enter>", lambda e, btn=del_btn, c=card: [c.configure(bg="#F0F1F5"), btn.configure(bg="#F0F1F5")])
             del_btn.bind("<Leave>", lambda e, btn=del_btn, c=card: [c.configure(bg=self.CARD), btn.configure(bg=self.CARD)])
 
             # 2. Skip Toggle
@@ -492,25 +513,25 @@ class MacroApp:
             
             wait_var = tk.StringVar(value=str(step.get("wait", 0)))
             
-            border_frame = tk.Frame(wait_frame, bg="#4B5563") # clear visible border
+            border_frame = tk.Frame(wait_frame, bg=self.CARD_BORDER) # clear visible border
             border_frame.pack(expand=True, pady=4)
             
-            entry_frame = tk.Frame(border_frame, bg="#1E2530")
+            entry_frame = tk.Frame(border_frame, bg="#FFFFFF")
             entry_frame.pack(padx=1, pady=1, fill=tk.BOTH, expand=True) # 1px simulated geometric border
             
-            wait_entry = tk.Entry(entry_frame, textvariable=wait_var, width=5, font=("Segoe UI", 11, "bold"), bg="#1E2530", fg="#FFFFFF", insertbackground="#FFFFFF", bd=0, justify="center")
+            wait_entry = tk.Entry(entry_frame, textvariable=wait_var, width=5, font=("Segoe UI", 11, "bold"), bg="#FFFFFF", fg=self.TEXT, insertbackground=self.TEXT, bd=0, justify="center")
             wait_entry.pack(padx=4, pady=4)
             wait_var.trace_add("write", lambda *args, idx=i, v=wait_var: self._update_seq_wait(idx, v))
             
             # Allow focus events to cascade entry frame styling correctly
             def _on_focus_in(e, bf=border_frame, ef=entry_frame, we=wait_entry): 
-                bf.configure(bg="#FF7A18")
-                ef.configure(bg="#2A2F3A")
-                we.configure(bg="#2A2F3A")
+                bf.configure(bg=self.PRIMARY)
+                ef.configure(bg="#FFFFFF")
+                we.configure(bg="#FFFFFF")
             def _on_focus_out(e, bf=border_frame, ef=entry_frame, we=wait_entry): 
-                bf.configure(bg="#4B5563")
-                ef.configure(bg="#1E2530")
-                we.configure(bg="#1E2530")
+                bf.configure(bg=self.CARD_BORDER)
+                ef.configure(bg="#FFFFFF")
+                we.configure(bg="#FFFFFF")
             wait_entry.bind("<FocusIn>", _on_focus_in)
             wait_entry.bind("<FocusOut>", _on_focus_out)
 
@@ -534,7 +555,7 @@ class MacroApp:
         # Screenshot capture button
         btn_row = tk.Frame(header, bg=self.BG)
         btn_row.pack(side=tk.RIGHT, padx=(0, 8))
-        RoundedButton(btn_row, text="📸 Capture", bg_color=self.BORDER, fg_color=self.TEXT, hover_color="#3A3F4A", command=self._capture_screenshot, width=120, height=40).pack(side=tk.RIGHT)
+        RoundedButton(btn_row, text="📸 Capture", bg_color=self.BORDER, fg_color=self.TEXT, hover_color="#D1D5DB", command=self._capture_screenshot, width=120, height=40).pack(side=tk.RIGHT)
 
         list_container = tk.Frame(view, bg=self.BG)
         list_container.pack(fill=tk.BOTH, expand=True)
@@ -605,9 +626,9 @@ class MacroApp:
 
             actions = tk.Frame(card, bg=self.CARD)
             actions.pack(side=tk.RIGHT, fill=tk.Y)
-            create_action_btn(actions, "✏ Rename", "#AAB4C3", "#D1D5DB", lambda n=img_name: self._rename_image(n), (0, 16))
-            create_action_btn(actions, "🔄 Replace", "#FF8A3D", "#FF9D5C", lambda n=img_name: self._upload_image(n), (0, 16))
-            create_action_btn(actions, "🗑 Delete", "#E05252", "#EF4444", lambda n=img_name: self._delete_image(n), (0, 5))
+            create_action_btn(actions, "✏ Rename", "#8E96A4", self.TEXT, lambda n=img_name: self._rename_image(n), (0, 16))
+            create_action_btn(actions, "🔄 Replace", self.PRIMARY, self.PRIMARY_HOVER, lambda n=img_name: self._upload_image(n), (0, 16))
+            create_action_btn(actions, "🗑 Delete", self.ERROR, "#FF7675", lambda n=img_name: self._delete_image(n), (0, 5))
 
         self._update_image_statuses()
         
@@ -737,10 +758,10 @@ class MacroApp:
         self.root.after(0, self._on_macro_done)
 
     def _update_hint_state(self, is_running):
-        color = "#e5e7eb" if is_running else "#9aa4b2"
-        badge_bg = "#2563eb" if is_running else "#1f2430"
-        badge_border = "#3b82f6" if is_running else "#2a2f3a"
-        badge_fg = "#ffffff" if is_running else "#e5e7eb"
+        color = self.TEXT if is_running else self.TEXT_SEC
+        badge_bg = self.PRIMARY if is_running else self.BORDER
+        badge_border = self.PRIMARY_HOVER if is_running else self.BORDER
+        badge_fg = "#FFFFFF" if is_running else self.TEXT
         
         try:
             self.hint_icon.configure(fg=color)
