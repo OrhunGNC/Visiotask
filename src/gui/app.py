@@ -531,6 +531,11 @@ class MacroApp:
 
         RoundedButton(header, text="Add New Image", bg_color=self.PRIMARY, fg_color="#FFF", hover_color=self.PRIMARY_HOVER, command=self._add_new_image, width=140, height=40).pack(side=tk.RIGHT)
 
+        # Screenshot capture button
+        btn_row = tk.Frame(header, bg=self.BG)
+        btn_row.pack(side=tk.RIGHT, padx=(0, 8))
+        RoundedButton(btn_row, text="📸 Capture", bg_color=self.BORDER, fg_color=self.TEXT, hover_color="#3A3F4A", command=self._capture_screenshot, width=120, height=40).pack(side=tk.RIGHT)
+
         list_container = tk.Frame(view, bg=self.BG)
         list_container.pack(fill=tk.BOTH, expand=True)
 
@@ -840,6 +845,51 @@ class MacroApp:
                     self._refresh_sequence_list()
         except Exception as e: 
             messagebox.showerror("Error", str(e))
+
+    def _capture_screenshot(self):
+        """Open a fullscreen overlay to screenshot and crop a region, then save as template."""
+        from src.gui.overlay import ScreenshotOverlay
+
+        # Hide the main window so it doesn't appear in the screenshot
+        self.root.attributes("-alpha", 0.0)
+        self.root.update()
+
+        def on_capture(crop_image, x, y, w, h):
+            self.root.attributes("-alpha", 1.0)
+            # Ask the user for a filename
+            default_name = f"capture_{w}x{h}.png"
+            dialog = CustomInputDialog(self.root, "Save Captured Image", "Filename:", ok_text="Save", default_value=default_name)
+            new_name = dialog.result
+
+            if not new_name:
+                return
+
+            if not new_name.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
+                new_name += ".png"
+
+            if new_name in state.IMAGE_FILES:
+                messagebox.showinfo("Exists", f"Image '{new_name}' already exists.")
+                return
+
+            try:
+                save_path = os.path.join(IMAGE_DIR, new_name)
+                crop_image.save(save_path)
+                state.IMAGE_FILES.append(new_name)
+                state.MACRO_SEQUENCE.append({"name": new_name, "wait": 0.5, "skip_next": False, "double_click": False})
+                state.save_config()
+                self._log(f"[+] Captured screenshot as: {new_name} ({w}x{h})")
+                if self.current_view in ["Manage Images", "Macro Sequence"]:
+                    self._refresh_image_list()
+                    if self.current_view == "Macro Sequence":
+                        self._refresh_sequence_list()
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to save captured image: {e}")
+
+        def on_cancel():
+            self.root.attributes("-alpha", 1.0)
+            self._log("[-] Screenshot capture cancelled.")
+
+        ScreenshotOverlay(self.root, on_capture, on_cancel)
 
     def _update_image_statuses(self):
         for img_name, (indicator, label) in self.image_status_labels.items():
