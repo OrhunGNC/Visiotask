@@ -13,9 +13,9 @@ from src.engine.macro import run_macro
 
 
 class MacroApp:
-    BG = "#0F1117"
-    CARD = "#1A1D26"
-    BORDER = "#2A2F3A"
+    BG = "#0F172A"
+    CARD = "#1E293B"
+    BORDER = "#334155"
     PRIMARY = "#FF7A18"
     PRIMARY_HOVER = "#FF8C36"
     SUCCESS = "#22C55E"
@@ -23,6 +23,9 @@ class MacroApp:
     ERROR = "#EF4444"
     TEXT = "#E5E7EB"
     TEXT_SEC = "#9CA3AF"
+    TEXT_MUTED = "#64748B"
+    INPUT_BG = "#0F172A"
+    HOVER_BG = "#263348"
 
     def __init__(self, root):
         self.root = root
@@ -30,12 +33,12 @@ class MacroApp:
         self.root.configure(bg=self.BG)
         self.root.geometry("1000x700")
         self.root.minsize(1000, 700)
-        
+
         icon_path = os.path.join(RESOURCE_DIR, "icon.ico")
         if os.path.exists(icon_path):
             try: self.root.iconbitmap(icon_path)
             except Exception: pass
-        
+
         try:
             import ctypes
             self.root.update_idletasks()
@@ -81,12 +84,12 @@ class MacroApp:
 
         self.scan_area_var.trace_add("write", _on_settings_change)
         self.click_mode_var.trace_add("write", _on_settings_change)
-        
+
         self.style = ttk.Style()
         self.style.theme_use("clam")
-        self.style.configure("TCombobox", fieldbackground=self.BG, background=self.CARD, foreground=self.TEXT, bordercolor=self.BORDER, arrowcolor=self.TEXT_SEC, padding=6)
-        self.style.map("TCombobox", fieldbackground=[("readonly", self.BG)])
-        
+        self.style.configure("TCombobox", fieldbackground=self.INPUT_BG, background=self.CARD, foreground=self.TEXT, bordercolor=self.BORDER, arrowcolor=self.TEXT_SEC, padding=6)
+        self.style.map("TCombobox", fieldbackground=[("readonly", self.INPUT_BG)])
+
         self.current_view = "Run Macro"
         self.sidebar_buttons = {}
         self.views = {}
@@ -95,129 +98,176 @@ class MacroApp:
         self._check_images()
         self.root.bind("<Alt-F4>", lambda _event: self._close_window())
 
+    # ------------------------------------------------------------------ #
+    #  UI construction
+    # ------------------------------------------------------------------ #
+
     def _build_ui(self):
         # Sidebar
-        self.sidebar = tk.Frame(self.root, bg=self.CARD, width=240)
+        self.sidebar = tk.Frame(self.root, bg=self.BG, width=240)
         self.sidebar.pack(side=tk.LEFT, fill=tk.Y)
         self.sidebar.pack_propagate(False)
-        
-        brand_frame = tk.Frame(self.sidebar, bg=self.CARD)
-        brand_frame.pack(pady=(30, 40), padx=20, anchor="w", fill=tk.X)
-        
+
+        # Logo area
+        brand_frame = tk.Frame(self.sidebar, bg=self.BG)
+        brand_frame.pack(pady=(28, 32), padx=20, anchor="w", fill=tk.X)
+
         icon_path = os.path.join(RESOURCE_DIR, "icon.ico")
         if os.path.exists(icon_path):
             try:
                 pil_icon = Image.open(icon_path).resize((28, 28))
                 self._sidebar_icon = ImageTk.PhotoImage(pil_icon)
-                tk.Label(brand_frame, image=self._sidebar_icon, bg=self.CARD).pack(side=tk.LEFT, padx=(0, 10))
+                tk.Label(brand_frame, image=self._sidebar_icon, bg=self.BG).pack(side=tk.LEFT, padx=(0, 10))
             except Exception: pass
-            
-        tk.Label(brand_frame, text="Visiotask", font=("Segoe UI", 20, "bold"), bg=self.CARD, fg=self.PRIMARY).pack(side=tk.LEFT)
-        
-        # Main View
+
+        tk.Label(brand_frame, text="Visiotask", font=("Segoe UI", 20, "bold"), bg=self.BG, fg=self.PRIMARY).pack(side=tk.LEFT)
+
+        # Sidebar menu items
+        menu_items = [
+            ("▶  Run Macro", "Run Macro"),
+            ("☰  Macro Sequence", "Macro Sequence"),
+            ("🖼  Manage Images", "Manage Images"),
+        ]
+        for icon_text, view_name in menu_items:
+            self._create_sidebar_btn(icon_text, view_name)
+
+        # Footer items (pinned to bottom, grayed out)
+        footer_spacer = tk.Frame(self.sidebar, bg=self.BG)
+        footer_spacer.pack(fill=tk.BOTH, expand=True)
+
+        footer = tk.Frame(self.sidebar, bg=self.BG)
+        footer.pack(side=tk.BOTTOM, fill=tk.X, padx=0, pady=(0, 16))
+
+        for item_text in ["⚙  Settings", "ℹ  About"]:
+            fi = tk.Frame(footer, bg=self.BG, cursor="arrow")
+            fi.pack(fill=tk.X)
+            fi_lbl = tk.Label(fi, text=item_text, font=("Segoe UI", 11), bg=self.BG, fg=self.TEXT_MUTED, cursor="arrow")
+            fi_lbl.pack(anchor="w", padx=24, pady=8)
+            fi.bind("<Enter>", lambda e, f=fi, l=fi_lbl: (l.configure(fg=self.TEXT_SEC),))
+            fi.bind("<Leave>", lambda e, f=fi, l=fi_lbl: (l.configure(fg=self.TEXT_MUTED),))
+
+        # Main content area
         self.main_content = tk.Frame(self.root, bg=self.BG)
         self.main_content.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        
-        for name in ["Run Macro", "Macro Sequence", "Manage Images"]:
-            self._create_sidebar_btn(name)
 
         self._build_run_macro_view()
         self._build_sequence_view()
         self._build_images_view()
-        
+
         self._show_view("Run Macro")
 
-    def _create_sidebar_btn(self, name):
-        btn = tk.Frame(self.sidebar, bg=self.CARD, cursor="hand2")
-        btn.pack(fill=tk.X, pady=2)
-        
-        indicator = tk.Frame(btn, bg=self.CARD, width=4)
-        indicator.pack(side=tk.LEFT, fill=tk.Y)
-        
-        lbl = tk.Label(btn, text=name, font=("Segoe UI", 12), bg=self.CARD, fg=self.TEXT_SEC, cursor="hand2")
-        lbl.pack(side=tk.LEFT, padx=16, pady=12)
-        
+    def _create_sidebar_btn(self, icon_text, view_name):
+        outer = tk.Frame(self.sidebar, bg=self.BG, cursor="hand2", height=44)
+        outer.pack(fill=tk.X, pady=1)
+        outer.pack_propagate(False)
+
+        # Orange pill indicator (3px × 24px on left edge, initially hidden)
+        indicator = tk.Frame(outer, bg=self.BG, width=3, height=24)
+        indicator.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 0), pady=10)
+
+        lbl = tk.Label(outer, text=icon_text, font=("Segoe UI", 12), bg=self.BG, fg=self.TEXT_MUTED, cursor="hand2")
+        lbl.pack(side=tk.LEFT, padx=(16, 0), fill=tk.X)
+
         def on_enter(e):
-            if self.current_view != name:
-                btn.configure(bg=self.BORDER)
-                lbl.configure(bg=self.BORDER, fg=self.TEXT)
-                indicator.configure(bg=self.BORDER)
-                
+            if self.current_view != view_name:
+                outer.configure(bg=self.HOVER_BG)
+                lbl.configure(bg=self.HOVER_BG, fg=self.TEXT_SEC)
+                indicator.configure(bg=self.HOVER_BG)
+
         def on_leave(e):
-            if self.current_view != name:
-                btn.configure(bg=self.CARD)
-                lbl.configure(bg=self.CARD, fg=self.TEXT_SEC)
-                indicator.configure(bg=self.CARD)
-                
-        def on_click(e): self._show_view(name)
-            
-        for w in (btn, indicator, lbl):
+            if self.current_view != view_name:
+                outer.configure(bg=self.BG)
+                lbl.configure(bg=self.BG, fg=self.TEXT_MUTED)
+                indicator.configure(bg=self.BG)
+
+        def on_click(e): self._show_view(view_name)
+
+        for w in (outer, indicator, lbl):
             w.bind("<Enter>", on_enter)
             w.bind("<Leave>", on_leave)
             w.bind("<Button-1>", on_click)
-            
-        self.sidebar_buttons[name] = {"frame": btn, "label": lbl, "indicator": indicator}
+
+        self.sidebar_buttons[view_name] = {"frame": outer, "label": lbl, "indicator": indicator}
 
     def _show_view(self, name):
         self.current_view = name
-        for v in self.views.values(): v.pack_forget()
-        
+        for v in self.views.values():
+            v.pack_forget()
+
         for b_name, b_dict in self.sidebar_buttons.items():
             if b_name == name:
-                b_dict["frame"].configure(bg=self.BORDER)
-                b_dict["label"].configure(bg=self.BORDER, fg=self.TEXT, font=("Segoe UI", 12, "bold"))
+                b_dict["frame"].configure(bg=self.CARD)
+                b_dict["label"].configure(bg=self.CARD, fg=self.TEXT, font=("Segoe UI", 12, "bold"))
                 b_dict["indicator"].configure(bg=self.PRIMARY)
             else:
-                b_dict["frame"].configure(bg=self.CARD)
-                b_dict["label"].configure(bg=self.CARD, fg=self.TEXT_SEC, font=("Segoe UI", 12))
-                b_dict["indicator"].configure(bg=self.CARD)
-                
+                b_dict["frame"].configure(bg=self.BG)
+                b_dict["label"].configure(bg=self.BG, fg=self.TEXT_MUTED, font=("Segoe UI", 12))
+                b_dict["indicator"].configure(bg=self.BG)
+
         if name in self.views:
             self.views[name].pack(fill=tk.BOTH, expand=True, padx=32, pady=32)
             if name == "Macro Sequence": self._refresh_sequence_list()
             elif name == "Manage Images": self._refresh_image_list()
 
+    # ------------------------------------------------------------------ #
+    #  Rounded card helper
+    # ------------------------------------------------------------------ #
+
+    def _make_card(self, parent, padx=0, pady=0):
+        """Create a card-styled frame with CARD bg and visual padding to simulate rounded corners."""
+        card = tk.Frame(parent, bg=self.CARD, padx=16, pady=16)
+        return card
+
+    # ------------------------------------------------------------------ #
+    #  Page 1: Run Macro
+    # ------------------------------------------------------------------ #
+
     def _build_run_macro_view(self):
         view = tk.Frame(self.main_content, bg=self.BG)
         self.views["Run Macro"] = view
-        
-        tk.Label(view, text="Run Macro", font=("Segoe UI", 24, "bold"), bg=self.BG, fg=self.TEXT).pack(anchor="w")
-        tk.Label(view, text="Configure settings and monitor execution.", font=("Segoe UI", 12), bg=self.BG, fg=self.TEXT_SEC).pack(anchor="w", pady=(0, 24))
-        
-        top_panels = tk.Frame(view, bg=self.BG)
-        top_panels.pack(fill=tk.X, pady=(0, 24))
-        top_panels.columnconfigure(0, weight=1, minsize=300)
-        top_panels.columnconfigure(1, weight=1)
-        
-        # Configuration Card
-        config_card = tk.Frame(top_panels, bg=self.CARD, bd=0)
-        config_card.grid(row=0, column=0, sticky="nsew", padx=(0, 12))
-        
-        tk.Label(config_card, text="Configuration", font=("Segoe UI", 14, "bold"), bg=self.CARD, fg=self.TEXT).pack(anchor="w", padx=20, pady=(20, 10))
-        
-        grid = tk.Frame(config_card, bg=self.CARD)
-        grid.pack(fill=tk.X, padx=20, pady=(0, 20))
-        
-        ttk.Combobox(grid, textvariable=self.scan_area_var, values=("left", "right", "all", "custom"), state="readonly", width=12, font=("Segoe UI", 10)).grid(row=0, column=1, sticky="w", padx=16, pady=8)
-        tk.Label(grid, text="Scan area", font=("Segoe UI", 11), bg=self.CARD, fg=self.TEXT_SEC).grid(row=0, column=0, sticky="w")
-        
-        # Add button for Interactive Region Selection
-        self.btn_select_region = tk.Button(grid, text="Select Region", font=("Segoe UI", 9), bg=self.BORDER, fg=self.TEXT, bd=0, cursor="hand2", command=self._open_region_selector)
-        self.btn_select_region.grid(row=0, column=2, sticky="w", padx=(0, 16))
-        
-        self.timer_var = tk.StringVar(value="")
-        timer_frame = tk.Frame(grid, bg=self.BG, highlightthickness=1, highlightbackground=self.BORDER)
-        self.timer_entry = tk.Entry(timer_frame, textvariable=self.timer_var, width=5, font=("Segoe UI", 11), bg=self.BG, fg=self.TEXT, insertbackground=self.TEXT, bd=0)
-        self.timer_entry.pack(side=tk.LEFT, padx=6, pady=4)
-        tk.Label(timer_frame, text="minutes", font=("Segoe UI", 11), bg=self.BG, fg=self.TEXT_SEC).pack(side=tk.LEFT, padx=(0, 6))
-        timer_frame.grid(row=1, column=1, sticky="w", padx=16, pady=8)
-        tk.Label(grid, text="Stop after", font=("Segoe UI", 11), bg=self.CARD, fg=self.TEXT_SEC).grid(row=1, column=0, sticky="w")
-        
-        # Click Mode: background = no cursor move, foreground = move cursor, window = target specific app
-        ttk.Combobox(grid, textvariable=self.click_mode_var, values=("background", "foreground", "window"), state="readonly", width=12, font=("Segoe UI", 10)).grid(row=2, column=1, sticky="w", padx=16, pady=8)
-        tk.Label(grid, text="Click mode", font=("Segoe UI", 11), bg=self.CARD, fg=self.TEXT_SEC).grid(row=2, column=0, sticky="w")
 
-        # Target Window selector — only visible when click_mode == "window"
+        # Page title
+        tk.Label(view, text="Run Macro", font=("Segoe UI", 24, "bold"), bg=self.BG, fg=self.TEXT).pack(anchor="w")
+        tk.Label(view, text="Configure settings and monitor execution.", font=("Segoe UI", 12), bg=self.BG, fg=self.TEXT_SEC).pack(anchor="w", pady=(0, 20))
+
+        # Top row: Configuration Card + Status Card
+        top_row = tk.Frame(view, bg=self.BG)
+        top_row.pack(fill=tk.X, pady=(0, 16))
+        top_row.columnconfigure(0, weight=1, minsize=300)
+        top_row.columnconfigure(1, weight=1)
+
+        # ---- Configuration Card ----
+        config_card = self._make_card(top_row)
+        config_card.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
+
+        tk.Label(config_card, text="Configuration", font=("Segoe UI", 14, "bold"), bg=self.CARD, fg=self.TEXT).pack(anchor="w", pady=(0, 12))
+
+        grid = tk.Frame(config_card, bg=self.CARD)
+        grid.pack(fill=tk.X)
+        grid.columnconfigure(1, weight=1)
+
+        # Scan area
+        tk.Label(grid, text="Scan area", font=("Segoe UI", 11), bg=self.CARD, fg=self.TEXT_SEC).grid(row=0, column=0, sticky="w", pady=8)
+        scan_frame = tk.Frame(grid, bg=self.CARD)
+        scan_frame.grid(row=0, column=1, sticky="w", padx=(16, 0), pady=8)
+        ttk.Combobox(scan_frame, textvariable=self.scan_area_var, values=("left", "right", "all", "custom"), state="readonly", width=12, font=("Segoe UI", 10)).pack(side=tk.LEFT)
+        self.btn_select_region = tk.Button(scan_frame, text="Select Region", font=("Segoe UI", 9), bg=self.BORDER, fg=self.TEXT, bd=0, cursor="hand2", command=self._open_region_selector, padx=8, pady=2)
+        self.btn_select_region.pack(side=tk.LEFT, padx=(8, 0))
+
+        # Stop after
+        tk.Label(grid, text="Stop after", font=("Segoe UI", 11), bg=self.CARD, fg=self.TEXT_SEC).grid(row=1, column=0, sticky="w", pady=8)
+        self.timer_var = tk.StringVar(value="")
+        timer_frame = tk.Frame(grid, bg=self.INPUT_BG, highlightthickness=1, highlightbackground=self.BORDER)
+        timer_frame.grid(row=1, column=1, sticky="w", padx=(16, 0), pady=8)
+        self.timer_entry = tk.Entry(timer_frame, textvariable=self.timer_var, width=5, font=("Segoe UI", 11), bg=self.INPUT_BG, fg=self.TEXT, insertbackground=self.TEXT, bd=0)
+        self.timer_entry.pack(side=tk.LEFT, padx=6, pady=4)
+        tk.Label(timer_frame, text="minutes", font=("Segoe UI", 11), bg=self.INPUT_BG, fg=self.TEXT_SEC).pack(side=tk.LEFT, padx=(0, 6))
+
+        # Click mode
+        tk.Label(grid, text="Click mode", font=("Segoe UI", 11), bg=self.CARD, fg=self.TEXT_SEC).grid(row=2, column=0, sticky="w", pady=8)
+        ttk.Combobox(grid, textvariable=self.click_mode_var, values=("background", "foreground", "window"), state="readonly", width=12, font=("Segoe UI", 10)).grid(row=2, column=1, sticky="w", padx=(16, 0), pady=8)
+
+        # Target Window (conditional)
         self.window_select_frame = tk.Frame(grid, bg=self.CARD)
         tk.Label(self.window_select_frame, text="Target win", font=("Segoe UI", 11), bg=self.CARD, fg=self.TEXT_SEC).pack(side=tk.LEFT)
         self.window_var = tk.StringVar(value=state.TARGET_WINDOW_TITLE)
@@ -227,152 +277,154 @@ class MacroApp:
         self.btn_refresh_windows.pack(side=tk.LEFT, padx=(0, 4))
         self.window_var.trace_add("write", self._on_window_change)
         self.click_mode_var.trace_add("write", self._on_click_mode_change)
-        # Place in grid but initially hidden; will be shown when mode == "window"
-        self.window_select_frame.grid(row=3, column=0, columnspan=3, sticky="w", padx=(0, 16), pady=4)
-        self._on_click_mode_change()  # set initial visibility
+        self.window_select_frame.grid(row=3, column=0, columnspan=2, sticky="w", padx=(0, 16), pady=4)
+        self._on_click_mode_change()
         try:
-            self._refresh_windows()        # populate window list
+            self._refresh_windows()
         except Exception:
-            pass  # Win32 APIs may not be available in all environments
+            pass
 
-        # Status Card
-        status_card = tk.Frame(top_panels, bg=self.CARD, bd=0)
-        status_card.grid(row=0, column=1, sticky="nsew", padx=(12, 0))
-        
-        status_inner = tk.Frame(status_card, bg=self.CARD)
-        status_inner.place(relx=0.5, rely=0.45, anchor="center")
-        
+        # ---- Status Card ----
+        status_card = self._make_card(top_row)
+        status_card.grid(row=0, column=1, sticky="nsew", padx=(8, 0))
+
+        # Circular status indicator on Canvas
+        self.status_canvas = tk.Canvas(status_card, bg=self.CARD, highlightthickness=0, width=120, height=120)
+        self.status_canvas.pack(pady=(8, 4))
+
+        # Draw the idle "Ready" ring
+        self._draw_idle_ring()
+
         self.status_var = tk.StringVar(value="Ready")
-        self.status_label = tk.Label(status_inner, textvariable=self.status_var, font=("Segoe UI", 16, "bold"), bg=self.CARD, fg=self.TEXT_SEC)
+        self.status_label = tk.Label(status_card, textvariable=self.status_var, font=("Segoe UI", 14, "bold"), bg=self.CARD, fg=self.TEXT_SEC)
         self.status_label.pack()
-        
+
         self.timer_display_var = tk.StringVar(value="")
-        self.timer_display_label = tk.Label(status_inner, textvariable=self.timer_display_var, font=("Consolas", 32, "bold"), bg=self.CARD, fg=self.PRIMARY)
-        self.timer_display_label.pack(pady=(4,0))
-        
+        self.timer_display_label = tk.Label(status_card, textvariable=self.timer_display_var, font=("Consolas", 20, "bold"), bg=self.CARD, fg=self.PRIMARY)
+        self.timer_display_label.pack(pady=(4, 0))
+
+        # Buttons
         btn_frame = tk.Frame(status_card, bg=self.CARD)
-        btn_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=20)
-        
-        btn_inner = tk.Frame(btn_frame, bg=self.CARD)
-        btn_inner.pack(anchor="center")
-        
-        self.start_btn = RoundedButton(btn_inner, text="Start Macro", bg_color=self.PRIMARY, fg_color="#FFF", hover_color=self.PRIMARY_HOVER, command=self._start, width=150, height=44)
-        self.start_btn.pack(side=tk.LEFT, padx=8)
-        
-        self.stop_btn = RoundedButton(btn_inner, text="Stop", bg_color=self.CARD, fg_color=self.TEXT, hover_color=self.BORDER, outline_color=self.BORDER, command=self._stop, width=100, height=44)
-        self.stop_btn.pack(side=tk.LEFT, padx=8)
+        btn_frame.pack(pady=(12, 0))
+
+        self.start_btn = RoundedButton(btn_frame, text="▶  Start Macro", bg_color=self.PRIMARY, fg_color="#FFF", hover_color=self.PRIMARY_HOVER, command=self._start, width=160, height=42)
+        self.start_btn.pack(side=tk.LEFT, padx=6)
+
+        self.stop_btn = RoundedButton(btn_frame, text="■  Stop", bg_color=self.BORDER, fg_color=self.TEXT_SEC, hover_color="#475569", outline_color=self.BORDER, command=self._stop, width=100, height=42)
+        self.stop_btn.pack(side=tk.LEFT, padx=6)
         self.stop_btn.set_state(tk.DISABLED)
 
-        # Footer Hint
+        # ---- Hint bar ----
         self.hint_frame = tk.Frame(view, bg=self.BG)
-        self.hint_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=(12, 0))
-        
+        self.hint_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=(8, 0))
+
         hint_inner = tk.Frame(self.hint_frame, bg=self.BG)
         hint_inner.pack(anchor="center")
-        
-        self.hint_icon = tk.Label(hint_inner, text="⌨", font=("Segoe UI", 12), bg=self.BG, fg="#9aa4b2")
-        self.hint_icon.pack(side=tk.LEFT, padx=(4, 6))
-        
-        self.hint_text1 = tk.Label(hint_inner, text="Press", font=("Segoe UI", 10), bg=self.BG, fg="#9aa4b2")
-        self.hint_text1.pack(side=tk.LEFT)
-        
-        # Q Key Badge
-        self.hint_badge = tk.Frame(hint_inner, bg="#1f2430", highlightbackground="#2a2f3a", highlightthickness=1)
-        self.hint_badge.pack(side=tk.LEFT, padx=6)
-        self.hint_badge_lbl = tk.Label(self.hint_badge, text="Q", font=("Segoe UI", 8, "bold"), bg="#1f2430", fg="#E5E7EB", pady=1, padx=4)
-        self.hint_badge_lbl.pack()
-        
-        self.hint_text2 = tk.Label(hint_inner, text="to stop the macro  |  Window mode: works behind other apps", font=("Segoe UI", 10), bg=self.BG, fg="#9aa4b2")
-        self.hint_text2.pack(side=tk.LEFT)
 
-        # Log Panel
-        log_card = tk.Frame(view, bg=self.CARD, bd=0)
-        log_card.pack(fill=tk.BOTH, expand=True)
+        self.hint_text1 = tk.Label(hint_inner, text="⌨  Press [Q] to stop the macro  |  Window mode: works behind other apps", font=("Segoe UI", 10), bg=self.BG, fg=self.TEXT_MUTED)
+        self.hint_text1.pack()
+
+        # ---- Execution Log Card ----
+        log_card = self._make_card(view)
+        log_card.pack(fill=tk.BOTH, expand=True, pady=(12, 0))
 
         log_header = tk.Frame(log_card, bg=self.CARD)
-        log_header.pack(fill=tk.X, padx=20, pady=(16, 8))
+        log_header.pack(fill=tk.X, pady=(0, 8))
         tk.Label(log_header, text="Execution Log", font=("Segoe UI", 14, "bold"), bg=self.CARD, fg=self.TEXT).pack(side=tk.LEFT)
         tk.Button(log_header, text="Clear", font=("Segoe UI", 10), fg=self.TEXT_SEC, bg=self.CARD, bd=0, activebackground=self.CARD, cursor="hand2", command=self._clear_log).pack(side=tk.RIGHT)
 
-        log_frame = tk.Frame(log_card, bg=self.BG)
-        log_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=(0, 20))
-        
-        self.log_text = tk.Text(log_frame, font=("Segoe UI", 11), bg=self.BG, fg=self.TEXT, insertbackground=self.TEXT, bd=0, highlightthickness=0, state=tk.DISABLED, wrap=tk.WORD, padx=12, pady=12)
-        scrollbar = tk.Scrollbar(log_frame, command=self.log_text.yview, bg=self.BG, troughcolor=self.CARD, bd=0)
+        log_body = tk.Frame(log_card, bg=self.INPUT_BG, bd=0)
+        log_body.pack(fill=tk.BOTH, expand=True)
+
+        self.log_text = tk.Text(log_body, font=("Consolas", 10), bg=self.INPUT_BG, fg=self.TEXT, insertbackground=self.TEXT, bd=0, highlightthickness=0, state=tk.DISABLED, wrap=tk.WORD, padx=12, pady=12)
+        scrollbar = tk.Scrollbar(log_body, command=self.log_text.yview, bg=self.INPUT_BG, troughcolor=self.CARD, bd=0)
         self.log_text.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        
+
         self.log_text.tag_config("success", foreground=self.SUCCESS)
         self.log_text.tag_config("error", foreground=self.ERROR)
         self.log_text.tag_config("warning", foreground=self.WARNING)
         self.log_text.tag_config("info", foreground=self.TEXT_SEC)
 
+    def _draw_idle_ring(self):
+        """Draw the idle grey ring with 'Ready' text."""
+        c = self.status_canvas
+        c.delete("all")
+        # Outer ring (grey)
+        c.create_oval(10, 10, 110, 110, outline=self.BORDER, width=4)
+        # Inner text
+        c.create_text(60, 55, text="●", font=("Segoe UI", 18), fill=self.TEXT_SEC)
+        c.create_text(60, 80, text="Ready", font=("Segoe UI", 11), fill=self.TEXT_SEC)
+
+    def _draw_running_ring(self):
+        """Draw the green progress ring with play icon."""
+        c = self.status_canvas
+        c.delete("all")
+        # Green ring
+        c.create_oval(10, 10, 110, 110, outline=self.SUCCESS, width=4)
+        # Play icon
+        c.create_text(60, 52, text="▶", font=("Segoe UI", 28), fill=self.SUCCESS)
+        c.create_text(60, 85, text="Running", font=("Segoe UI", 11, "bold"), fill=self.SUCCESS)
+
+    def _draw_stopped_ring(self):
+        """Draw the red/error ring for stopped state."""
+        c = self.status_canvas
+        c.delete("all")
+        c.create_oval(10, 10, 110, 110, outline=self.ERROR, width=4)
+        c.create_text(60, 80, text="Stopped", font=("Segoe UI", 11), fill=self.ERROR)
+
     def _open_region_selector(self):
         from src.gui.overlay import RegionSelectorOverlay
-        self.root.attributes("-alpha", 0.0) # Hide main window temporarily
+        self.root.attributes("-alpha", 0.0)
         def on_select(x, y, w, h):
             state.CUSTOM_REGION = [x, y, w, h]
             self.scan_area_var.set("custom")
             state.save_config()
             self.root.attributes("-alpha", 1.0)
             self._log(f"[+] Region selected and saved parametrically: ({x},{y}, {w}x{h})")
-        
+
         def on_cancel():
             self.root.attributes("-alpha", 1.0)
             self._log("[-] Region selection cancelled.")
 
         RegionSelectorOverlay(self.root, on_select, on_cancel)
 
+    # ------------------------------------------------------------------ #
+    #  Page 2: Macro Sequence
+    # ------------------------------------------------------------------ #
+
     def _build_sequence_view(self):
         view = tk.Frame(self.main_content, bg=self.BG)
         self.views["Macro Sequence"] = view
-        
+
+        # Header area
         header_frame = tk.Frame(view, bg=self.BG)
-        header_frame.pack(fill=tk.X, pady=(0, 24))
-        tk.Label(header_frame, text="Macro Sequence", font=("Segoe UI", 24, "bold"), bg=self.BG, fg=self.TEXT).pack(anchor="w")
-        tk.Label(header_frame, text="Arrange image checks, wait times, and conditions.", font=("Segoe UI", 12), bg=self.BG, fg=self.TEXT_SEC).pack(anchor="w")
-        tk.Label(header_frame, text="* Setting Wait to 0.0 forces the macro to search infinitely until the next image is found.", font=("Segoe UI", 10, "italic"), bg=self.BG, fg="#8E96A4").pack(anchor="w", pady=(4, 0))
-        tk.Label(header_frame, text="* Skip Next forces the macro to skip the next image if the selected one is not found.", font=("Segoe UI", 10, "italic"), bg=self.BG, fg="#8E96A4").pack(anchor="w", pady=(2, 0))
+        header_frame.pack(fill=tk.X, pady=(0, 4))
 
-        # Fixed Column Headers
-        list_header_row = tk.Frame(view, bg=self.BG, pady=4, padx=16)
-        list_header_row.pack(fill=tk.X, padx=(0, 8))
-        
-        tk.Label(list_header_row, text="", bg=self.BG, width=3).pack(side=tk.LEFT)
-        tk.Label(list_header_row, text="Image", font=("Segoe UI", 10, "bold"), bg=self.BG, fg=self.TEXT_SEC, width=15, anchor="w").pack(side=tk.LEFT, padx=(50, 10))
-        
-        headers_right = tk.Frame(list_header_row, bg=self.BG)
-        headers_right.pack(side=tk.RIGHT)
-        
-        hd_trash = tk.Frame(headers_right, bg=self.BG, width=40, height=20)
-        hd_trash.pack_propagate(False)
-        hd_trash.pack(side=tk.RIGHT)
+        titles = tk.Frame(header_frame, bg=self.BG)
+        titles.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        tk.Label(titles, text="Macro Sequence", font=("Segoe UI", 24, "bold"), bg=self.BG, fg=self.TEXT).pack(anchor="w")
+        tk.Label(titles, text="Arrange image checks, wait times, and conditions.", font=("Segoe UI", 12), bg=self.BG, fg=self.TEXT_SEC).pack(anchor="w")
+        tk.Label(titles, text="* Setting Wait to 0 forces the macro to search infinitely until the next image is found.", font=("Segoe UI", 10, "italic"), bg=self.BG, fg=self.TEXT_MUTED).pack(anchor="w", pady=(4, 0))
+        tk.Label(titles, text="* Skip Next forces the macro to skip the next image if the selected one is not found.", font=("Segoe UI", 10, "italic"), bg=self.BG, fg=self.TEXT_MUTED).pack(anchor="w", pady=(2, 0))
 
-        hd_skip = tk.Frame(headers_right, bg=self.BG, width=80, height=20)
-        hd_skip.pack_propagate(False)
-        hd_skip.pack(side=tk.RIGHT, padx=10)
-        tk.Label(hd_skip, text="Skip Next", font=("Segoe UI", 10, "bold"), bg=self.BG, fg=self.TEXT_SEC).pack(expand=True)
+        # Add Step button (visual only —Adding is done via Images tab)
+        add_btn_frame = tk.Frame(header_frame, bg=self.BG)
+        add_btn_frame.pack(side=tk.RIGHT, padx=(16, 0), pady=(8, 0))
+        self._seq_add_btn = RoundedButton(add_btn_frame, text="＋ Add Step", bg_color=self.PRIMARY, fg_color="#FFF", hover_color=self.PRIMARY_HOVER, command=lambda: self._show_view("Manage Images"), width=130, height=36, font=("Segoe UI", 11, "bold"))
+        self._seq_add_btn.pack()
 
-        hd_dc = tk.Frame(headers_right, bg=self.BG, width=70, height=20)
-        hd_dc.pack_propagate(False)
-        hd_dc.pack(side=tk.RIGHT, padx=10)
-        tk.Label(hd_dc, text="Double", font=("Segoe UI", 10, "bold"), bg=self.BG, fg=self.TEXT_SEC).pack(expand=True)
+        # Separator
+        tk.Frame(view, bg=self.BORDER, height=1).pack(fill=tk.X, pady=(12, 0))
 
-        hd_wait = tk.Frame(headers_right, bg=self.BG, width=80, height=20)
-        hd_wait.pack_propagate(False)
-        hd_wait.pack(side=tk.RIGHT, padx=(10, 14))
-        tk.Label(hd_wait, text="Wait (s)", font=("Segoe UI", 10, "bold"), bg=self.BG, fg=self.TEXT_SEC).pack(expand=True)
-
-        # Subtle separator
-        tk.Frame(view, bg="#1E2530", height=1).pack(fill=tk.X, pady=0)
-
+        # Scrollable list area
         list_container = tk.Frame(view, bg=self.BG)
-        list_container.pack(fill=tk.BOTH, expand=True)
+        list_container.pack(fill=tk.BOTH, expand=True, pady=(8, 0))
 
         self.seq_canvas = tk.Canvas(list_container, bg=self.BG, highlightthickness=0, bd=0)
         scrollbar = SmoothScrollbar(list_container, target_canvas=self.seq_canvas)
-        
+
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.seq_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
@@ -397,29 +449,36 @@ class MacroApp:
         self.seq_dc_vars = []
 
         if not state.MACRO_SEQUENCE:
-            tk.Label(self.seq_scroll_frame, text="No sequence steps.", font=("Segoe UI", 12), bg=self.BG, fg=self.TEXT_SEC).pack(pady=40)
+            # Empty state
+            empty_frame = tk.Frame(self.seq_scroll_frame, bg=self.BG)
+            empty_frame.pack(fill=tk.BOTH, expand=True, pady=(80, 0))
+            tk.Label(empty_frame, text="☰", font=("Segoe UI", 48), bg=self.BG, fg=self.TEXT_MUTED).pack()
+            tk.Label(empty_frame, text="No sequence steps.", font=("Segoe UI", 16, "bold"), bg=self.BG, fg=self.TEXT).pack(pady=(8, 4))
+            tk.Label(empty_frame, text="Add images from the Images tab to get started.", font=("Segoe UI", 11), bg=self.BG, fg=self.TEXT_MUTED).pack()
             return
 
         for i, step in enumerate(state.MACRO_SEQUENCE):
-            card = tk.Frame(self.seq_scroll_frame, bg=self.CARD, pady=8, padx=16)
+            card = tk.Frame(self.seq_scroll_frame, bg=self.CARD, pady=10, padx=14)
             if i > 0:
                 card.pack(fill=tk.X, pady=(6, 0))
             else:
                 card.pack(fill=tk.X, pady=0)
-            
-            # Hover effect
-            def on_enter(e, c=card): c.configure(bg="#212631")
+
+            # Hover
+            def on_enter(e, c=card): c.configure(bg=self.HOVER_BG)
             def on_leave(e, c=card): c.configure(bg=self.CARD)
             card.bind("<Enter>", on_enter)
             card.bind("<Leave>", on_leave)
-            
+
+            # Reorder buttons (▲/▼)
             reorder_frame = tk.Frame(card, bg=self.CARD)
-            reorder_frame.pack(side=tk.LEFT)
+            reorder_frame.pack(side=tk.LEFT, padx=(0, 8))
             reorder_frame.bind("<Enter>", on_enter)
             reorder_frame.bind("<Leave>", on_leave)
             tk.Button(reorder_frame, text="▲", font=("Segoe UI", 8), bg=self.CARD, fg=self.TEXT_SEC, bd=0, cursor="hand2", command=lambda idx=i: self._move_seq(idx, -1), state=tk.NORMAL if i > 0 else tk.DISABLED).pack()
             tk.Button(reorder_frame, text="▼", font=("Segoe UI", 8), bg=self.CARD, fg=self.TEXT_SEC, bd=0, cursor="hand2", command=lambda idx=i: self._move_seq(idx, 1), state=tk.NORMAL if i < len(state.MACRO_SEQUENCE)-1 else tk.DISABLED).pack()
 
+            # Image thumbnail
             img_path = os.path.join(IMAGE_DIR, step["name"])
             lbl_preview = tk.Label(card, bg=self.BORDER, width=32, height=32)
             if os.path.isfile(img_path):
@@ -430,35 +489,36 @@ class MacroApp:
                     self._seq_images.append(tk_img)
                     lbl_preview.config(image=tk_img, width=0, height=0)
                 except Exception: lbl_preview.config(text="Err", fg=self.ERROR)
-            lbl_preview.pack(side=tk.LEFT, padx=(12, 12))
+            lbl_preview.pack(side=tk.LEFT, padx=(4, 12))
             lbl_preview.bind("<Enter>", on_enter)
             lbl_preview.bind("<Leave>", on_leave)
 
-            name_lbl = tk.Label(card, text=step["name"], font=("Segoe UI", 11, "bold"), bg=self.CARD, fg=self.TEXT, width=16, anchor="w")
-            name_lbl.pack(side=tk.LEFT)
-            name_lbl.bind("<Enter>", on_enter)
-            name_lbl.bind("<Leave>", on_leave)
+            # Step name + number
+            name_frame = tk.Frame(card, bg=self.CARD)
+            name_frame.pack(side=tk.LEFT, fill=tk.Y)
+            name_frame.bind("<Enter>", on_enter)
+            name_frame.bind("<Leave>", on_leave)
+            tk.Label(name_frame, text=step["name"], font=("Segoe UI", 11, "bold"), bg=self.CARD, fg=self.TEXT).pack(anchor="w")
+            tk.Label(name_frame, text=f"Step {i+1}", font=("Segoe UI", 9), bg=self.CARD, fg=self.TEXT_MUTED).pack(anchor="w")
 
+            # Right-side controls
             actions = tk.Frame(card, bg=self.CARD)
             actions.pack(side=tk.RIGHT, fill=tk.Y)
             actions.bind("<Enter>", on_enter)
             actions.bind("<Leave>", on_leave)
 
-            # Controls aligned exactly under headers
-            
-            # 1. Delete button (far right)
-            btn_frame = tk.Frame(actions, bg=self.CARD, width=40)
+            # Delete
+            btn_frame = tk.Frame(actions, bg=self.CARD, width=36)
             btn_frame.pack_propagate(False)
             btn_frame.pack(side=tk.RIGHT, fill=tk.Y)
             btn_frame.bind("<Enter>", on_enter)
             btn_frame.bind("<Leave>", on_leave)
-            
             del_btn = tk.Button(btn_frame, text="🗑", font=("Segoe UI Symbol", 12), bg=self.CARD, fg=self.ERROR, bd=0, cursor="hand2", command=lambda n=step["name"]: self._delete_image(n))
             del_btn.pack(expand=True)
-            del_btn.bind("<Enter>", lambda e, btn=del_btn, c=card: [c.configure(bg="#212631"), btn.configure(bg="#212631")])
-            del_btn.bind("<Leave>", lambda e, btn=del_btn, c=card: [c.configure(bg=self.CARD), btn.configure(bg=self.CARD)])
+            del_btn.bind("<Enter>", lambda e, b=del_btn, c=card: [c.configure(bg=self.HOVER_BG), b.configure(bg=self.HOVER_BG)])
+            del_btn.bind("<Leave>", lambda e, b=del_btn, c=card: [c.configure(bg=self.CARD), b.configure(bg=self.CARD)])
 
-            # 2. Skip Toggle
+            # Skip Next Toggle
             skip_frame = tk.Frame(actions, bg=self.CARD, width=80)
             skip_frame.pack_propagate(False)
             skip_frame.pack(side=tk.RIGHT, padx=10, fill=tk.Y)
@@ -470,7 +530,7 @@ class MacroApp:
             sw.pack(expand=True)
             skip_var.trace_add("write", lambda *args, idx=i, v=skip_var: self._update_seq_skip(idx, v))
 
-            # 3. Double Click Toggle
+            # Double-click Toggle
             dc_frame = tk.Frame(actions, bg=self.CARD, width=70)
             dc_frame.pack_propagate(False)
             dc_frame.pack(side=tk.RIGHT, padx=10, fill=tk.Y)
@@ -483,59 +543,91 @@ class MacroApp:
             sw_dc.pack(expand=True)
             dc_var.trace_add("write", lambda *args, idx=i, v=dc_var: self._update_seq_dc(idx, v))
 
-            # 4. Wait Entry
+            # Wait Entry
             wait_frame = tk.Frame(actions, bg=self.CARD, width=80)
             wait_frame.pack_propagate(False)
             wait_frame.pack(side=tk.RIGHT, padx=(10, 14), fill=tk.Y)
             wait_frame.bind("<Enter>", on_enter)
             wait_frame.bind("<Leave>", on_leave)
-            
+
             wait_var = tk.StringVar(value=str(step.get("wait", 0)))
-            
-            border_frame = tk.Frame(wait_frame, bg="#4B5563") # clear visible border
+
+            border_frame = tk.Frame(wait_frame, bg=self.BORDER)
             border_frame.pack(expand=True, pady=4)
-            
-            entry_frame = tk.Frame(border_frame, bg="#1E2530")
-            entry_frame.pack(padx=1, pady=1, fill=tk.BOTH, expand=True) # 1px simulated geometric border
-            
-            wait_entry = tk.Entry(entry_frame, textvariable=wait_var, width=5, font=("Segoe UI", 11, "bold"), bg="#1E2530", fg="#FFFFFF", insertbackground="#FFFFFF", bd=0, justify="center")
+
+            entry_frame = tk.Frame(border_frame, bg=self.INPUT_BG)
+            entry_frame.pack(padx=1, pady=1, fill=tk.BOTH, expand=True)
+
+            wait_entry = tk.Entry(entry_frame, textvariable=wait_var, width=5, font=("Segoe UI", 11, "bold"), bg=self.INPUT_BG, fg="#FFFFFF", insertbackground="#FFFFFF", bd=0, justify="center")
             wait_entry.pack(padx=4, pady=4)
             wait_var.trace_add("write", lambda *args, idx=i, v=wait_var: self._update_seq_wait(idx, v))
-            
-            # Allow focus events to cascade entry frame styling correctly
-            def _on_focus_in(e, bf=border_frame, ef=entry_frame, we=wait_entry): 
-                bf.configure(bg="#FF7A18")
-                ef.configure(bg="#2A2F3A")
-                we.configure(bg="#2A2F3A")
-            def _on_focus_out(e, bf=border_frame, ef=entry_frame, we=wait_entry): 
-                bf.configure(bg="#4B5563")
-                ef.configure(bg="#1E2530")
-                we.configure(bg="#1E2530")
+
+            def _on_focus_in(e, bf=border_frame, ef=entry_frame, we=wait_entry):
+                bf.configure(bg=self.PRIMARY)
+                ef.configure(bg="#1c2538")
+                we.configure(bg="#1c2538")
+            def _on_focus_out(e, bf=border_frame, ef=entry_frame, we=wait_entry):
+                bf.configure(bg=self.BORDER)
+                ef.configure(bg=self.INPUT_BG)
+                we.configure(bg=self.INPUT_BG)
             wait_entry.bind("<FocusIn>", _on_focus_in)
             wait_entry.bind("<FocusOut>", _on_focus_out)
 
         _bind_mousewheel(self.seq_canvas, self.seq_scroll_frame)
         self.seq_canvas.bind("<MouseWheel>", lambda e: self.seq_canvas.yview_scroll(int(-1 * (e.delta / 120)), "units"))
 
+    # ------------------------------------------------------------------ #
+    #  Page 3: Manage Images
+    # ------------------------------------------------------------------ #
+
     def _build_images_view(self):
         view = tk.Frame(self.main_content, bg=self.BG)
         self.views["Manage Images"] = view
-        
+
+        # Header
         header = tk.Frame(view, bg=self.BG)
-        header.pack(fill=tk.X, pady=(0, 24))
-        
+        header.pack(fill=tk.X, pady=(0, 16))
+
         titles = tk.Frame(header, bg=self.BG)
-        titles.pack(side=tk.LEFT)
-        tk.Label(titles, text="Manage Images", font=("Segoe UI", 24, "bold"), bg=self.BG, fg=self.TEXT).pack(anchor="w")
-        tk.Label(titles, text="Upload and maintain images.", font=("Segoe UI", 12), bg=self.BG, fg=self.TEXT_SEC).pack(anchor="w")
+        titles.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        tk.Label(titles, text="Your Images", font=("Segoe UI", 24, "bold"), bg=self.BG, fg=self.TEXT).pack(anchor="w")
+        tk.Label(titles, text="Upload and maintain template images.", font=("Segoe UI", 12), bg=self.BG, fg=self.TEXT_SEC).pack(anchor="w")
 
-        RoundedButton(header, text="Add New Image", bg_color=self.PRIMARY, fg_color="#FFF", hover_color=self.PRIMARY_HOVER, command=self._add_new_image, width=140, height=40).pack(side=tk.RIGHT)
+        # Action buttons on right
+        btn_group = tk.Frame(header, bg=self.BG)
+        btn_group.pack(side=tk.RIGHT, padx=(0, 0), pady=(8, 0))
+        RoundedButton(btn_group, text="📸 Capture", bg_color=self.BORDER, fg_color=self.TEXT, hover_color="#475569", command=self._capture_screenshot, width=110, height=36, font=("Segoe UI", 10, "bold")).pack(side=tk.RIGHT, padx=(8, 0))
+        RoundedButton(btn_group, text="＋  Add New", bg_color=self.PRIMARY, fg_color="#FFF", hover_color=self.PRIMARY_HOVER, command=self._add_new_image, width=120, height=36, font=("Segoe UI", 10, "bold")).pack(side=tk.RIGHT)
 
-        # Screenshot capture button
-        btn_row = tk.Frame(header, bg=self.BG)
-        btn_row.pack(side=tk.RIGHT, padx=(0, 8))
-        RoundedButton(btn_row, text="📸 Capture", bg_color=self.BORDER, fg_color=self.TEXT, hover_color="#3A3F4A", command=self._capture_screenshot, width=120, height=40).pack(side=tk.RIGHT)
+        # Search bar + view toggle row
+        search_row = tk.Frame(view, bg=self.BG)
+        search_row.pack(fill=tk.X, pady=(0, 12))
 
+        # Search input
+        search_border = tk.Frame(search_row, bg=self.BORDER, padx=1, pady=1)
+        search_border.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 8))
+        search_inner = tk.Frame(search_border, bg=self.INPUT_BG)
+        search_inner.pack(fill=tk.BOTH, expand=True)
+        self.search_var = tk.StringVar()
+        self.search_var.trace_add("write", lambda *args: self._filter_image_list())
+        self.search_entry = tk.Entry(search_inner, textvariable=self.search_var, font=("Segoe UI", 11), bg=self.INPUT_BG, fg=self.TEXT, insertbackground=self.TEXT, bd=0)
+        self.search_entry.pack(fill=tk.X, padx=10, pady=8)
+        # Placeholder
+        self.search_entry.insert(0, "🔍  Search images...")
+        self.search_entry.configure(fg=self.TEXT_MUTED)
+        self.search_entry.bind("<FocusIn>", self._on_search_focus_in)
+        self.search_entry.bind("<FocusOut>", self._on_search_focus_out)
+
+        # Grid/List toggle (visual only, default list)
+        toggle_frame = tk.Frame(search_row, bg=self.BG)
+        toggle_frame.pack(side=tk.RIGHT)
+        self._view_toggle_active = "list"
+        self.btn_list_view = tk.Button(toggle_frame, text="☰", font=("Segoe UI", 12), bg=self.CARD, fg=self.PRIMARY, bd=0, cursor="hand2", padx=8, pady=4)
+        self.btn_list_view.pack(side=tk.LEFT, padx=(0, 2))
+        self.btn_grid_view = tk.Button(toggle_frame, text="⊞", font=("Segoe UI", 12), bg=self.BG, fg=self.TEXT_MUTED, bd=0, cursor="hand2", padx=8, pady=4)
+        self.btn_grid_view.pack(side=tk.LEFT)
+
+        # Scrollable list
         list_container = tk.Frame(view, bg=self.BG)
         list_container.pack(fill=tk.BOTH, expand=True)
 
@@ -552,18 +644,42 @@ class MacroApp:
         self.img_scroll_frame.bind("<Configure>", _update_img_scrollregion)
         self.img_canvas.bind("<Configure>", lambda e: [self.img_canvas.itemconfig(self.img_canvas_window, width=e.width), _update_img_scrollregion()])
         self.img_canvas_window = self.img_canvas.create_window((0, 0), window=self.img_scroll_frame, anchor="nw")
-        
+
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.img_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         self.image_status_labels = {}
 
-    def _refresh_image_list(self):
+    def _on_search_focus_in(self, event):
+        if self.search_entry.get() == "🔍  Search images...":
+            self.search_entry.delete(0, tk.END)
+            self.search_entry.configure(fg=self.TEXT)
+
+    def _on_search_focus_out(self, event):
+        if not self.search_entry.get().strip():
+            self.search_entry.insert(0, "🔍  Search images...")
+            self.search_entry.configure(fg=self.TEXT_MUTED)
+
+    def _filter_image_list(self):
+        query = self.search_var.get()
+        if query == "🔍  Search images..." or not query.strip():
+            self._refresh_image_list(filter_text="")
+        else:
+            self._refresh_image_list(filter_text=query.strip().lower())
+
+    def _refresh_image_list(self, filter_text=None):
         for widget in self.img_scroll_frame.winfo_children(): widget.destroy()
-        self.image_status_labels.clear()
 
         if not hasattr(self, '_grid_images'): self._grid_images = []
         self._grid_images.clear()
+
+        images_to_show = state.IMAGE_FILES
+        if filter_text is not None:
+            images_to_show = [name for name in state.IMAGE_FILES if filter_text in name.lower()]
+        elif hasattr(self, 'search_var'):
+            q = self.search_var.get()
+            if q and q != "🔍  Search images...":
+                images_to_show = [name for name in state.IMAGE_FILES if q.lower() in name.lower()]
 
         def create_action_btn(parent, text, default_fg, hover_fg, command, px):
             btn = tk.Button(parent, text=text, font=("Segoe UI", 10), bg=self.CARD, fg=default_fg, activebackground=self.CARD, activeforeground=hover_fg, bd=0, cursor="hand2", command=command)
@@ -572,29 +688,48 @@ class MacroApp:
             btn.pack(side=tk.LEFT, padx=px)
             return btn
 
-        for i, img_name in enumerate(state.IMAGE_FILES):
+        if not images_to_show:
+            # Empty state
+            empty_frame = tk.Frame(self.img_scroll_frame, bg=self.BG)
+            empty_frame.pack(fill=tk.BOTH, expand=True, pady=(80, 0))
+            tk.Label(empty_frame, text="🖼", font=("Segoe UI", 48), bg=self.BG, fg=self.TEXT_MUTED).pack()
+            tk.Label(empty_frame, text="No images yet." if not state.IMAGE_FILES else "No matching images.", font=("Segoe UI", 16, "bold"), bg=self.BG, fg=self.TEXT).pack(pady=(8, 4))
+            desc = "Drag & drop images or click Add New." if not state.IMAGE_FILES else "Try a different search term."
+            tk.Label(empty_frame, text=desc, font=("Segoe UI", 11), bg=self.BG, fg=self.TEXT_MUTED).pack()
+            self.image_status_labels.clear()
+            return
+
+        self.image_status_labels.clear()
+
+        for i, img_name in enumerate(images_to_show):
             card = tk.Frame(self.img_scroll_frame, bg=self.CARD, pady=12, padx=16)
             if i > 0:
-                card.pack(fill=tk.X, pady=(10, 0))
+                card.pack(fill=tk.X, pady=(8, 0))
             else:
                 card.pack(fill=tk.X, pady=0)
-            
+
+            # Hover
+            def on_enter(e, c=card): c.configure(bg=self.HOVER_BG)
+            def on_leave(e, c=card): c.configure(bg=self.CARD)
+
+            # Thumbnail (48x48)
             img_path = os.path.join(IMAGE_DIR, img_name)
-            lbl_preview = tk.Label(card, bg=self.BORDER, width=40, height=40)
+            lbl_preview = tk.Label(card, bg=self.BORDER, width=48, height=48)
             if os.path.isfile(img_path):
                 try:
                     pil_img = Image.open(img_path)
-                    pil_img.thumbnail((40, 40))
+                    pil_img.thumbnail((48, 48))
                     tk_img = ImageTk.PhotoImage(pil_img)
                     self._grid_images.append(tk_img)
                     lbl_preview.config(image=tk_img, width=0, height=0)
                 except: lbl_preview.config(text="Err", fg=self.ERROR)
             lbl_preview.pack(side=tk.LEFT, padx=(0, 16))
 
+            # Details: name + status
             details = tk.Frame(card, bg=self.CARD)
             details.pack(side=tk.LEFT, fill=tk.Y)
             tk.Label(details, text=img_name, font=("Segoe UI", 12, "bold"), bg=self.CARD, fg=self.TEXT).pack(anchor="w")
-            
+
             status_frame = tk.Frame(details, bg=self.CARD)
             status_frame.pack(fill=tk.X)
             indicator = tk.Canvas(status_frame, width=10, height=10, bg=self.CARD, highlightthickness=0)
@@ -603,16 +738,21 @@ class MacroApp:
             lbl_status.pack(side=tk.LEFT, padx=6)
             self.image_status_labels[img_name] = (indicator, lbl_status)
 
+            # Actions on right
             actions = tk.Frame(card, bg=self.CARD)
             actions.pack(side=tk.RIGHT, fill=tk.Y)
-            create_action_btn(actions, "✏ Rename", "#AAB4C3", "#D1D5DB", lambda n=img_name: self._rename_image(n), (0, 16))
+            create_action_btn(actions, "✏ Rename", self.TEXT_SEC, self.TEXT, lambda n=img_name: self._rename_image(n), (0, 16))
             create_action_btn(actions, "🔄 Replace", "#FF8A3D", "#FF9D5C", lambda n=img_name: self._upload_image(n), (0, 16))
-            create_action_btn(actions, "🗑 Delete", "#E05252", "#EF4444", lambda n=img_name: self._delete_image(n), (0, 5))
+            create_action_btn(actions, "🗑 Delete", self.ERROR, "#F87171", lambda n=img_name: self._delete_image(n), (0, 5))
 
         self._update_image_statuses()
-        
+
         _bind_mousewheel(self.img_canvas, self.img_scroll_frame)
         self.img_canvas.bind("<MouseWheel>", lambda e: self.img_canvas.yview_scroll(int(-1 * (e.delta / 120)), "units"))
+
+    # ------------------------------------------------------------------ #
+    #  Core action methods (preserved)
+    # ------------------------------------------------------------------ #
 
     def _close_window(self):
         self.stop_event.set()
@@ -629,13 +769,13 @@ class MacroApp:
             timestamp = time.strftime("[%H:%M:%S] ")
             tag = "info"
             icon = "ℹ"
-            
+
             if msg.startswith("[+]"): tag, icon, msg = "success", "✔", msg[3:].strip()
             elif msg.startswith("[-]"): tag, icon, msg = "error", "❌", msg[3:].strip()
             elif msg.startswith("[!]"): tag, icon, msg = "error", "❌", msg[3:].strip()
             elif msg.startswith("[~]"): tag, icon, msg = "warning", "⚠", msg[3:].strip()
             elif msg.startswith("[i]"): msg = msg[3:].strip()
-                
+
             self.log_text.insert(tk.END, f"{timestamp}{icon} {msg}\n", tag)
             self.log_text.see(tk.END)
             self.log_text.configure(state=tk.DISABLED)
@@ -665,7 +805,6 @@ class MacroApp:
             windows = enumerate_windows()
             titles = [t for _, t in windows]
             self.window_combo["values"] = titles
-            # Preserve current selection if still valid
             if self.window_var.get() not in titles and titles:
                 self.window_var.set("")
         except Exception:
@@ -695,7 +834,6 @@ class MacroApp:
         t_input = self.timer_var.get().strip()
 
         if area == "all" and ratio not in ["16:9", "16:10", "16:11"]:
-            # Optionally just a warning, but we can auto-allow since we detect it natively, remove hard limit
             pass
 
         self.timer_val = 0
@@ -710,7 +848,8 @@ class MacroApp:
         self.status_label.configure(fg=self.SUCCESS)
         self._update_hint_state(True)
         self.timer_display_var.set("")
-        
+        self._draw_running_ring()
+
         if self.timer_val > 0:
             self.remaining_time = self.timer_val
             self._update_timer()
@@ -725,10 +864,12 @@ class MacroApp:
         if self.remaining_time <= 0:
             self._log("[i] Timer finished. Stopping.")
             self.stop_event.set()
-            self.timer_display_var.set("00:00")
+            self.timer_display_var.set("00:00:00")
             return
-        m, s = divmod(int(self.remaining_time), 60)
-        self.timer_display_var.set(f"{m:02d}:{s:02d}")
+        h = int(self.remaining_time // 3600)
+        m = int((self.remaining_time % 3600) // 60)
+        s = int(self.remaining_time % 60)
+        self.timer_display_var.set(f"{h:02d}:{m:02d}:{s:02d}")
         self.remaining_time -= 1
         self.root.after(1000, self._update_timer)
 
@@ -737,17 +878,9 @@ class MacroApp:
         self.root.after(0, self._on_macro_done)
 
     def _update_hint_state(self, is_running):
-        color = "#e5e7eb" if is_running else "#9aa4b2"
-        badge_bg = "#2563eb" if is_running else "#1f2430"
-        badge_border = "#3b82f6" if is_running else "#2a2f3a"
-        badge_fg = "#ffffff" if is_running else "#e5e7eb"
-        
+        color = "#E5E7EB" if is_running else self.TEXT_MUTED
         try:
-            self.hint_icon.configure(fg=color)
             self.hint_text1.configure(fg=color)
-            self.hint_text2.configure(fg=color)
-            self.hint_badge.configure(bg=badge_bg, highlightbackground=badge_border)
-            self.hint_badge_lbl.configure(bg=badge_bg, fg=badge_fg)
         except AttributeError:
             pass
 
@@ -757,6 +890,7 @@ class MacroApp:
         self.status_var.set("Stopped")
         self.status_label.configure(fg=self.ERROR)
         self._update_hint_state(False)
+        self._draw_stopped_ring()
 
     def _stop(self):
         self.stop_event.set()
@@ -765,39 +899,39 @@ class MacroApp:
     def _on_drop(self, files):
         if not files:
             return
-            
+
         for file_item in files:
             # Handle different formats returned by windnd (bytes vs str)
             try:
                 path = file_item if isinstance(file_item, str) else file_item.decode('utf-8')
             except UnicodeDecodeError:
                 path = file_item.decode('gbk', errors='ignore')
-                
+
             path = os.path.normpath(path)
-                
+
             if not os.path.isfile(path): continue
-            
+
             ext = os.path.splitext(path)[1].lower()
             if ext not in ['.png', '.jpg', '.jpeg', '.bmp']:
                 self._log(f"[-] Dropped file is not a supported image: {path}")
                 continue
-                
+
             original_filename = os.path.basename(path)
-            
+
             # Show dialog prefilled with original filename
             dialog = CustomInputDialog(self.root, "Add Dropped Image", "Filename:", ok_text="Add", default_value=original_filename)
             new_name = dialog.result
-            
+
             if not new_name:
                 continue
-                
-            if not new_name.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')): 
+
+            if not new_name.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
                 new_name += ext if ext else ".png"
-                
+
             if new_name in state.IMAGE_FILES:
                 messagebox.showinfo("Exists", f"Image '{new_name}' already exists.")
                 continue
-                
+
             try:
                 shutil.copy(path, os.path.join(IMAGE_DIR, new_name))
                 state.IMAGE_FILES.append(new_name)
@@ -813,26 +947,26 @@ class MacroApp:
 
     def _add_new_image(self):
         dialog = CustomInputDialog(self.root, "Add New Image", "Filename (Optional):")
-        
+
         if dialog.result is None:
             return  # User clicked Cancel or closed the popup
-            
+
         new_name = dialog.result
-            
+
         path = filedialog.askopenfilename(filetypes=[("Image files", "*.png *.jpg *.jpeg *.bmp")])
         if not path:
             return
-            
+
         if not new_name:
             new_name = os.path.basename(path)
-            
+
         if not new_name.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
             ext = os.path.splitext(path)[1].lower()
             new_name += ext if ext else ".png"
 
-        if new_name in state.IMAGE_FILES: 
+        if new_name in state.IMAGE_FILES:
             return messagebox.showinfo("Exists", "Already exists.")
-            
+
         try:
             shutil.copy(path, os.path.join(IMAGE_DIR, new_name))
             state.IMAGE_FILES.append(new_name)
@@ -843,7 +977,7 @@ class MacroApp:
                 self._refresh_image_list()
                 if self.current_view == "Macro Sequence":
                     self._refresh_sequence_list()
-        except Exception as e: 
+        except Exception as e:
             messagebox.showerror("Error", str(e))
 
     def _capture_screenshot(self):
@@ -916,7 +1050,7 @@ class MacroApp:
         dialog = CustomInputDialog(self.root, "Rename Image", "New Filename:", ok_text="Save", default_value=target)
         new_name = dialog.result
         if not new_name: return
-        
+
         ext = os.path.splitext(target)[1]
         if not new_name.lower().endswith(tuple(['.png', '.jpg', '.jpeg', '.bmp'])):
             new_name += ext if ext else ".png"
@@ -929,21 +1063,21 @@ class MacroApp:
 
         old_path = os.path.join(IMAGE_DIR, target)
         new_path = os.path.join(IMAGE_DIR, new_name)
-        
+
         try:
             if os.path.exists(old_path):
                 os.rename(old_path, new_path)
-                
+
             idx = state.IMAGE_FILES.index(target)
             state.IMAGE_FILES[idx] = new_name
-            
+
             for step in state.MACRO_SEQUENCE:
                 if step["name"] == target:
                     step["name"] = new_name
-            
+
             state.save_config()
             self._log(f"[+] Renamed {target} to {new_name}")
-            
+
             if self.current_view in ["Manage Images", "Macro Sequence"]:
                 self._refresh_image_list()
                 if self.current_view == "Macro Sequence":
@@ -955,7 +1089,7 @@ class MacroApp:
         try:
             if os.path.isfile(os.path.join(IMAGE_DIR, target)): os.remove(os.path.join(IMAGE_DIR, target))
             if target in state.IMAGE_FILES: state.IMAGE_FILES.remove(target)
-            
+
             state.MACRO_SEQUENCE = [s for s in state.MACRO_SEQUENCE if s["name"] != target]
             state.save_config()
             self._log(f"[-] Deleted {target}")
@@ -984,4 +1118,3 @@ class MacroApp:
     def _update_seq_dc(self, idx, var):
         state.MACRO_SEQUENCE[idx]["double_click"] = var.get()
         state.save_config()
-

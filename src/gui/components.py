@@ -32,8 +32,8 @@ class RoundedButton(tk.Canvas):
         h = max(self.winfo_height(), self.req_height)
         if w < 10 or h < 10: return
         
-        color = "#2A2F3A" if self.disabled and not self.outline_color else self.bg_color
-        out_col = "#2A2F3A" if self.disabled else self.outline_color
+        color = "#334155" if self.disabled and not self.outline_color else self.bg_color
+        out_col = "#334155" if self.disabled else self.outline_color
         
         self.create_polygon(self._get_points(w, h, self.radius), fill=color, outline=out_col, smooth=True)
         fg = "#9CA3AF" if self.disabled else self.fg_color
@@ -186,7 +186,7 @@ class CustomInputDialog(tk.Toplevel):
         super().__init__(parent)
         self.result = None
         self.overrideredirect(True)
-        self.configure(bg="#2A2F3A")
+        self.configure(bg="#1E293B")
         
         w, h = 460, 280
         x = parent.winfo_rootx() + (parent.winfo_width() // 2) - (w // 2)
@@ -198,7 +198,7 @@ class CustomInputDialog(tk.Toplevel):
         self.attributes("-topmost", True)
         self.focus_force()
         
-        main_frame = tk.Frame(self, bg="#1A1D26")
+        main_frame = tk.Frame(self, bg="#1E293B")
         main_frame.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
         
         self._drag_data = {"x": 0, "y": 0}
@@ -214,18 +214,18 @@ class CustomInputDialog(tk.Toplevel):
         main_frame.bind("<ButtonPress-1>", _on_drag_start)
         main_frame.bind("<B1-Motion>", _on_drag_motion)
         
-        lbl_title = tk.Label(main_frame, text=title_text, font=("Segoe UI", 18, "bold"), bg="#1A1D26", fg="#E5E7EB")
+        lbl_title = tk.Label(main_frame, text=title_text, font=("Segoe UI", 18, "bold"), bg="#1E293B", fg="#E5E7EB")
         lbl_title.pack(anchor="w", padx=30, pady=(24, 16))
         lbl_title.bind("<ButtonPress-1>", _on_drag_start)
         lbl_title.bind("<B1-Motion>", _on_drag_motion)
         
-        tk.Label(main_frame, text=label_text, font=("Segoe UI", 12), bg="#1A1D26", fg="#E5E7EB").pack(anchor="w", padx=30)
+        tk.Label(main_frame, text=label_text, font=("Segoe UI", 12), bg="#1E293B", fg="#E5E7EB").pack(anchor="w", padx=30)
         
-        input_frame = tk.Frame(main_frame, bg="#0F1117", highlightthickness=1, highlightbackground="#2A2F3A")
+        input_frame = tk.Frame(main_frame, bg="#0F172A", highlightthickness=1, highlightbackground="#334155")
         input_frame.pack(fill=tk.X, padx=30, pady=(8, 4))
         
         self.entry_var = tk.StringVar(value=default_value)
-        self.entry = tk.Entry(input_frame, textvariable=self.entry_var, font=("Segoe UI", 12), bg="#0F1117", fg="#E5E7EB", insertbackground="#E5E7EB", bd=0)
+        self.entry = tk.Entry(input_frame, textvariable=self.entry_var, font=("Segoe UI", 12), bg="#0F172A", fg="#E5E7EB", insertbackground="#E5E7EB", bd=0)
         self.entry.pack(fill=tk.X, padx=12, pady=10)
         self.entry.bind("<Return>", lambda e: self._on_submit())
         
@@ -239,15 +239,15 @@ class CustomInputDialog(tk.Toplevel):
                     self.entry.select_range(0, tk.END)
         self.after(100, _focus_and_select)
         
-        tk.Label(main_frame, text="e.g. icon.png", font=("Segoe UI", 10), bg="#1A1D26", fg="#9CA3AF").pack(anchor="w", padx=30)
+        tk.Label(main_frame, text="e.g. icon.png", font=("Segoe UI", 10), bg="#1E293B", fg="#9CA3AF").pack(anchor="w", padx=30)
         
-        btn_frame = tk.Frame(main_frame, bg="#1A1D26")
+        btn_frame = tk.Frame(main_frame, bg="#1E293B")
         btn_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=30, pady=(10, 24))
         
         self.btn_submit = RoundedButton(btn_frame, ok_text, bg_color="#FF7A18", fg_color="#FFFFFF", hover_color="#FF8C36", command=self._on_submit, width=120, height=44, font=("Segoe UI", 11, "bold"))
         self.btn_submit.pack(side=tk.RIGHT)
         
-        self.btn_cancel = RoundedButton(btn_frame, "Cancel", bg_color="#1A1D26", fg_color="#E5E7EB", hover_color="#2A2F3A", outline_color="#2A2F3A", command=self._on_cancel, width=100, height=44, font=("Segoe UI", 11))
+        self.btn_cancel = RoundedButton(btn_frame, "Cancel", bg_color="#1E293B", fg_color="#E5E7EB", hover_color="#334155", outline_color="#334155", command=self._on_cancel, width=100, height=44, font=("Segoe UI", 11))
         self.btn_cancel.pack(side=tk.RIGHT, padx=(0, 16))
 
         self.grab_set()
