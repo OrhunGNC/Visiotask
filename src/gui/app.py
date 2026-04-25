@@ -884,46 +884,6 @@ class MacroApp:
         # ── Divider ──────────────────────────────────────
         tk.Frame(view, bg=self.BORDER_SUBTLE, height=1).pack(fill=tk.X, pady=(10, 14))
 
-        # ── Search Bar ────────────────────────────────────
-        search_row = tk.Frame(view, bg=self.BG)
-        search_row.pack(fill=tk.X, pady=(0, 14))
-
-        search_border = tk.Frame(search_row, bg=self.INPUT_BORDER)
-        search_border.pack(fill=tk.X, padx=(0, 6))
-        search_inner = tk.Frame(search_border, bg=self.INPUT_BG)
-        search_inner.pack(fill=tk.X, padx=1, pady=1)
-
-        search_icon = tk.Canvas(search_inner, width=20, height=20, bg=self.INPUT_BG,
-                                 highlightthickness=0)
-        search_icon.pack(side=tk.LEFT, padx=(10, 4), pady=7)
-        # Draw magnifying glass icon
-        search_icon.create_oval(4, 4, 15, 15, outline=self.TEXT_DIM, width=1.5)
-        search_icon.create_line(14, 14, 19, 19, fill=self.TEXT_DIM, width=1.5)
-
-        self.search_var = tk.StringVar(value="")
-        self.search_var.trace_add("write", lambda *a: self._refresh_image_list())
-        search_entry = tk.Entry(search_inner, textvariable=self.search_var,
-                                 font=("Segoe UI Variable", 11), bg=self.INPUT_BG,
-                                 fg=self.TEXT, insertbackground=self.TEXT, bd=0,
-                                 highlightthickness=0)
-        search_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10), pady=7)
-        search_entry.insert(0, "")
-        # Placeholder behavior
-        search_entry.bind("<FocusIn>", lambda e: (
-            search_border.configure(bg=self.INPUT_FOCUS)
-            if search_entry.get() == "Search images..." else None
-        ))
-        search_entry.bind("<FocusOut>", lambda e: (
-            search_border.configure(bg=self.INPUT_BORDER)
-            if search_entry.get() != "Search images..." else None
-        ))
-
-        # Image count label
-        self.img_count_var = tk.StringVar(value="")
-        tk.Label(search_row, textvariable=self.img_count_var,
-                 font=("Segoe UI Variable", 10), bg=self.BG,
-                 fg=self.TEXT_DIM).pack(side=tk.RIGHT, padx=(8, 0))
-
         # ── Scrollable card grid ──────────────────────────
         grid_container = tk.Frame(view, bg=self.BG)
         grid_container.pack(fill=tk.BOTH, expand=True)
@@ -938,13 +898,13 @@ class MacroApp:
             h = self.img_scroll_frame.winfo_height()
             ch = self.img_canvas.winfo_height()
             self.img_canvas.configure(scrollregion=(0, 0, w, max(h, ch)))
-            # Re-layout cards when canvas width changes
-            self._layout_image_grid(e.width if e else w)
+            # Rebuild flow layout when canvas width changes
+            self._rebuild_flow_layout()
 
         self.img_scroll_frame.bind("<Configure>", _update_img_scrollregion)
         self.img_canvas.bind("<Configure>",
             lambda e: [self.img_canvas.itemconfig(self.img_canvas_window, width=e.width),
-                       _update_img_scrollregion(e)])
+                       _update_img_scrollregion()])
         self.img_canvas_window = self.img_canvas.create_window((0, 0),
             window=self.img_scroll_frame, anchor="nw")
 
@@ -952,46 +912,61 @@ class MacroApp:
         self.img_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.image_status_labels = {}
         self._grid_images = []
-        self._img_card_refs = []  # prevent garbage collection
 
-    def _layout_image_grid(self, canvas_width=None):
-        """Reposition image cards in a responsive grid layout."""
-        if canvas_width is None:
-            canvas_width = self.img_canvas.winfo_width()
-        if canvas_width < 100:
+    def _rebuild_flow_layout(self):
+        """Recalculate cards-per-row and rebuild the flow layout."""
+        canvas_width = self.img_canvas.winfo_width()
+        if canvas_width < 50:
             return
         cell_w = self.CARD_W + self.CARD_PAD
         cols = max(1, canvas_width // cell_w)
-        cards = self.img_scroll_frame.winfo_children()
-        if not cards:
+
+        # Get all direct children (should be row frames or cards)
+        children = self.img_scroll_frame.winfo_children()
+        if not children:
             return
-        for i, card in enumerate(cards):
-            row = i // cols
-            col = i % cols
-            card.grid(row=row, column=col, padx=self.CARD_PAD // 2,
-                      pady=self.CARD_PAD // 2)
-            # Remove column weight so cards stay at fixed width
-            self.img_scroll_frame.columnconfigure(col, weight=0)
+
+        # Collect all card widgets
+        all_cards = []
+        for row_frame in children:
+            if hasattr(row_frame, '_is_row'):
+                for card in row_frame.winfo_children():
+                    all_cards.append(card)
+                row_frame.destroy()
+            else:
+                # It's a card directly (empty state etc)
+                all_cards.append(row_frame)
+                # Don't destroy non-row children — they'll be re-packed below
+                # Actually, skip these for flow layout
+                continue
+
+        # Re-create row frames and repack cards
+        row_idx = 0
+        row_frame = tk.Frame(self.img_scroll_frame, bg=self.BG)
+        row_frame._is_row = True
+        row_frame.pack(fill=tk.X, pady=(0, self.CARD_PAD // 2))
+
+        col_count = 0
+        for card in all_cards:
+            if col_count >= cols:
+                row_idx += 1
+                row_frame = tk.Frame(self.img_scroll_frame, bg=self.BG)
+                row_frame._is_row = True
+                row_frame.pack(fill=tk.X, pady=(0, self.CARD_PAD // 2))
+                col_count = 0
+            card.pack(in_=row_frame, side=tk.LEFT, padx=self.CARD_PAD // 2)
+            col_count += 1
 
     def _refresh_image_list(self):
         for widget in self.img_scroll_frame.winfo_children():
             widget.destroy()
         self.image_status_labels.clear()
         self._grid_images.clear()
-        self._img_card_refs.clear()
 
-        search = self.search_var.get().strip().lower() if hasattr(self, 'search_var') else ""
-        # Remove placeholder from search
-        if search == "search images...":
-            search = ""
-
-        filtered = [n for n in state.IMAGE_FILES if search in n.lower()] if search else state.IMAGE_FILES
-        self.img_count_var.set(f"{len(filtered)} image{'s' if len(filtered) != 1 else ''}")
-
-        if not filtered:
+        if not state.IMAGE_FILES:
             # Empty state with illustration
             empty = tk.Frame(self.img_scroll_frame, bg=self.BG)
-            empty.grid(row=0, column=0, padx=40, pady=60)
+            empty.pack(pady=(60, 20))
 
             icon = tk.Canvas(empty, width=64, height=64, bg=self.BG, highlightthickness=0)
             icon.pack(pady=(0, 14))
@@ -1008,23 +983,42 @@ class MacroApp:
                      fg=self.TEXT_DIM).pack(pady=(4, 0))
             return
 
-        for idx, img_name in enumerate(filtered):
-            self._create_image_card(idx, img_name)
+        # Calculate cards per row from canvas width
+        canvas_width = self.img_canvas.winfo_width()
+        if canvas_width < 50:
+            canvas_width = 800  # fallback
+        cell_w = self.CARD_W + self.CARD_PAD
+        cols = max(1, canvas_width // cell_w)
+
+        col_count = 0
+        row_frame = tk.Frame(self.img_scroll_frame, bg=self.BG)
+        row_frame._is_row = True
+        row_frame.pack(fill=tk.X, pady=(0, self.CARD_PAD // 2))
+
+        for idx, img_name in enumerate(state.IMAGE_FILES):
+            if col_count >= cols:
+                row_frame = tk.Frame(self.img_scroll_frame, bg=self.BG)
+                row_frame._is_row = True
+                row_frame.pack(fill=tk.X, pady=(0, self.CARD_PAD // 2))
+                col_count = 0
+            self._create_image_card(row_frame, img_name)
+            col_count += 1
 
         self._update_image_statuses()
-        self.root.after(50, lambda: self._layout_image_grid())
         _bind_mousewheel(self.img_canvas, self.img_scroll_frame)
         self.img_canvas.bind("<MouseWheel>",
             lambda e: self.img_canvas.yview_scroll(int(-1 * (e.delta / 120)), "units"))
 
-    def _create_image_card(self, idx, img_name):
-        """Create a single image card in the grid."""
+    def _create_image_card(self, parent, img_name):
+        """Create a single image card packed into a row frame."""
         cw = self.CARD_W
 
-        # ── Shadow layer (fixed-size grid cell) ──
-        card_shadow = tk.Frame(self.img_scroll_frame, bg=self.SHADOW,
+        # ── Shadow layer (fixed-size card) ──
+        card_shadow = tk.Frame(parent, bg=self.SHADOW,
                                 width=cw, height=self.CARD_H)
         card_shadow.pack_propagate(False)
+        card_shadow.pack(side=tk.LEFT, padx=self.CARD_PAD // 2,
+                          pady=self.CARD_PAD // 2)
 
         # ── Card with border ──
         card = tk.Frame(card_shadow, bg=self.CARD,
@@ -1119,10 +1113,6 @@ class MacroApp:
         for w in (card_shadow, card, info, thumb_label, thumb_frame, actions_frame):
             w.bind("<Enter>", on_enter)
             w.bind("<Leave>", on_leave)
-
-        # Grid placement (will be repositioned by _layout_image_grid)
-        card_shadow.grid(row=0, column=idx, padx=self.CARD_PAD // 2,
-                          pady=self.CARD_PAD // 2)
 
     # ──────────────────────────────────────────────────────
     #  CORE LOGIC
