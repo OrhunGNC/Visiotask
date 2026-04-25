@@ -628,7 +628,7 @@ class MacroApp:
         tk.Frame(view, bg=self.BORDER_SUBTLE, height=1).pack(fill=tk.X, pady=(0, 8))
 
         # Column headers — fixed-width frames packed RIGHT first, then LEFT, then expand
-        list_header = tk.Frame(view, bg="#091320", padx=10, pady=6)
+        list_header = tk.Frame(view, bg="#091320", padx=10, pady=10)
         list_header.pack(fill=tk.X, padx=(0, 6))
 
         # Right-aligned columns (pack RIGHT first)
@@ -690,11 +690,12 @@ class MacroApp:
             return
 
         for i, step in enumerate(state.MACRO_SEQUENCE):
-            # ── Row card ──
-            row_outer = tk.Frame(self.seq_scroll_frame, bg=self.CARD)
+            # ── Row card (fixed 58px height per design system) ──
+            row_outer = tk.Frame(self.seq_scroll_frame, bg=self.CARD, height=58)
+            row_outer.pack_propagate(False)
             row_outer.pack(fill=tk.X, pady=(4, 0))
 
-            row = tk.Frame(row_outer, bg=self.CARD, pady=8, padx=10,
+            row = tk.Frame(row_outer, bg=self.CARD, padx=10,
                            highlightthickness=1, highlightbackground=self.BORDER)
 
             def on_row_enter(e, r=row, ro=row_outer):
@@ -704,7 +705,7 @@ class MacroApp:
                 r.configure(highlightbackground=self.BORDER, bg=self.CARD)
                 ro.configure(bg=self.CARD)
 
-            row.pack(fill=tk.X, expand=True, padx=1, pady=1)
+            row.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
 
             # ── Right columns (pack RIGHT first, fixed widths matching header) ──
 
@@ -1053,7 +1054,7 @@ class MacroApp:
         self.start_btn.set_state(tk.DISABLED)
         self.stop_btn.set_state(tk.NORMAL)
         self.status_var.set("Running")
-        self.status_label.configure(fg=self.SUCCESS)
+        self.status_label.configure(fg=self.WARNING)
         self.progress_ring.set_running(True)
         self.timer_display_var.set("")
 

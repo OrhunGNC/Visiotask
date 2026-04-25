@@ -327,20 +327,23 @@ class CustomDropdown(tk.Frame):
 
 
 class ProgressRing(tk.Canvas):
-    """Animated neon circular progress ring with pulsing green glow and play icon."""
+    """Animated circular progress ring with pulsing glow and play icon.
+    States: idle (dim), running (yellow pulse), stopped (red)."""
+
+    # Ring states
+    STATE_IDLE = "idle"
+    STATE_RUNNING = "running"
+    STATE_STOPPED = "stopped"
 
     def __init__(self, parent, size=120, ring_width=5, bg_color="#0B1322",
-                 ring_color="#00E676", inactive_color="#172240",
-                 icon_color="#FFFFFF", **kwargs):
+                 **kwargs):
         super().__init__(parent, width=size, height=size, bg=bg_color,
                          highlightthickness=0, **kwargs)
         self._size = size
         self._ring_width = ring_width
-        self._ring_color = ring_color
-        self._inactive_color = inactive_color
-        self._icon_color = icon_color
         self._bg_color = bg_color
-        self._is_running = False
+        self._ring_state = self.STATE_IDLE
+        self._ring_color = "#FACC15"  # default running color
         self._pulse_phase = 0
         self._pulse_after_id = None
         self._draw()
@@ -351,43 +354,57 @@ class ProgressRing(tk.Canvas):
         cx, cy = s / 2, s / 2
         r = (s / 2) - self._ring_width - 10
 
+        is_running = self._ring_state == self.STATE_RUNNING
+        is_stopped = self._ring_state == self.STATE_STOPPED
+
         # Outer glow rings when running
-        if self._is_running:
+        if is_running:
             for offset, stipple in [(8, "gray12"), (5, "gray25"), (3, "gray50")]:
                 glow_r = r + offset
                 self.create_oval(cx - glow_r, cy - glow_r, cx + glow_r, cy + glow_r,
                                  outline=self._ring_color, width=1, stipple=stipple)
 
         # Background track
+        track_color = "#172240"
         self.create_oval(cx - r, cy - r, cx + r, cy + r,
-                         outline=self._inactive_color, width=self._ring_width + 1)
+                         outline=track_color, width=self._ring_width + 1)
 
-        # Active ring
-        if self._is_running:
+        # Active / stopped ring
+        if is_running:
             self.create_oval(cx - r, cy - r, cx + r, cy + r,
                              outline=self._ring_color, width=self._ring_width + 2)
+        elif is_stopped:
+            self.create_oval(cx - r, cy - r, cx + r, cy + r,
+                             outline="#EF4444", width=self._ring_width + 2)
         else:
-            # Dim dashed ring to indicate idle state
+            # Idle: dim dashed ring
             self.create_oval(cx - r, cy - r, cx + r, cy + r,
                              outline="#1E3050", width=self._ring_width)
 
-        # Center icon
-        if self._is_running:
-            # Animated play triangle
-            points = [cx - 7, cy - 10, cx - 7, cy + 10, cx + 11, cy]
-            self.create_polygon(points, fill=self._icon_color, outline=self._icon_color)
+        # Center icon — play triangle
+        points = [cx - 7, cy - 10, cx - 7, cy + 10, cx + 11, cy]
+        if is_running:
+            self.create_polygon(points, fill="#FFFFFF", outline="#FFFFFF")
+        elif is_stopped:
+            # Red play icon when stopped
+            self.create_polygon(points, fill="#EF4444", outline="#EF4444")
         else:
-            # Idle play triangle in muted color
-            points = [cx - 7, cy - 10, cx - 7, cy + 10, cx + 11, cy]
+            # Muted play icon when idle
             self.create_polygon(points, fill="#3A4D66", outline="#3A4D66")
 
     def set_running(self, running):
-        self._is_running = running
+        """Set ring state. True = running (yellow), False = stopped (red)."""
+        self._ring_state = self.STATE_RUNNING if running else self.STATE_STOPPED
         self._draw()
         if running:
             self._start_pulse()
         else:
             self._stop_pulse()
+
+    def set_idle(self):
+        """Reset ring to idle (dim) state."""
+        self._ring_state = self.STATE_IDLE
+        self._stop_pulse()
 
     def _start_pulse(self):
         self._stop_pulse()
@@ -395,18 +412,18 @@ class ProgressRing(tk.Canvas):
         self._pulse_tick()
 
     def _pulse_tick(self):
-        if not self._is_running:
+        if self._ring_state != self.STATE_RUNNING:
             return
         self._pulse_phase = (self._pulse_phase + 1) % 40
         self._draw()
 
-        # Intensity cycling for neon glow
+        # Intensity cycling for amber/yellow neon glow
         if self._pulse_phase < 13:
-            self._ring_color = "#00E676"
+            self._ring_color = "#FACC15"
         elif self._pulse_phase < 26:
-            self._ring_color = "#00CC6A"
+            self._ring_color = "#E5A80D"
         else:
-            self._ring_color = "#55FFB2"
+            self._ring_color = "#FFD84D"
 
         self._pulse_after_id = self.after(70, self._pulse_tick)
 
@@ -417,8 +434,9 @@ class ProgressRing(tk.Canvas):
             except Exception:
                 pass
             self._pulse_after_id = None
-        self._ring_color = "#00E676"
-        self._is_running = False
+        self._ring_color = "#FACC15"
+        if self._ring_state != self.STATE_STOPPED:
+            self._ring_state = self.STATE_IDLE
         self._draw()
 
 
