@@ -39,6 +39,13 @@ class MacroApp:
     INPUT_BORDER = "#1E2D42"        # Input border
     INPUT_FOCUS = "#FF7A1A"          # Input focus border
 
+    # Sequence table column widths (header + rows must match exactly)
+    COL_DRAG = 36
+    COL_DEL = 50
+    COL_SKIP = 80
+    COL_DC = 80
+    COL_WAIT = 90
+
     def __init__(self, root):
         self.root = root
         self.root.title("Visiotask")
@@ -632,14 +639,8 @@ class MacroApp:
         list_header = tk.Frame(view, bg="#091320", padx=10, pady=10)
         list_header.pack(fill=tk.X, padx=(0, 6))
 
-        COL_DEL = 50
-        COL_SKIP = 80
-        COL_DC = 80
-        COL_WAIT = 90
-        COL_DRAG = 36
-
         # Right-aligned columns (pack RIGHT first → rightmost first)
-        for text, w in [("🗑", COL_DEL), ("Skip", COL_SKIP), ("Double", COL_DC), ("Wait (s)", COL_WAIT)]:
+        for text, w in [("🗑", self.COL_DEL), ("Skip", self.COL_SKIP), ("Double", self.COL_DC), ("Wait (s)", self.COL_WAIT)]:
             col = tk.Frame(list_header, bg="#091320", width=w)
             col.pack_propagate(False)
             col.pack(side=tk.RIGHT, padx=(0, 6))
@@ -647,7 +648,7 @@ class MacroApp:
                      bg="#091320", fg="#6B7D94").pack(expand=True)
 
         # Drag handle column
-        drag_col = tk.Frame(list_header, bg="#091320", width=COL_DRAG)
+        drag_col = tk.Frame(list_header, bg="#091320", width=self.COL_DRAG)
         drag_col.pack_propagate(False)
         drag_col.pack(side=tk.LEFT)
 
@@ -717,7 +718,7 @@ class MacroApp:
             # ── Right columns (pack RIGHT first → rightmost first, matching header order) ──
 
             # Delete column (50px)
-            del_col = tk.Frame(row, bg=self.CARD, width=COL_DEL)
+            del_col = tk.Frame(row, bg=self.CARD, width=self.COL_DEL)
             del_col.pack_propagate(False)
             del_col.pack(side=tk.RIGHT, padx=(0, 6))
             del_btn = tk.Button(del_col, text="🗑", font=("Segoe UI Symbol", 10),
@@ -734,7 +735,7 @@ class MacroApp:
                           ro.configure(bg=self.CARD)))
 
             # Skip column (80px)
-            skip_col = tk.Frame(row, bg=self.CARD, width=COL_SKIP)
+            skip_col = tk.Frame(row, bg=self.CARD, width=self.COL_SKIP)
             skip_col.pack_propagate(False)
             skip_col.pack(side=tk.RIGHT, padx=(0, 6))
             skip_var = tk.BooleanVar(value=step.get("skip_next", False))
@@ -745,7 +746,7 @@ class MacroApp:
                 lambda *a, idx=i, v=skip_var: self._update_seq_skip(idx, v))
 
             # Double click column (80px)
-            dc_col = tk.Frame(row, bg=self.CARD, width=COL_DC)
+            dc_col = tk.Frame(row, bg=self.CARD, width=self.COL_DC)
             dc_col.pack_propagate(False)
             dc_col.pack(side=tk.RIGHT, padx=(0, 6))
             dc_var = tk.BooleanVar(value=step.get("double_click", False))
@@ -758,7 +759,7 @@ class MacroApp:
                 lambda *a, idx=i, v=dc_var: self._update_seq_dc(idx, v))
 
             # Wait column (90px)
-            wait_col = tk.Frame(row, bg=self.CARD, width=COL_WAIT)
+            wait_col = tk.Frame(row, bg=self.CARD, width=self.COL_WAIT)
             wait_col.pack_propagate(False)
             wait_col.pack(side=tk.RIGHT, padx=(0, 6))
             wait_var = tk.StringVar(value=str(step.get("wait", 0)))
@@ -788,7 +789,7 @@ class MacroApp:
             # ── Left columns ──
 
             # Drag handle column (36px)
-            drag_col = tk.Frame(row, bg=self.CARD, width=COL_DRAG)
+            drag_col = tk.Frame(row, bg=self.CARD, width=self.COL_DRAG)
             drag_col.pack_propagate(False)
             drag_col.pack(side=tk.LEFT, fill=tk.Y, pady=4)
             drag_lbl = tk.Label(drag_col, text="⠿", font=("Segoe UI", 10),
