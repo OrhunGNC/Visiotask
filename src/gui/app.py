@@ -111,8 +111,8 @@ class MacroApp:
     # ──────────────────────────────────────────────────────
 
     def _build_ui(self):
-        # ── Sidebar (narrow, 190px) ─────────────────────
-        self.sidebar = tk.Frame(self.root, bg=self.BG, width=190)
+        # ── Sidebar (compact, 180px) ─────────────────────
+        self.sidebar = tk.Frame(self.root, bg=self.BG, width=180)
         self.sidebar.pack(side=tk.LEFT, fill=tk.Y)
         self.sidebar.pack_propagate(False)
 
@@ -121,18 +121,18 @@ class MacroApp:
 
         # Logo — compact
         brand_frame = tk.Frame(self.sidebar, bg=self.BG)
-        brand_frame.pack(pady=(24, 36), padx=18, anchor="w", fill=tk.X)
+        brand_frame.pack(pady=(20, 28), padx=16, anchor="w", fill=tk.X)
 
         icon_path = os.path.join(RESOURCE_DIR, "icon.ico")
         if os.path.exists(icon_path):
             try:
-                pil_icon = Image.open(icon_path).resize((22, 22))
+                pil_icon = Image.open(icon_path).resize((20, 20))
                 self._sidebar_icon = ImageTk.PhotoImage(pil_icon)
-                tk.Label(brand_frame, image=self._sidebar_icon, bg=self.BG).pack(side=tk.LEFT, padx=(0, 8))
+                tk.Label(brand_frame, image=self._sidebar_icon, bg=self.BG).pack(side=tk.LEFT, padx=(0, 7))
             except Exception:
                 pass
 
-        tk.Label(brand_frame, text="Visiotask", font=("Segoe UI Variable", 15, "bold"),
+        tk.Label(brand_frame, text="Visiotask", font=("Segoe UI Variable", 14, "bold"),
                  bg=self.BG, fg=self.PRIMARY).pack(side=tk.LEFT)
 
         # Navigation — only the three specified items
@@ -171,40 +171,44 @@ class MacroApp:
             canvas.create_rectangle(s-hs-1, s-hs-1, s-2, s-2, outline=color, width=1.5)
 
     def _create_sidebar_btn(self, name):
-        # Active glow background frame (shows on active item)
+        # Active item wrapper — provides glow padding + rounded bg feel
         glow = tk.Frame(self.sidebar, bg=self.BG, cursor="hand2")
-        glow.pack(fill=tk.X, pady=1, padx=8)
+        glow.pack(fill=tk.X, pady=2, padx=8)
 
-        # Inner button frame — gets rounded appearance
+        # Inner button with rounded-style background
         btn = tk.Frame(glow, bg=self.BG, cursor="hand2")
-        btn.pack(fill=tk.X)
+        btn.pack(fill=tk.X, ipady=4)
 
-        # Left indicator bar (3px)
-        indicator = tk.Frame(btn, bg=self.BG, width=3)
-        indicator.pack(side=tk.LEFT, fill=tk.Y, pady=6)
+        # Left orange accent bar (2px thin, refined)
+        indicator = tk.Frame(btn, bg=self.BG, width=2)
+        indicator.pack(side=tk.LEFT, fill=tk.Y, pady=4)
         indicator.pack_propagate(False)
 
-        # Line icon canvas
+        # Line icon canvas (16×16)
         icon_type = {"Run Macro": "play", "Macro Sequence": "sequence",
                      "Manage Images": "images"}.get(name, "play")
 
-        icon_canvas = tk.Canvas(btn, width=18, height=16, bg=self.BG,
+        icon_canvas = tk.Canvas(btn, width=16, height=16, bg=self.BG,
                                  highlightthickness=0, cursor="hand2")
-        icon_canvas.pack(side=tk.LEFT, padx=(14, 6), pady=8)
+        icon_canvas.pack(side=tk.LEFT, padx=(12, 6), pady=6)
         self._draw_line_icon(icon_canvas, icon_type, self.TEXT_DIM)
 
-        # Text label
+        # Text label — tighter spacing
         lbl = tk.Label(btn, text=name, font=("Segoe UI Variable", 11),
                        bg=self.BG, fg=self.TEXT_SEC, cursor="hand2")
-        lbl.pack(side=tk.LEFT, padx=(0, 14), pady=8)
+        lbl.pack(side=tk.LEFT, padx=(0, 12), pady=6)
+
+        # Hover state color constants
+        hover_bg = "#0D1829"
+        active_glow = self.PRIMARY_DIM
 
         def on_enter(e):
             if self.current_view != name:
                 glow.configure(bg=self.BG)
-                btn.configure(bg=self.CARD_GLOW)
-                lbl.configure(bg=self.CARD_GLOW, fg=self.TEXT)
-                icon_canvas.configure(bg=self.CARD_GLOW)
-                indicator.configure(bg=self.CARD_GLOW)
+                btn.configure(bg=hover_bg)
+                lbl.configure(bg=hover_bg, fg=self.TEXT)
+                icon_canvas.configure(bg=hover_bg)
+                indicator.configure(bg=self.BORDER)
                 self._draw_line_icon(icon_canvas, icon_type, self.TEXT_SEC)
 
         def on_leave(e):
@@ -237,15 +241,14 @@ class MacroApp:
         for b_name, b_dict in self.sidebar_buttons.items():
             icon_type = b_dict["icon_type"]
             if b_name == name:
-                b_dict["glow"].configure(bg=self.CARD_GLOW)
-                b_dict["frame"].configure(bg=self.CARD_GLOW)
-                b_dict["label"].configure(bg=self.CARD_GLOW, fg=self.TEXT,
+                # Active: orange glow bg + thin orange left accent
+                b_dict["glow"].configure(bg=self.PRIMARY_DIM)
+                b_dict["frame"].configure(bg="#0D1829")
+                b_dict["label"].configure(bg="#0D1829", fg=self.TEXT,
                                           font=("Segoe UI Variable", 11, "bold"))
                 b_dict["indicator"].configure(bg=self.PRIMARY)
-                b_dict["icon"].configure(bg=self.CARD_GLOW)
+                b_dict["icon"].configure(bg="#0D1829")
                 self._draw_line_icon(b_dict["icon"], icon_type, self.PRIMARY)
-                # Add subtle glow border to indicator
-                b_dict["glow"].configure(bg=self.PRIMARY_DIM)
             else:
                 b_dict["glow"].configure(bg=self.BG)
                 b_dict["frame"].configure(bg=self.BG)
@@ -600,51 +603,50 @@ class MacroApp:
 
         # ── Header with title + Add Step button ─────
         header_row = tk.Frame(view, bg=self.BG)
-        header_row.pack(fill=tk.X, pady=(0, 4))
+        header_row.pack(fill=tk.X, pady=(0, 2))
 
         titles = tk.Frame(header_row, bg=self.BG)
         titles.pack(side=tk.LEFT)
         tk.Label(titles, text="Macro Sequence",
-                 font=("Segoe UI Variable", 22, "bold"),
+                 font=("Segoe UI Variable", 20, "bold"),
                  bg=self.BG, fg=self.TEXT).pack(anchor="w")
         tk.Label(titles, text="Arrange image checks, wait times, and conditions.",
-                 font=("Segoe UI Variable", 11), bg=self.BG,
-                 fg=self.TEXT_SEC).pack(anchor="w", pady=(2, 0))
+                 font=("Segoe UI Variable", 10), bg=self.BG,
+                 fg=self.TEXT_SEC).pack(anchor="w", pady=(1, 0))
 
-        # + Add Step button — prominent orange, top right
+        # + Add Step button — compact, tall, orange gradient style
         self._add_step_btn = RoundedButton(
             header_row, text="+  Add Step",
             bg_color=self.PRIMARY, fg_color="#FFFFFF",
             hover_color=self.PRIMARY_HOVER, glow_color="#FF9040",
             command=self._add_seq_step,
-            width=140, height=38, radius=10,
+            width=120, height=40, radius=10,
             font=("Segoe UI Variable", 10, "bold"))
-        self._add_step_btn.pack(side=tk.RIGHT, pady=(8, 0))
+        self._add_step_btn.pack(side=tk.RIGHT, pady=(6, 0))
 
         # ── Help notes with info icons ────────────────
         notes = tk.Frame(view, bg=self.BG)
-        notes.pack(fill=tk.X, pady=(8, 0))
+        notes.pack(fill=tk.X, pady=(6, 0))
 
         for note_text in [
-            "Wait 0.0 = search infinitely until the next image is found.",
+            "Wait 0.0 = search infinitely until next image is found.",
             "Skip Next skips the following step when this image is not found.",
         ]:
             row = tk.Frame(notes, bg=self.BG)
-            row.pack(anchor="w", pady=1)
+            row.pack(anchor="w", pady=0)
             info_icon = tk.Canvas(row, width=14, height=14, bg=self.BG, highlightthickness=0)
             info_icon.pack(side=tk.LEFT, padx=(0, 5))
-            # Small "i" icon
-            info_icon.create_oval(2, 2, 12, 12, outline=self.TEXT_DIM, width=1)
-            info_icon.create_text(7, 7, text="i", fill=self.TEXT_DIM, font=("Segoe UI Variable", 7, "bold"))
+            info_icon.create_oval(2, 2, 12, 12, outline="#4A5A70", width=1)
+            info_icon.create_text(7, 7, text="i", fill="#5A6B82", font=("Segoe UI Variable", 7, "bold"))
             tk.Label(row, text=note_text, font=("Segoe UI Variable", 9),
-                     bg=self.BG, fg=self.TEXT_DIM).pack(side=tk.LEFT)
+                     bg=self.BG, fg="#5A6B82").pack(side=tk.LEFT)
 
         # ── Divider ──────────────────────────────────
-        tk.Frame(view, bg=self.BORDER_SUBTLE, height=1).pack(fill=tk.X, pady=(8, 0))
+        tk.Frame(view, bg=self.BORDER_SUBTLE, height=1).pack(fill=tk.X, pady=(6, 0))
 
         # ── Table card with shadow ───────────────────
         table_shadow = tk.Frame(view, bg=self.SHADOW)
-        table_shadow.pack(fill=tk.BOTH, expand=True, pady=(10, 0))
+        table_shadow.pack(fill=tk.BOTH, expand=True, pady=(8, 0))
 
         table_card = tk.Frame(table_shadow, bg=self.CARD,
                                highlightthickness=1,
@@ -652,36 +654,37 @@ class MacroApp:
         table_card.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
 
         # ── Sticky header row ─────────────────────────
-        header_inner = tk.Frame(table_card, bg="#0D1829")
-        header_inner.pack(fill=tk.X, padx=0, pady=0)
+        hdr = tk.Frame(table_card, bg="#0A1525", padx=12, pady=8)
+        hdr.pack(fill=tk.X)
 
-        # Column structure: # | drag | Image | (right side:) Actions | Skip | Double | Wait
-        hdr_num = tk.Frame(header_inner, bg="#0D1829", width=32, height=30)
+        # # column
+        hdr_num = tk.Frame(hdr, bg="#0A1525", width=28)
         hdr_num.pack_propagate(False)
-        hdr_num.pack(side=tk.LEFT, padx=(16, 0))
+        hdr_num.pack(side=tk.LEFT)
         tk.Label(hdr_num, text="#", font=("Segoe UI Variable", 9, "bold"),
-                 bg="#0D1829", fg=self.TEXT_DIM).pack(expand=True)
+                 bg="#0A1525", fg="#4A5A70").pack(expand=True)
 
-        hdr_drag = tk.Frame(header_inner, bg="#0D1829", width=28, height=30)
+        # Drag column
+        hdr_drag = tk.Frame(hdr, bg="#0A1525", width=24)
         hdr_drag.pack_propagate(False)
         hdr_drag.pack(side=tk.LEFT)
-        # No label in drag column
 
-        hdr_img = tk.Frame(header_inner, bg="#0D1829", height=30)
-        hdr_img.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(4, 0))
+        # Image column (expands)
+        hdr_img = tk.Frame(hdr, bg="#0A1525")
+        hdr_img.pack(side=tk.LEFT, fill=tk.X, expand=True)
         tk.Label(hdr_img, text="Image", font=("Segoe UI Variable", 9, "bold"),
-                 bg="#0D1829", fg=self.TEXT_DIM, anchor="w").pack(side=tk.LEFT)
+                 bg="#0A1525", fg="#4A5A70", anchor="w").pack(side=tk.LEFT)
 
-        # Right-aligned columns
-        for text, w in [("Actions", 80), ("Skip Next", 68), ("Double", 56), ("Wait (s)", 64)]:
-            hdr_col = tk.Frame(header_inner, bg="#0D1829", width=w, height=30)
+        # Right-aligned columns (Actions, Skip, Double, Wait)
+        for text, w in [("Actions", 72), ("Skip", 52), ("Double", 52), ("Wait", 52)]:
+            hdr_col = tk.Frame(hdr, bg="#0A1525", width=w)
             hdr_col.pack_propagate(False)
-            hdr_col.pack(side=tk.RIGHT, padx=(0, 0))
+            hdr_col.pack(side=tk.RIGHT)
             tk.Label(hdr_col, text=text, font=("Segoe UI Variable", 9, "bold"),
-                     bg="#0D1829", fg=self.TEXT_DIM).pack(expand=True)
+                     bg="#0A1525", fg="#4A5A70").pack(expand=True)
 
         # Header separator
-        tk.Frame(table_card, bg=self.BORDER, height=1).pack(fill=tk.X)
+        tk.Frame(table_card, bg="#1A2538", height=1).pack(fill=tk.X)
 
         # ── Scrollable list inside the card ───────────
         list_container = tk.Frame(table_card, bg=self.CARD)
@@ -754,43 +757,49 @@ class MacroApp:
         if not state.MACRO_SEQUENCE:
             # ── Empty state: centered illustration ────
             empty_frame = tk.Frame(self.seq_scroll_frame, bg=self.CARD)
-            empty_frame.pack(fill=tk.BOTH, expand=True, pady=(60, 40))
+            empty_frame.pack(fill=tk.BOTH, expand=True, pady=(48, 32))
 
-            # Workflow illustration canvas
-            empty_icon = tk.Canvas(empty_frame, width=64, height=64, bg=self.CARD, highlightthickness=0)
-            empty_icon.pack(pady=(0, 16))
-            # Draw a linked-nodes icon
-            c = self.TEXT_DIM
-            # Node 1
-            empty_icon.create_oval(6, 18, 22, 34, outline=c, width=1.5)
-            empty_icon.create_line(22, 26, 28, 26, fill=c, width=1.5)
-            # Node 2
-            empty_icon.create_oval(28, 18, 44, 34, outline=c, width=1.5)
-            empty_icon.create_line(44, 26, 50, 26, fill=c, width=1.5)
-            # Node 3 (dashed)
-            empty_icon.create_oval(50, 18, 66, 34, outline=c, width=1.5, dash=(3, 3))
+            # Workflow illustration — 3 linked nodes
+            empty_icon = tk.Canvas(empty_frame, width=72, height=48, bg=self.CARD, highlightthickness=0)
+            empty_icon.pack(pady=(0, 14))
+            c = "#2A3650"
+            # Node 1 (solid)
+            empty_icon.create_oval(8, 10, 28, 30, outline=c, width=2, fill="")
+            empty_icon.create_oval(12, 14, 24, 26, outline=c, width=1, fill="#0E1628")
+            # Connector 1
+            empty_icon.create_line(28, 20, 34, 20, fill=c, width=2)
+            # Node 2 (solid)
+            empty_icon.create_oval(34, 10, 54, 30, outline=c, width=2, fill="")
+            empty_icon.create_oval(38, 14, 50, 26, outline=c, width=1, fill="#0E1628")
+            # Connector 2
+            empty_icon.create_line(54, 20, 60, 20, fill=c, width=2)
+            # Node 3 (dashed — "to be added")
+            empty_icon.create_oval(60, 10, 80, 30, outline="#1A2538", width=2, fill="", dash=(4, 4))
+            # Plus icon inside node 3
+            empty_icon.create_line(66, 20, 74, 20, fill="#1A2538", width=1.5)
+            empty_icon.create_line(70, 16, 70, 24, fill="#1A2538", width=1.5)
 
             tk.Label(empty_frame, text="No sequence steps.",
-                     font=("Segoe UI Variable", 14, "bold"),
+                     font=("Segoe UI Variable", 13, "bold"),
                      bg=self.CARD, fg=self.TEXT_SEC).pack()
             tk.Label(empty_frame, text="Click '+ Add Step' to create your first step.",
-                     font=("Segoe UI Variable", 11),
-                     bg=self.CARD, fg=self.TEXT_DIM).pack(pady=(4, 0))
+                     font=("Segoe UI Variable", 10),
+                     bg=self.CARD, fg=self.TEXT_DIM).pack(pady=(3, 0))
             return
 
         for i, step in enumerate(state.MACRO_SEQUENCE):
-            # ── Row card with shadow effect ───────────
+            # ── Row card with hover elevation ───────────
             row_outer = tk.Frame(self.seq_scroll_frame, bg=self.CARD)
-            row_outer.pack(fill=tk.X, pady=(3, 0), padx=2)
+            row_outer.pack(fill=tk.X, pady=(2, 0), padx=4)
 
-            row = tk.Frame(row_outer, bg=self.CARD, pady=8, padx=14,
+            row = tk.Frame(row_outer, bg=self.CARD, pady=6, padx=12,
                            highlightthickness=1, highlightbackground=self.BORDER)
             row.pack(fill=tk.X)
 
-            # Hover effects
+            # Hover effects — orange highlight + raise
             def _on_row_enter(e, r=row, ro=row_outer):
                 r.configure(highlightbackground=self.PRIMARY, bg=self.CARD_RAISED)
-                ro.configure(bg=self.CARD_RAISED)
+                ro.configure(bg="#0D1829")
             def _on_row_leave(e, r=row, ro=row_outer):
                 r.configure(highlightbackground=self.BORDER, bg=self.CARD)
                 ro.configure(bg=self.CARD)
@@ -800,26 +809,23 @@ class MacroApp:
                 w.bind("<Leave>", _on_row_leave)
 
             # ── Step number ────────────────────────────
-            num_lbl = tk.Label(row, text=str(i + 1), font=("Segoe UI Variable", 10, "bold"),
-                               bg=self.CARD, fg=self.TEXT_DIM, width=2, anchor="center")
-            num_lbl.pack(side=tk.LEFT, padx=(0, 4))
+            num_lbl = tk.Label(row, text=str(i + 1), font=("Segoe UI Variable", 9),
+                               bg=self.CARD, fg="#4A5A70", width=3, anchor="center")
+            num_lbl.pack(side=tk.LEFT, padx=(0, 2))
             num_lbl.bind("<Enter>", lambda e, r=row, ro=row_outer: (_on_row_enter(e, r, ro)))
             num_lbl.bind("<Leave>", lambda e, r=row, ro=row_outer: (_on_row_leave(e, r, ro)))
 
             # ── Drag handle (⠿) ───────────────────────
-            drag_frame = tk.Frame(row, bg=self.CARD, width=28, cursor="hand2")
-            drag_frame.pack(side=tk.LEFT, padx=(0, 4))
+            drag_frame = tk.Frame(row, bg=self.CARD, width=24, cursor="hand2")
+            drag_frame.pack(side=tk.LEFT, padx=(0, 2))
             drag_frame.pack_propagate(False)
             drag_lbl = tk.Label(drag_frame, text="⠿", font=("Segoe UI", 9),
-                                bg=self.CARD, fg=self.TEXT_DIM, cursor="hand2")
+                                bg=self.CARD, fg="#3A4A5E", cursor="hand2")
             drag_lbl.pack(expand=True)
             drag_lbl.bind("<Enter>", lambda e, r=row, ro=row_outer: (_on_row_enter(e, r, ro)))
             drag_lbl.bind("<Leave>", lambda e, r=row, ro=row_outer: (_on_row_leave(e, r, ro)))
 
-            # Drag buttons (▲/▼) on the drag handle
-            drag_lbl.bind("<Button-1>", lambda e, idx=i: None)  # Potential DnD target
-
-            # Reorder buttons — subtle, appear on hover
+            # Reorder arrows on hover
             up_btn = tk.Button(drag_frame, text="▲", font=("Segoe UI", 6),
                                bg=self.CARD, fg=self.TEXT_DIM, bd=0, cursor="hand2", width=1,
                                command=lambda idx=i: self._move_seq(idx, -1),
@@ -828,7 +834,7 @@ class MacroApp:
                                bg=self.CARD, fg=self.TEXT_DIM, bd=0, cursor="hand2", width=1,
                                command=lambda idx=i: self._move_seq(idx, 1),
                                state=tk.NORMAL if i < len(state.MACRO_SEQUENCE) - 1 else tk.DISABLED)
-            # Show reorder on drag handle hover
+
             def _show_reorder(e, u=up_btn, d=dn_btn, dl=drag_lbl):
                 u.pack(side=tk.TOP)
                 d.pack(side=tk.TOP)
@@ -840,28 +846,36 @@ class MacroApp:
             drag_frame.bind("<Enter>", lambda e: _show_reorder(e))
             drag_frame.bind("<Leave>", lambda e: _hide_reorder(e))
 
-            # ── Image thumbnail + name ──────────────────
+            # ── Image thumbnail with rounded border ────
             img_path = os.path.join(IMAGE_DIR, step["name"])
-            preview_frame = tk.Frame(row, bg=self.CARD)
-            preview_frame.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(4, 8))
 
-            lbl_preview = tk.Label(preview_frame, bg=self.BORDER, width=32, height=32)
+            thumb_border = tk.Frame(row, bg="#1E2D42", padx=1, pady=1)
+            thumb_border.pack(side=tk.LEFT, padx=(4, 8))
+            lbl_preview = tk.Label(thumb_border, bg="#0A1020", width=36, height=36)
             if os.path.isfile(img_path):
                 try:
                     pil_img = Image.open(img_path)
-                    pil_img.thumbnail((32, 32))
+                    pil_img.thumbnail((36, 36))
                     tk_img = ImageTk.PhotoImage(pil_img)
                     self._seq_images.append(tk_img)
                     lbl_preview.config(image=tk_img, width=0, height=0)
                 except Exception:
                     lbl_preview.config(text="Err", fg=self.ERROR)
-            lbl_preview.pack(side=tk.LEFT, padx=(0, 10))
-            for w in (preview_frame, lbl_preview):
+
+            for w in (thumb_border, lbl_preview):
                 w.bind("<Enter>", lambda e, r=row, ro=row_outer: (_on_row_enter(e, r, ro)))
                 w.bind("<Leave>", lambda e, r=row, ro=row_outer: (_on_row_leave(e, r, ro)))
 
-            name_lbl = tk.Label(preview_frame, text=step["name"],
-                                font=("Segoe UI Variable", 11, "bold"),
+            def _on_thumb_enter(e, tb=thumb_border):
+                tb.configure(bg=self.PRIMARY)
+            def _on_thumb_leave(e, tb=thumb_border):
+                tb.configure(bg="#1E2D42")
+            lbl_preview.bind("<Enter>", lambda e: (_on_row_enter(e, row, row_outer), _on_thumb_enter(e)))
+            lbl_preview.bind("<Leave>", lambda e: (_on_row_leave(e, row, row_outer), _on_thumb_leave(e)))
+
+            # ── Filename — vertically centered ─────────
+            name_lbl = tk.Label(row, text=step["name"],
+                                font=("Segoe UI Variable", 11),
                                 bg=self.CARD, fg=self.TEXT, anchor="w")
             name_lbl.pack(side=tk.LEFT, fill=tk.X, expand=True)
             name_lbl.bind("<Enter>", lambda e, r=row, ro=row_outer: (_on_row_enter(e, r, ro)))
@@ -874,19 +888,21 @@ class MacroApp:
                 w.bind("<Enter>", lambda e, r=row, ro=row_outer: (_on_row_enter(e, r, ro)))
                 w.bind("<Leave>", lambda e, r=row, ro=row_outer: (_on_row_leave(e, r, ro)))
 
-            # Delete action icon
-            del_btn = tk.Button(actions, text="🗑", font=("Segoe UI Symbol", 10),
-                                bg=self.CARD, fg="#7A4A4A", bd=0, cursor="hand2", width=2,
+            # Delete — elegant icon button with hover bg
+            del_btn = tk.Button(actions, text="🗑", font=("Segoe UI Symbol", 9),
+                                bg=self.CARD, fg="#5A4A4A", bd=0, cursor="hand2", width=2,
+                                activebackground=self.CARD_RAISED, activeforeground=self.ERROR,
                                 command=lambda n=step["name"]: self._delete_image(n))
-            del_btn.pack(side=tk.RIGHT, padx=(4, 0))
+            del_btn.pack(side=tk.RIGHT, padx=(2, 0))
             del_btn.bind("<Enter>", lambda e, b=del_btn: b.configure(fg=self.ERROR, bg=self.CARD_RAISED))
-            del_btn.bind("<Leave>", lambda e, b=del_btn: b.configure(fg="#7A4A4A", bg=self.CARD))
+            del_btn.bind("<Leave>", lambda e, b=del_btn: b.configure(fg="#5A4A4A", bg=self.CARD))
 
-            # Duplicate action icon
-            dup_btn = tk.Button(actions, text="⧉", font=("Segoe UI Symbol", 10),
+            # Duplicate — elegant icon button
+            dup_btn = tk.Button(actions, text="⧉", font=("Segoe UI Symbol", 9),
                                 bg=self.CARD, fg=self.TEXT_DIM, bd=0, cursor="hand2", width=2,
+                                activebackground=self.CARD_RAISED, activeforeground=self.PRIMARY,
                                 command=lambda idx=i: self._duplicate_seq_step(idx))
-            dup_btn.pack(side=tk.RIGHT, padx=(4, 0))
+            dup_btn.pack(side=tk.RIGHT, padx=(2, 0))
             dup_btn.bind("<Enter>", lambda e, b=dup_btn: b.configure(fg=self.PRIMARY, bg=self.CARD_RAISED))
             dup_btn.bind("<Leave>", lambda e, b=dup_btn: b.configure(fg=self.TEXT_DIM, bg=self.CARD))
 
@@ -896,7 +912,7 @@ class MacroApp:
                 self.seq_dc_vars = []
             self.seq_dc_vars.append(dc_var)
             sw_dc = ToggleSwitch(actions, dc_var, width=44, height=22)
-            sw_dc.pack(side=tk.RIGHT, padx=6)
+            sw_dc.pack(side=tk.RIGHT, padx=4)
             dc_var.trace_add("write",
                 lambda *a, idx=i, v=dc_var: self._update_seq_dc(idx, v))
 
@@ -904,18 +920,18 @@ class MacroApp:
             skip_var = tk.BooleanVar(value=step.get("skip_next", False))
             self.seq_skip_vars.append(skip_var)
             sw_skip = ToggleSwitch(actions, skip_var, width=44, height=22)
-            sw_skip.pack(side=tk.RIGHT, padx=6)
+            sw_skip.pack(side=tk.RIGHT, padx=4)
             skip_var.trace_add("write",
                 lambda *a, idx=i, v=skip_var: self._update_seq_skip(idx, v))
 
-            # Wait input with orange focus border
+            # Wait input with orange focus border and rounded appearance
             wait_var = tk.StringVar(value=str(step.get("wait", 0)))
             wait_border = tk.Frame(actions, bg=self.INPUT_BORDER)
-            wait_border.pack(side=tk.RIGHT, padx=6)
+            wait_border.pack(side=tk.RIGHT, padx=(4, 0))
             wait_inner = tk.Frame(wait_border, bg=self.INPUT_BG)
             wait_inner.pack(padx=1, pady=1)
             wait_entry = tk.Entry(wait_inner, textvariable=wait_var, width=4,
-                                   font=("Segoe UI Variable", 10, "bold"),
+                                   font=("Cascadia Code", 10),
                                    bg=self.INPUT_BG, fg="#FFFFFF",
                                    insertbackground="#FFFFFF", bd=0, justify="center")
             wait_entry.pack(padx=4, pady=3)
@@ -932,10 +948,6 @@ class MacroApp:
                 we.configure(bg=self.INPUT_BG)
             wait_entry.bind("<FocusIn>", _on_focus_in)
             wait_entry.bind("<FocusOut>", _on_focus_out)
-
-            # Row separator (subtle)
-            if i < len(state.MACRO_SEQUENCE) - 1:
-                tk.Frame(self.seq_scroll_frame, bg=self.BORDER_SUBTLE, height=1).pack(fill=tk.X, padx=20)
 
         _bind_mousewheel(self.seq_canvas, self.seq_scroll_frame)
         self.seq_canvas.bind("<MouseWheel>",
