@@ -641,14 +641,14 @@ class MacroApp:
 
         # Right-aligned columns (pack RIGHT first → rightmost first)
         for text, w in [("🗑", self.COL_DEL), ("Skip", self.COL_SKIP), ("Double", self.COL_DC), ("Wait (s)", self.COL_WAIT)]:
-            col = tk.Frame(list_header, bg="#091320", width=w)
+            col = tk.Frame(list_header, bg="#091320", width=w, height=32)
             col.pack_propagate(False)
-            col.pack(side=tk.RIGHT, padx=(0, 6))
+            col.pack(side=tk.RIGHT, fill=tk.Y, padx=(0, 6))
             tk.Label(col, text=text, font=("Segoe UI Variable", 10, "bold"),
                      bg="#091320", fg="#6B7D94").pack(expand=True)
 
         # Drag handle column
-        drag_col = tk.Frame(list_header, bg="#091320", width=self.COL_DRAG)
+        drag_col = tk.Frame(list_header, bg="#091320", width=self.COL_DRAG, height=32)
         drag_col.pack_propagate(False)
         drag_col.pack(side=tk.LEFT)
 

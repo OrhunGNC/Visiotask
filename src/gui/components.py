@@ -407,7 +407,8 @@ class ProgressRing(tk.Canvas):
         self._stop_pulse()
 
     def _start_pulse(self):
-        self._stop_pulse()
+        self._cancel_pulse()
+        self._ring_state = self.STATE_RUNNING  # ensure state is RUNNING after cancel
         self._pulse_phase = 0
         self._pulse_tick()
 
@@ -427,13 +428,17 @@ class ProgressRing(tk.Canvas):
 
         self._pulse_after_id = self.after(70, self._pulse_tick)
 
-    def _stop_pulse(self):
+    def _cancel_pulse(self):
+        """Cancel the pulse timer without changing ring state."""
         if self._pulse_after_id:
             try:
                 self.after_cancel(self._pulse_after_id)
             except Exception:
                 pass
             self._pulse_after_id = None
+
+    def _stop_pulse(self):
+        self._cancel_pulse()
         self._ring_color = "#00E676"
         if self._ring_state != self.STATE_STOPPED:
             self._ring_state = self.STATE_IDLE
