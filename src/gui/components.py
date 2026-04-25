@@ -55,9 +55,27 @@ class RoundedButton(tk.Canvas):
         self.create_text(w / 2, h / 2, text=self.text, fill=fg, font=self.font)
 
     def _get_points(self, w, h, r):
+        """Generate smooth rounded rectangle polygon points using arc approximation."""
         w, h = w - 1, h - 1
-        return [r, 0, w-r, 0, w, 0, w, r, w, h-r, w, h,
-                w-r, h, r, h, 0, h, 0, h-r, 0, r, 0, 0, r, 0]
+        pts = []
+        steps = max(3, r // 2)  # more steps = smoother curves, but at least 3 per corner
+        # Top-left corner (center at r, r)
+        for i in range(steps + 1):
+            a = math.pi + (math.pi / 2) * i / steps
+            pts.extend([r + r * math.cos(a), r + r * math.sin(a)])
+        # Top-right corner (center at w-r, r)
+        for i in range(steps + 1):
+            a = 3 * math.pi / 2 + (math.pi / 2) * i / steps
+            pts.extend([w - r + r * math.cos(a), r + r * math.sin(a)])
+        # Bottom-right corner (center at w-r, h-r)
+        for i in range(steps + 1):
+            a = 0 + (math.pi / 2) * i / steps
+            pts.extend([w - r + r * math.cos(a), h - r + r * math.sin(a)])
+        # Bottom-left corner (center at r, h-r)
+        for i in range(steps + 1):
+            a = math.pi / 2 + (math.pi / 2) * i / steps
+            pts.extend([r + r * math.cos(a), h - r + r * math.sin(a)])
+        return pts
 
     def _on_enter(self, event):
         if not self.disabled:
@@ -145,18 +163,22 @@ class ToggleSwitch(tk.Canvas):
         else:
             bg = self.inactive_hover if self._is_hovered else self.inactive_bg
 
-        r = self.h / 2
         w, h = self.w, self.h
+        r = h / 2
 
-        self.create_arc(0, 0, self.h, self.h, start=90, extent=180, fill=bg, outline=bg)
-        self.create_arc(self.w - self.h, 0, self.w, self.h, start=270, extent=180, fill=bg, outline=bg)
-        self.create_rectangle(self.h / 2, 0, self.w - self.h / 2, self.h, fill=bg, outline=bg)
+        # Draw pill/capsule using two semicircles + center rect
+        self.create_oval(0, 0, h, h, fill=bg, outline=bg)
+        self.create_oval(w - h, 0, w, h, fill=bg, outline=bg)
+        self.create_rectangle(h / 2, 0, w - h / 2, h, fill=bg, outline="")
 
+        # Thumb with shadow
         thumb_r = r - 3
-        cx = self.w - r if state else r
+        cx = (w - r) if state else r
 
-        self.create_oval(cx - thumb_r, r - thumb_r + 1, cx + thumb_r, r + thumb_r + 1,
+        # Dark shadow under thumb for depth
+        self.create_oval(cx - thumb_r, r - thumb_r + 1.5, cx + thumb_r, r + thumb_r + 1.5,
                          fill="#0A1020", outline="")
+        # White thumb
         self.create_oval(cx - thumb_r, r - thumb_r, cx + thumb_r, r + thumb_r,
                          fill=self.thumb_color, outline=self.thumb_color)
 
@@ -222,8 +244,8 @@ class CustomDropdown(tk.Frame):
         c = self._arrow_canvas
         c.delete("all")
         color = self._accent if filled else "#5A6B82"
-        # Smooth chevron
-        c.create_polygon(4, 7, 10, 13, 16, 7, fill=color, outline=color, smooth=False)
+        # Smooth chevron — wider, cleaner shape
+        c.create_polygon(4, 8, 10, 14, 16, 8, fill=color, outline=color, smooth=False)
 
     def _truncate(self, text):
         """Truncate display text if max_display_len is set."""
@@ -400,8 +422,13 @@ class ProgressRing(tk.Canvas):
             self.create_oval(cx - r, cy - r, cx + r, cy + r,
                              outline="#1E3050", width=self._ring_width)
 
-        # Center icon — play triangle
-        points = [cx - 7, cy - 10, cx - 7, cy + 10, cx + 11, cy]
+        # Center icon — play triangle, sized proportionally to ring
+        icon_scale = r * 0.42  # play triangle fills ~42% of ring radius
+        icon_h = icon_scale * 1.3  # height from center to tip
+        icon_w = icon_scale * 0.8  # half-width of the triangle base
+        points = [cx - icon_w, cy - icon_h,
+                  cx - icon_w, cy + icon_h,
+                  cx + icon_scale, cy]
         if is_running:
             self.create_polygon(points, fill="#FFFFFF", outline="#FFFFFF")
         elif is_stopped:

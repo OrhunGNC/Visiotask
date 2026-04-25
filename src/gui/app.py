@@ -1,3 +1,4 @@
+import math
 import os
 import shutil
 import threading
@@ -90,7 +91,6 @@ class MacroApp:
         state.SCREEN_WIDTH = w
         state.SCREEN_HEIGHT = h
         if w > 0 and h > 0:
-            import math
             gcd = math.gcd(w, h)
             state.SCREEN_RATIO = f"{w // gcd}:{h // gcd}"
         state.save_config()
@@ -155,27 +155,29 @@ class MacroApp:
         self._build_images_view()
         self._show_view("Run Macro")
 
-    def _draw_line_icon(self, canvas, icon_type, color, size=16):
+    def _draw_line_icon(self, canvas, icon_type, color, size=18):
         """Draw a minimal line icon on a small canvas."""
         canvas.delete("all")
         s = size
-        p = 2  # padding
+        p = 1  # padding
         if icon_type == "play":
-            # Play triangle — thin strokes
-            canvas.create_polygon(p+3, p+2, p+3, s-2, s-3, s//2,
-                                  fill="", outline=color, width=1.5)
+            # Play triangle — filled for clarity at small size
+            canvas.create_polygon(p+4, p+3, p+4, s-3, s-4, s//2,
+                                  fill=color, outline="")
         elif icon_type == "sequence":
-            # Stacked lines — list icon
+            # Stacked lines with dots — clean hamburger/list icon
             for i in range(3):
-                y = p + 3 + i * 4
-                canvas.create_line(p + 2, y, s - 2, y, fill=color, width=1.5)
+                y = p + 4 + i * 5
+                canvas.create_line(p + 4, y, s - 3, y, fill=color, width=1.5)
+                canvas.create_oval(p + 1, y - 2, p + 5, y + 2, fill=color, outline="")
         elif icon_type == "images":
-            # Grid of 4 squares
-            hs = (s - 4) // 2
-            canvas.create_rectangle(p+1, p+1, p+hs, p+hs, outline=color, width=1.5)
-            canvas.create_rectangle(s-hs-1, p+1, s-2, p+hs, outline=color, width=1.5)
-            canvas.create_rectangle(p+1, s-hs-1, p+hs, s-2, outline=color, width=1.5)
-            canvas.create_rectangle(s-hs-1, s-hs-1, s-2, s-2, outline=color, width=1.5)
+            # Grid of 4 squares — clearer proportions
+            gap = 2
+            sq = (s - gap - 2 * p) // 2
+            canvas.create_rectangle(p+1, p+1, p+1+sq, p+1+sq, outline=color, width=1.5)
+            canvas.create_rectangle(s-p-sq, p+1, s-p-1, p+1+sq, outline=color, width=1.5)
+            canvas.create_rectangle(p+1, s-p-sq, p+1+sq, s-p-1, outline=color, width=1.5)
+            canvas.create_rectangle(s-p-sq, s-p-sq, s-p-1, s-p-1, outline=color, width=1.5)
 
     def _create_sidebar_btn(self, name):
         # Active glow background frame (shows on active item)
@@ -195,15 +197,15 @@ class MacroApp:
         icon_type = {"Run Macro": "play", "Macro Sequence": "sequence",
                      "Manage Images": "images"}.get(name, "play")
 
-        icon_canvas = tk.Canvas(btn, width=18, height=16, bg=self.BG,
+        icon_canvas = tk.Canvas(btn, width=20, height=20, bg=self.BG,
                                  highlightthickness=0, cursor="hand2")
-        icon_canvas.pack(side=tk.LEFT, padx=(14, 6), pady=8)
+        icon_canvas.pack(side=tk.LEFT, padx=(14, 6), pady=6)
         self._draw_line_icon(icon_canvas, icon_type, self.TEXT_DIM)
 
         # Text label
-        lbl = tk.Label(btn, text=name, font=("Segoe UI Variable", 11),
+        lbl = tk.Label(btn, text=name, font=("Segoe UI Variable", 12),
                        bg=self.BG, fg=self.TEXT_SEC, cursor="hand2")
-        lbl.pack(side=tk.LEFT, padx=(0, 14), pady=8)
+        lbl.pack(side=tk.LEFT, padx=(0, 14), pady=6)
 
         def on_enter(e):
             if self.current_view != name:
@@ -247,7 +249,7 @@ class MacroApp:
                 b_dict["glow"].configure(bg=self.CARD_GLOW)
                 b_dict["frame"].configure(bg=self.CARD_GLOW)
                 b_dict["label"].configure(bg=self.CARD_GLOW, fg=self.TEXT,
-                                          font=("Segoe UI Variable", 11, "bold"))
+                                          font=("Segoe UI Variable", 12, "bold"))
                 b_dict["indicator"].configure(bg=self.PRIMARY)
                 b_dict["icon"].configure(bg=self.CARD_GLOW)
                 self._draw_line_icon(b_dict["icon"], icon_type, self.PRIMARY)
@@ -257,7 +259,7 @@ class MacroApp:
                 b_dict["glow"].configure(bg=self.BG)
                 b_dict["frame"].configure(bg=self.BG)
                 b_dict["label"].configure(bg=self.BG, fg=self.TEXT_SEC,
-                                           font=("Segoe UI Variable", 11))
+                                           font=("Segoe UI Variable", 12))
                 b_dict["indicator"].configure(bg=self.BG)
                 b_dict["icon"].configure(bg=self.BG)
                 self._draw_line_icon(b_dict["icon"], icon_type, self.TEXT_DIM)
@@ -282,7 +284,7 @@ class MacroApp:
         title_frame.pack(fill=tk.X, pady=(0, 4))
 
         tk.Label(title_frame, text="Run Macro",
-                 font=("Segoe UI Variable", 22, "bold"),
+                 font=("Segoe UI Variable", 20, "bold"),
                  bg=self.BG, fg=self.TEXT).pack(anchor="w")
         tk.Label(title_frame, text="Configure settings and monitor execution.",
                  font=("Segoe UI Variable", 11), bg=self.BG,
@@ -316,10 +318,18 @@ class MacroApp:
         gear_canvas.pack(side=tk.LEFT, padx=(0, 8))
         gc = self.PRIMARY
         # Gear circle + teeth
-        gear_canvas.create_oval(3, 3, 17, 17, outline=gc, width=1.5)
-        gear_canvas.create_oval(7, 7, 13, 13, outline=gc, width=1.5)
-        for angle_x, angle_y in [(10, 1), (10, 19), (1, 10), (19, 10)]:
-            gear_canvas.create_line(10, 10, angle_x, angle_y, fill=gc, width=1.5)
+        # Draw a proper gear icon with 8 teeth
+        gc = self.PRIMARY
+        gear_canvas.create_oval(4, 4, 16, 16, outline=gc, width=1.5)
+        gear_canvas.create_oval(8, 8, 12, 12, outline=gc, width=1.5)
+        # 8 teeth at 45° increments
+        cx, cy, r_out, r_in = 10, 10, 10, 6
+        for i in range(8):
+            angle = i * math.pi / 4
+            gear_canvas.create_line(
+                cx + r_in * math.cos(angle), cy + r_in * math.sin(angle),
+                cx + r_out * math.cos(angle), cy + r_out * math.sin(angle),
+                fill=gc, width=1.5)
 
         tk.Label(config_header, text="Configuration",
                  font=("Segoe UI Variable", 14, "bold"),
@@ -509,13 +519,13 @@ class MacroApp:
         log_title_frame = tk.Frame(log_header, bg=self.CARD)
         log_title_frame.pack(side=tk.LEFT)
 
-        log_icon = tk.Canvas(log_title_frame, width=18, height=18, bg=self.CARD,
+        log_icon = tk.Canvas(log_title_frame, width=20, height=20, bg=self.CARD,
                               highlightthickness=0)
         log_icon.pack(side=tk.LEFT, padx=(0, 8))
-        # Terminal icon: rectangle with > prompt
-        log_icon.create_rectangle(1, 2, 17, 16, outline="#5A6B82", width=1.5)
-        log_icon.create_line(4, 6, 8, 9, fill=self.SUCCESS, width=1.5)
-        log_icon.create_line(4, 9, 10, 9, fill=self.SUCCESS, width=1.5)
+        # Terminal icon: rectangle with > prompt and underline
+        log_icon.create_rectangle(2, 3, 18, 17, outline="#5A6B82", width=1.5)
+        log_icon.create_line(5, 7, 9, 10, fill=self.SUCCESS, width=1.5)
+        log_icon.create_line(5, 10, 12, 10, fill=self.SUCCESS, width=1.5)
 
         tk.Label(log_title_frame, text="Execution Log",
                  font=("Segoe UI Variable", 13, "bold"),
@@ -618,7 +628,7 @@ class MacroApp:
         header_frame = tk.Frame(view, bg=self.BG)
         header_frame.pack(fill=tk.X, pady=(0, 4))
         tk.Label(header_frame, text="Macro Sequence",
-                 font=("Segoe UI Variable", 22, "bold"),
+                 font=("Segoe UI Variable", 20, "bold"),
                  bg=self.BG, fg=self.TEXT).pack(anchor="w")
         tk.Label(header_frame, text="Arrange image checks, wait times, and conditions.",
                  font=("Segoe UI Variable", 11), bg=self.BG,
@@ -741,7 +751,7 @@ class MacroApp:
             skip_col.pack(side=tk.RIGHT, fill=tk.Y, padx=(0, 6))
             skip_var = tk.BooleanVar(value=step.get("skip_next", False))
             self.seq_skip_vars.append(skip_var)
-            sw_skip = ToggleSwitch(skip_col, skip_var)
+            sw_skip = ToggleSwitch(skip_col, skip_var, width=44, height=22)
             sw_skip.pack(expand=True)
             skip_var.trace_add("write",
                 lambda *a, idx=i, v=skip_var: self._update_seq_skip(idx, v))
@@ -754,7 +764,7 @@ class MacroApp:
             if not hasattr(self, "seq_dc_vars"):
                 self.seq_dc_vars = []
             self.seq_dc_vars.append(dc_var)
-            sw_dc = ToggleSwitch(dc_col, dc_var)
+            sw_dc = ToggleSwitch(dc_col, dc_var, width=44, height=22)
             sw_dc.pack(expand=True)
             dc_var.trace_add("write",
                 lambda *a, idx=i, v=dc_var: self._update_seq_dc(idx, v))
@@ -1320,13 +1330,15 @@ class MacroApp:
             badge = badge_data[0] if isinstance(badge_data, tuple) else badge_data
             badge.delete("all")
             if os.path.isfile(os.path.join(IMAGE_DIR, img_name)):
-                badge.create_oval(3, 3, 15, 15, fill=self.SUCCESS, outline=self.SUCCESS)
-                badge.create_line(6, 9, 9, 12, fill="#FFFFFF", width=1.5)
-                badge.create_line(9, 12, 14, 5, fill="#FFFFFF", width=1.5)
+                # Green circle with white checkmark
+                badge.create_oval(2, 2, 16, 16, fill=self.SUCCESS, outline=self.SUCCESS)
+                badge.create_line(5, 9, 8, 12, fill="#FFFFFF", width=1.5)
+                badge.create_line(8, 12, 14, 5, fill="#FFFFFF", width=1.5)
             else:
-                badge.create_oval(3, 3, 15, 15, fill=self.ERROR, outline=self.ERROR)
-                badge.create_line(6, 6, 12, 12, fill="#FFFFFF", width=1.5)
-                badge.create_line(12, 6, 6, 12, fill="#FFFFFF", width=1.5)
+                # Red circle with white X
+                badge.create_oval(2, 2, 16, 16, fill=self.ERROR, outline=self.ERROR)
+                badge.create_line(5, 5, 13, 13, fill="#FFFFFF", width=1.5)
+                badge.create_line(13, 5, 5, 13, fill="#FFFFFF", width=1.5)
 
     def _upload_image(self, target_name):
         path = filedialog.askopenfilename(
