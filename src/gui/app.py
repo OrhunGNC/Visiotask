@@ -893,18 +893,21 @@ class MacroApp:
         scrollbar = SmoothScrollbar(grid_container, target_canvas=self.img_canvas)
         self.img_scroll_frame = tk.Frame(self.img_canvas, bg=self.BG, bd=0)
 
+        # Debounce resize: track last width to avoid rebuilding on every <Configure>
+        self._img_canvas_width = 0
+        self._img_resize_after_id = None
+
         def _update_img_scrollregion(e=None):
             w = self.img_scroll_frame.winfo_width()
             h = self.img_scroll_frame.winfo_height()
             ch = self.img_canvas.winfo_height()
             self.img_canvas.configure(scrollregion=(0, 0, w, max(h, ch)))
-            # Rebuild flow layout when canvas width changes
-            self._rebuild_flow_layout()
 
         self.img_scroll_frame.bind("<Configure>", _update_img_scrollregion)
         self.img_canvas.bind("<Configure>",
             lambda e: [self.img_canvas.itemconfig(self.img_canvas_window, width=e.width),
-                       _update_img_scrollregion()])
+                       _update_img_scrollregion(),
+                       self._schedule_image_reflow(e.width)])
         self.img_canvas_window = self.img_canvas.create_window((0, 0),
             window=self.img_scroll_frame, anchor="nw")
 
@@ -913,49 +916,22 @@ class MacroApp:
         self.image_status_labels = {}
         self._grid_images = []
 
-    def _rebuild_flow_layout(self):
-        """Recalculate cards-per-row and rebuild the flow layout."""
-        canvas_width = self.img_canvas.winfo_width()
-        if canvas_width < 50:
+    def _schedule_image_reflow(self, new_width):
+        """Debounced resize handler — only rebuild if width actually changed."""
+        # Only reflow when the number of columns would change
+        if new_width < 50:
             return
         cell_w = self.CARD_W + self.CARD_PAD
-        cols = max(1, canvas_width // cell_w)
+        new_cols = max(1, new_width // cell_w)
+        old_cols = max(1, self._img_canvas_width // cell_w) if self._img_canvas_width > 0 else 0
 
-        # Get all direct children (should be row frames or cards)
-        children = self.img_scroll_frame.winfo_children()
-        if not children:
-            return
+        if new_cols != old_cols and self._img_canvas_width > 0:
+            # Cancel any pending reflow and schedule a new one
+            if self._img_resize_after_id is not None:
+                self.root.after_cancel(self._img_resize_after_id)
+            self._img_resize_after_id = self.root.after(150, self._refresh_image_list)
 
-        # Collect all card widgets
-        all_cards = []
-        for row_frame in children:
-            if hasattr(row_frame, '_is_row'):
-                for card in row_frame.winfo_children():
-                    all_cards.append(card)
-                row_frame.destroy()
-            else:
-                # It's a card directly (empty state etc)
-                all_cards.append(row_frame)
-                # Don't destroy non-row children — they'll be re-packed below
-                # Actually, skip these for flow layout
-                continue
-
-        # Re-create row frames and repack cards
-        row_idx = 0
-        row_frame = tk.Frame(self.img_scroll_frame, bg=self.BG)
-        row_frame._is_row = True
-        row_frame.pack(fill=tk.X, pady=(0, self.CARD_PAD // 2))
-
-        col_count = 0
-        for card in all_cards:
-            if col_count >= cols:
-                row_idx += 1
-                row_frame = tk.Frame(self.img_scroll_frame, bg=self.BG)
-                row_frame._is_row = True
-                row_frame.pack(fill=tk.X, pady=(0, self.CARD_PAD // 2))
-                col_count = 0
-            card.pack(in_=row_frame, side=tk.LEFT, padx=self.CARD_PAD // 2)
-            col_count += 1
+        self._img_canvas_width = new_width
 
     def _refresh_image_list(self):
         for widget in self.img_scroll_frame.winfo_children():
@@ -992,13 +968,11 @@ class MacroApp:
 
         col_count = 0
         row_frame = tk.Frame(self.img_scroll_frame, bg=self.BG)
-        row_frame._is_row = True
         row_frame.pack(fill=tk.X, pady=(0, self.CARD_PAD // 2))
 
         for idx, img_name in enumerate(state.IMAGE_FILES):
             if col_count >= cols:
                 row_frame = tk.Frame(self.img_scroll_frame, bg=self.BG)
-                row_frame._is_row = True
                 row_frame.pack(fill=tk.X, pady=(0, self.CARD_PAD // 2))
                 col_count = 0
             self._create_image_card(row_frame, img_name)
