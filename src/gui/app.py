@@ -405,6 +405,7 @@ class MacroApp:
         self.window_dropdown = CustomDropdown(
             target_row, self.window_var, [],
             width=28, font=("Segoe UI Variable", 11),
+            max_display_len=30,
             bg=self.INPUT_BG, fg=self.TEXT, accent=self.PRIMARY,
             border_color=self.INPUT_BORDER)
         self.window_dropdown.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 6))
