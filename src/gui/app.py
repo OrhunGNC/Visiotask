@@ -960,16 +960,18 @@ class MacroApp:
             canvas_width = self.img_canvas.winfo_width()
         if canvas_width < 100:
             return
-        cw = self.CARD_W + self.CARD_PAD
-        cols = max(1, canvas_width // cw)
-        total_cards = len(self.img_scroll_frame.winfo_children())
-        if total_cards == 0:
+        cell_w = self.CARD_W + self.CARD_PAD
+        cols = max(1, canvas_width // cell_w)
+        cards = self.img_scroll_frame.winfo_children()
+        if not cards:
             return
-        for i, card in enumerate(self.img_scroll_frame.winfo_children()):
+        for i, card in enumerate(cards):
             row = i // cols
             col = i % cols
             card.grid(row=row, column=col, padx=self.CARD_PAD // 2,
-                      pady=self.CARD_PAD // 2, sticky="nsew")
+                      pady=self.CARD_PAD // 2)
+            # Remove column weight so cards stay at fixed width
+            self.img_scroll_frame.columnconfigure(col, weight=0)
 
     def _refresh_image_list(self):
         for widget in self.img_scroll_frame.winfo_children():
@@ -1018,24 +1020,26 @@ class MacroApp:
     def _create_image_card(self, idx, img_name):
         """Create a single image card in the grid."""
         cw = self.CARD_W
-        ch = self.CARD_H
-        thumb_h = self.CARD_THUMB
 
-        # ── Shadow layer ──
-        card_shadow = tk.Frame(self.img_scroll_frame, bg=self.SHADOW)
+        # ── Shadow layer (fixed-size grid cell) ──
+        card_shadow = tk.Frame(self.img_scroll_frame, bg=self.SHADOW,
+                                width=cw, height=self.CARD_H)
+        card_shadow.pack_propagate(False)
+
         # ── Card with border ──
         card = tk.Frame(card_shadow, bg=self.CARD,
                          highlightthickness=1, highlightbackground=self.BORDER)
         card.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
 
         # ── Thumbnail area ──
-        thumb_frame = tk.Frame(card, bg="#080E1A", height=thumb_h, width=cw - 2)
+        thumb_h = self.CARD_THUMB
+        thumb_frame = tk.Frame(card, bg="#080E1A", height=thumb_h)
         thumb_frame.pack(fill=tk.X, padx=0, pady=0)
         thumb_frame.pack_propagate(False)
 
         img_path = os.path.join(IMAGE_DIR, img_name)
         thumb_label = tk.Label(thumb_frame, bg="#080E1A")
-        thumb_label.pack(expand=True)
+        thumb_label.place(relx=0.5, rely=0.5, anchor="center")
 
         if os.path.isfile(img_path):
             try:
@@ -1048,10 +1052,36 @@ class MacroApp:
                 thumb_label.config(text="Err", fg=self.ERROR,
                                     font=("Segoe UI Variable", 10))
 
-        # ── Status badge (top-right of thumbnail) ──
+        # ── Action icons on top-right of thumbnail ──
+        actions_frame = tk.Frame(thumb_frame, bg="#0A0F1C", highlightthickness=0)
+
+        # Replace button (small icon)
+        rep_btn = tk.Button(actions_frame, text="⟳", font=("Segoe UI", 9),
+                              bg="#0A0F1C", fg="#FF8A3D", bd=0, cursor="hand2",
+                              activebackground="#14203A", activeforeground="#FF9D5C",
+                              padx=3, pady=0,
+                              command=lambda n=img_name: self._upload_image(n))
+        rep_btn.pack(side=tk.LEFT, padx=1)
+        rep_btn.bind("<Enter>", lambda e, b=rep_btn: b.config(fg="#FF9D5C", bg="#14203A"))
+        rep_btn.bind("<Leave>", lambda e, b=rep_btn: b.config(fg="#FF8A3D", bg="#0A0F1C"))
+
+        # Delete button (small icon)
+        del_btn = tk.Button(actions_frame, text="✕", font=("Segoe UI", 9, "bold"),
+                             bg="#0A0F1C", fg="#7A4A4A", bd=0, cursor="hand2",
+                             activebackground="#2A1215", activeforeground=self.ERROR,
+                             padx=3, pady=0,
+                             command=lambda n=img_name: self._delete_image(n))
+        del_btn.pack(side=tk.LEFT, padx=1)
+        del_btn.bind("<Enter>", lambda e, b=del_btn: b.config(fg=self.ERROR, bg="#2A1215"))
+        del_btn.bind("<Leave>", lambda e, b=del_btn: b.config(fg="#7A4A4A", bg="#0A0F1C"))
+
+        # Place action icons at top-right
+        actions_frame.place(relx=1.0, rely=0.0, x=-4, y=4, anchor="ne")
+
+        # ── Status badge (top-left of thumbnail) ──
         badge = tk.Canvas(thumb_frame, width=18, height=18, bg="#080E1A",
                            highlightthickness=0)
-        badge.place(relx=1.0, rely=0.0, x=-6, y=6, anchor="ne")
+        badge.place(relx=0.0, rely=0.0, x=4, y=4, anchor="nw")
         self.image_status_labels[img_name] = (badge,)
 
         # ── Info section ──
@@ -1060,8 +1090,9 @@ class MacroApp:
 
         # Filename (truncated if too long)
         display_name = img_name if len(img_name) <= 22 else img_name[:19] + "..."
-        tk.Label(info, text=display_name, font=("Segoe UI Variable", 11, "bold"),
-                 bg=self.CARD, fg=self.TEXT, anchor="w").pack(fill=tk.X)
+        name_lbl = tk.Label(info, text=display_name, font=("Segoe UI Variable", 11, "bold"),
+                             bg=self.CARD, fg=self.TEXT, anchor="w")
+        name_lbl.pack(fill=tk.X)
 
         # Resolution & size
         detail_text = ""
@@ -1076,55 +1107,22 @@ class MacroApp:
         tk.Label(info, text=detail_text, font=("Segoe UI Variable", 9),
                  bg=self.CARD, fg=self.TEXT_DIM, anchor="w").pack(fill=tk.X, pady=(2, 0))
 
-        # ── Hover overlay with action buttons ──
-        overlay = tk.Frame(card, bg="#0A0F1C")
-        # Overlay labels — translucent effect via dark bg
-        ov_title = tk.Label(overlay, text="Actions", font=("Segoe UI Variable", 9, "bold"),
-                             bg="#0A0F1C", fg=self.TEXT_SEC)
-        ov_title.pack(pady=(28, 6))
-
-        ov_btn_frame = tk.Frame(overlay, bg="#0A0F1C")
-        ov_btn_frame.pack()
-
-        def _make_ov_btn(parent, text, color, hover_color, cmd):
-            b = tk.Button(parent, text=text, font=("Segoe UI Variable", 9),
-                          bg="#14203A", fg=color, activebackground="#1A2844",
-                          activeforeground=hover_color, bd=0, cursor="hand2",
-                          padx=8, pady=4, command=cmd)
-            b.pack(side=tk.LEFT, padx=2)
-            b.bind("<Enter>", lambda e, b=b, c=hover_color: b.config(fg=c, bg="#1A2844"))
-            b.bind("<Leave>", lambda e, b=b, c=color: b.config(fg=c, bg="#14203A"))
-            return b
-
-        _make_ov_btn(ov_btn_frame, "Rename", self.TEXT_SEC, self.TEXT, lambda n=img_name: self._rename_image(n))
-        _make_ov_btn(ov_btn_frame, "Replace", "#FF8A3D", "#FF9D5C", lambda n=img_name: self._upload_image(n))
-        _make_ov_btn(ov_btn_frame, "Delete", "#7A4A4A", self.ERROR, lambda n=img_name: self._delete_image(n))
-
-        # ── Hover behavior ──
-        def on_enter(e, c=card, cs=card_shadow, ov=overlay, tf=thumb_frame):
+        # ── Hover behavior (orange border glow) ──
+        def on_enter(e, c=card, cs=card_shadow):
             c.configure(highlightbackground=self.PRIMARY, bg=self.CARD_RAISED)
             cs.configure(bg=self.CARD_RAISED)
-            # Show overlay on top of thumbnail area
-            ov.place(in_=tf, relx=0, rely=0, relwidth=1.0, relheight=1.0)
 
-        def on_leave(e, c=card, cs=card_shadow, ov=overlay):
+        def on_leave(e, c=card, cs=card_shadow):
             c.configure(highlightbackground=self.BORDER, bg=self.CARD)
             cs.configure(bg=self.SHADOW)
-            ov.place_forget()
 
-        for w in (card_shadow, card, info, thumb_label, thumb_frame):
+        for w in (card_shadow, card, info, thumb_label, thumb_frame, actions_frame):
             w.bind("<Enter>", on_enter)
             w.bind("<Leave>", on_leave)
 
         # Grid placement (will be repositioned by _layout_image_grid)
-        card_shadow.grid(row=idx // 4, column=idx % 4,
-                          padx=self.CARD_PAD // 2, pady=self.CARD_PAD // 2, sticky="nsew")
-        # Configure column weight so cards stretch properly
-        self.img_scroll_frame.columnconfigure(idx % 4, weight=1)
-
-        self._img_card_refs.append({
-            'shadow': card_shadow, 'card': card, 'overlay': overlay
-        })
+        card_shadow.grid(row=0, column=idx, padx=self.CARD_PAD // 2,
+                          pady=self.CARD_PAD // 2)
 
     # ──────────────────────────────────────────────────────
     #  CORE LOGIC
