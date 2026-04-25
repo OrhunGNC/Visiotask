@@ -893,10 +893,6 @@ class MacroApp:
         scrollbar = SmoothScrollbar(grid_container, target_canvas=self.img_canvas)
         self.img_scroll_frame = tk.Frame(self.img_canvas, bg=self.BG, bd=0)
 
-        # Debounce resize: track last width to avoid rebuilding on every <Configure>
-        self._img_canvas_width = 0
-        self._img_resize_after_id = None
-
         def _update_img_scrollregion(e=None):
             w = self.img_scroll_frame.winfo_width()
             h = self.img_scroll_frame.winfo_height()
@@ -906,8 +902,7 @@ class MacroApp:
         self.img_scroll_frame.bind("<Configure>", _update_img_scrollregion)
         self.img_canvas.bind("<Configure>",
             lambda e: [self.img_canvas.itemconfig(self.img_canvas_window, width=e.width),
-                       _update_img_scrollregion(),
-                       self._schedule_image_reflow(e.width)])
+                       _update_img_scrollregion()])
         self.img_canvas_window = self.img_canvas.create_window((0, 0),
             window=self.img_scroll_frame, anchor="nw")
 
@@ -915,23 +910,6 @@ class MacroApp:
         self.img_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.image_status_labels = {}
         self._grid_images = []
-
-    def _schedule_image_reflow(self, new_width):
-        """Debounced resize handler — only rebuild if width actually changed."""
-        # Only reflow when the number of columns would change
-        if new_width < 50:
-            return
-        cell_w = self.CARD_W + self.CARD_PAD
-        new_cols = max(1, new_width // cell_w)
-        old_cols = max(1, self._img_canvas_width // cell_w) if self._img_canvas_width > 0 else 0
-
-        if new_cols != old_cols and self._img_canvas_width > 0:
-            # Cancel any pending reflow and schedule a new one
-            if self._img_resize_after_id is not None:
-                self.root.after_cancel(self._img_resize_after_id)
-            self._img_resize_after_id = self.root.after(150, self._refresh_image_list)
-
-        self._img_canvas_width = new_width
 
     def _refresh_image_list(self):
         for widget in self.img_scroll_frame.winfo_children():
@@ -962,37 +940,34 @@ class MacroApp:
         # Calculate cards per row from canvas width
         canvas_width = self.img_canvas.winfo_width()
         if canvas_width < 50:
-            canvas_width = 800  # fallback
+            canvas_width = 800  # fallback before widget is realized
         cell_w = self.CARD_W + self.CARD_PAD
         cols = max(1, canvas_width // cell_w)
 
-        col_count = 0
-        row_frame = tk.Frame(self.img_scroll_frame, bg=self.BG)
-        row_frame.pack(fill=tk.X, pady=(0, self.CARD_PAD // 2))
+        # Use grid layout — fixed-size cards, no column weight
+        for col in range(cols):
+            self.img_scroll_frame.columnconfigure(col, weight=0)
 
         for idx, img_name in enumerate(state.IMAGE_FILES):
-            if col_count >= cols:
-                row_frame = tk.Frame(self.img_scroll_frame, bg=self.BG)
-                row_frame.pack(fill=tk.X, pady=(0, self.CARD_PAD // 2))
-                col_count = 0
-            self._create_image_card(row_frame, img_name)
-            col_count += 1
+            row = idx // cols
+            col = idx % cols
+            self._create_image_card(self.img_scroll_frame, img_name, row, col)
 
         self._update_image_statuses()
         _bind_mousewheel(self.img_canvas, self.img_scroll_frame)
         self.img_canvas.bind("<MouseWheel>",
             lambda e: self.img_canvas.yview_scroll(int(-1 * (e.delta / 120)), "units"))
 
-    def _create_image_card(self, parent, img_name):
-        """Create a single image card packed into a row frame."""
+    def _create_image_card(self, parent, img_name, row, col):
+        """Create a single image card placed with grid()."""
         cw = self.CARD_W
 
         # ── Shadow layer (fixed-size card) ──
         card_shadow = tk.Frame(parent, bg=self.SHADOW,
                                 width=cw, height=self.CARD_H)
         card_shadow.pack_propagate(False)
-        card_shadow.pack(side=tk.LEFT, padx=self.CARD_PAD // 2,
-                          pady=self.CARD_PAD // 2)
+        card_shadow.grid(row=row, column=col, padx=self.CARD_PAD // 2,
+                          pady=self.CARD_PAD // 2, sticky="nsew")
 
         # ── Card with border ──
         card = tk.Frame(card_shadow, bg=self.CARD,
@@ -1053,8 +1028,8 @@ class MacroApp:
         self.image_status_labels[img_name] = (badge,)
 
         # ── Info section ──
-        info = tk.Frame(card, bg=self.CARD, padx=12, pady=(8, 10))
-        info.pack(fill=tk.X)
+        info = tk.Frame(card, bg=self.CARD)
+        info.pack(fill=tk.X, padx=12, pady=(8, 10))
 
         # Filename (truncated if too long)
         display_name = img_name if len(img_name) <= 22 else img_name[:19] + "..."
