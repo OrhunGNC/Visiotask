@@ -720,7 +720,7 @@ class MacroApp:
             # Delete column (50px)
             del_col = tk.Frame(row, bg=self.CARD, width=self.COL_DEL)
             del_col.pack_propagate(False)
-            del_col.pack(side=tk.RIGHT, padx=(0, 6))
+            del_col.pack(side=tk.RIGHT, fill=tk.Y, padx=(0, 6))
             del_btn = tk.Button(del_col, text="🗑", font=("Segoe UI Symbol", 10),
                                 bg=self.CARD, fg="#7A4A4A", bd=0, cursor="hand2",
                                 command=lambda n=step["name"]: self._delete_image(n))
@@ -737,7 +737,7 @@ class MacroApp:
             # Skip column (80px)
             skip_col = tk.Frame(row, bg=self.CARD, width=self.COL_SKIP)
             skip_col.pack_propagate(False)
-            skip_col.pack(side=tk.RIGHT, padx=(0, 6))
+            skip_col.pack(side=tk.RIGHT, fill=tk.Y, padx=(0, 6))
             skip_var = tk.BooleanVar(value=step.get("skip_next", False))
             self.seq_skip_vars.append(skip_var)
             sw_skip = ToggleSwitch(skip_col, skip_var)
@@ -748,7 +748,7 @@ class MacroApp:
             # Double click column (80px)
             dc_col = tk.Frame(row, bg=self.CARD, width=self.COL_DC)
             dc_col.pack_propagate(False)
-            dc_col.pack(side=tk.RIGHT, padx=(0, 6))
+            dc_col.pack(side=tk.RIGHT, fill=tk.Y, padx=(0, 6))
             dc_var = tk.BooleanVar(value=step.get("double_click", False))
             if not hasattr(self, "seq_dc_vars"):
                 self.seq_dc_vars = []
@@ -761,7 +761,7 @@ class MacroApp:
             # Wait column (90px)
             wait_col = tk.Frame(row, bg=self.CARD, width=self.COL_WAIT)
             wait_col.pack_propagate(False)
-            wait_col.pack(side=tk.RIGHT, padx=(0, 6))
+            wait_col.pack(side=tk.RIGHT, fill=tk.Y, padx=(0, 6))
             wait_var = tk.StringVar(value=str(step.get("wait", 0)))
             wait_border = tk.Frame(wait_col, bg=self.INPUT_BORDER)
             wait_border.pack(expand=True)
@@ -1062,7 +1062,7 @@ class MacroApp:
         self.start_btn.set_state(tk.DISABLED)
         self.stop_btn.set_state(tk.NORMAL)
         self.status_var.set("Running")
-        self.status_label.configure(fg=self.WARNING)
+        self.status_label.configure(fg=self.SUCCESS)
         self.progress_ring.set_running(True)
         self.timer_display_var.set("")
 

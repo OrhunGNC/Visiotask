@@ -328,7 +328,7 @@ class CustomDropdown(tk.Frame):
 
 class ProgressRing(tk.Canvas):
     """Animated circular progress ring with pulsing glow and play icon.
-    States: idle (dim), running (yellow pulse), stopped (red)."""
+    States: idle (dim), running (green pulse), stopped (red)."""
 
     # Ring states
     STATE_IDLE = "idle"
@@ -343,7 +343,7 @@ class ProgressRing(tk.Canvas):
         self._ring_width = ring_width
         self._bg_color = bg_color
         self._ring_state = self.STATE_IDLE
-        self._ring_color = "#FACC15"  # default running color
+        self._ring_color = "#00E676"  # default running color (green)
         self._pulse_phase = 0
         self._pulse_after_id = None
         self._draw()
@@ -393,7 +393,7 @@ class ProgressRing(tk.Canvas):
             self.create_polygon(points, fill="#3A4D66", outline="#3A4D66")
 
     def set_running(self, running):
-        """Set ring state. True = running (yellow), False = stopped (red)."""
+        """Set ring state. True = running (green), False = stopped (red)."""
         self._ring_state = self.STATE_RUNNING if running else self.STATE_STOPPED
         self._draw()
         if running:
@@ -417,13 +417,13 @@ class ProgressRing(tk.Canvas):
         self._pulse_phase = (self._pulse_phase + 1) % 40
         self._draw()
 
-        # Intensity cycling for amber/yellow neon glow
+        # Intensity cycling for green neon glow
         if self._pulse_phase < 13:
-            self._ring_color = "#FACC15"
+            self._ring_color = "#00E676"
         elif self._pulse_phase < 26:
-            self._ring_color = "#E5A80D"
+            self._ring_color = "#00CC6A"
         else:
-            self._ring_color = "#FFD84D"
+            self._ring_color = "#55FFB2"
 
         self._pulse_after_id = self.after(70, self._pulse_tick)
 
@@ -434,7 +434,7 @@ class ProgressRing(tk.Canvas):
             except Exception:
                 pass
             self._pulse_after_id = None
-        self._ring_color = "#FACC15"
+        self._ring_color = "#00E676"
         if self._ring_state != self.STATE_STOPPED:
             self._ring_state = self.STATE_IDLE
         self._draw()
