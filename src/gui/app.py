@@ -662,7 +662,7 @@ class MacroApp:
             hdr_col = tk.Frame(hdr, bg="#091320", width=w)
             hdr_col.pack_propagate(False)
             hdr_col.pack(side=tk.RIGHT)
-            tk.Label(hdr_col, text=text, font=("Segoe UI Variable", 10, "semibold"),
+            tk.Label(hdr_col, text=text, font=("Segoe UI Variable", 10, "bold"),
                      bg="#091320", fg="#6B7D94").pack(expand=True)
 
         # Drag column (40px)
@@ -674,13 +674,13 @@ class MacroApp:
         hdr_num = tk.Frame(hdr, bg="#091320", width=60)
         hdr_num.pack_propagate(False)
         hdr_num.pack(side=tk.LEFT)
-        tk.Label(hdr_num, text="#", font=("Segoe UI Variable", 10, "semibold"),
+        tk.Label(hdr_num, text="#", font=("Segoe UI Variable", 10, "bold"),
                  bg="#091320", fg="#6B7D94").pack(expand=True)
 
         # Image column (fills remaining)
         hdr_img = tk.Frame(hdr, bg="#091320")
         hdr_img.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(10, 0))
-        tk.Label(hdr_img, text="Image", font=("Segoe UI Variable", 10, "semibold"),
+        tk.Label(hdr_img, text="Image", font=("Segoe UI Variable", 10, "bold"),
                  bg="#091320", fg="#6B7D94", anchor="w").pack(side=tk.LEFT)
 
         # Header separator
