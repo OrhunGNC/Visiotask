@@ -167,7 +167,7 @@ class CustomDropdown(tk.Frame):
     def __init__(self, parent, variable, values, width=14,
                  font=("Segoe UI Variable", 11),
                  bg="#0A1020", fg="#E5E7EB", accent="#FF7A1A",
-                 border_color="#1E2D42", height=6, **kwargs):
+                 border_color="#1E2D42", height=6, max_display_len=None, **kwargs):
         self._bg = bg
         self._fg = fg
         self._accent = accent
@@ -180,6 +180,7 @@ class CustomDropdown(tk.Frame):
         self._popup = None
         self._width_chars = width
         self._list_height = height
+        self._max_display_len = max_display_len
 
         super().__init__(parent, bg=bg, **kwargs)
 
@@ -195,10 +196,15 @@ class CustomDropdown(tk.Frame):
                                     cursor="hand2")
         self._btn_frame.pack(fill=tk.X, padx=1, pady=1)
 
-        self._value_label = tk.Label(self._btn_frame, textvariable=variable,
+        # Display label — shows truncated text if max_display_len is set
+        self._display_var = tk.StringVar(value=self._truncate(variable.get()))
+        self._value_label = tk.Label(self._btn_frame, textvariable=self._display_var,
                                      font=font, bg=bg, fg=fg, anchor="w",
                                      padx=14, pady=7)
         self._value_label.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+        # Override the variable with a trace to update display text
+        self._variable_trace_id = variable.trace_add("write", self._on_var_change)
 
         # Arrow icon — smooth chevron
         self._arrow_canvas = tk.Canvas(self._btn_frame, width=20, height=20,
@@ -218,6 +224,19 @@ class CustomDropdown(tk.Frame):
         color = self._accent if filled else "#5A6B82"
         # Smooth chevron
         c.create_polygon(4, 7, 10, 13, 16, 7, fill=color, outline=color, smooth=False)
+
+    def _truncate(self, text):
+        """Truncate display text if max_display_len is set."""
+        if self._max_display_len and len(text) > self._max_display_len:
+            return text[:self._max_display_len - 1] + "…"
+        return text
+
+    def _on_var_change(self, *args):
+        """Update display label when variable changes (truncated if needed)."""
+        try:
+            self._display_var.set(self._truncate(self._variable.get()))
+        except Exception:
+            pass
 
     def _on_enter(self, event=None):
         self._btn_frame.configure(highlightbackground=self._accent,

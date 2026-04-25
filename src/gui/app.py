@@ -405,6 +405,7 @@ class MacroApp:
         self.window_dropdown = CustomDropdown(
             target_row, self.window_var, [],
             width=28, font=("Segoe UI Variable", 11),
+            max_display_len=30,
             bg=self.INPUT_BG, fg=self.TEXT, accent=self.PRIMARY,
             border_color=self.INPUT_BORDER)
         self.window_dropdown.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 6))
@@ -837,46 +838,60 @@ class MacroApp:
     #  MANAGE IMAGES VIEW
     # ──────────────────────────────────────────────────────
 
+    # ──────────────────────────────────────────────────────
+    #  MANAGE IMAGES VIEW — Premium Asset Grid
+    # ──────────────────────────────────────────────────────
+
+    # Card grid layout constants
+    CARD_W = 200
+    CARD_H = 210
+    CARD_THUMB = 160
+    CARD_PAD = 14
+
     def _build_images_view(self):
         view = tk.Frame(self.main_content, bg=self.BG)
         self.views["Manage Images"] = view
 
-        header = tk.Frame(view, bg=self.BG)
-        header.pack(fill=tk.X, pady=(0, 4))
-        titles = tk.Frame(header, bg=self.BG)
+        # ── Header Section ────────────────────────────────
+        header_frame = tk.Frame(view, bg=self.BG)
+        header_frame.pack(fill=tk.X, pady=(0, 4))
+
+        titles = tk.Frame(header_frame, bg=self.BG)
         titles.pack(side=tk.LEFT)
         tk.Label(titles, text="Manage Images",
-                 font=("Segoe UI Variable", 22, "bold"),
+                 font=("Segoe UI Variable", 20, "bold"),
                  bg=self.BG, fg=self.TEXT).pack(anchor="w")
-        tk.Label(titles, text="Upload and maintain images.",
+        tk.Label(titles, text="Upload and organize image assets.",
                  font=("Segoe UI Variable", 11), bg=self.BG,
                  fg=self.TEXT_SEC).pack(anchor="w", pady=(2, 0))
 
-        # Divider
-        tk.Frame(view, bg=self.BORDER_SUBTLE, height=1).pack(fill=tk.X, pady=(10, 14))
-
-        RoundedButton(header, text="Add New Image",
+        # ── Right buttons ─────────────────────────────────
+        RoundedButton(header_frame, text="+  Add New Image",
                       bg_color=self.PRIMARY, fg_color="#FFF",
                       hover_color=self.PRIMARY_HOVER,
                       command=self._add_new_image,
-                      width=130, height=38, radius=10,
+                      width=150, height=40, radius=10,
                       font=("Segoe UI Variable", 10, "bold")).pack(side=tk.RIGHT)
 
-        btn_row = tk.Frame(header, bg=self.BG)
-        btn_row.pack(side=tk.RIGHT, padx=(0, 8))
-        RoundedButton(btn_row, text="📸 Capture",
+        btn_row = tk.Frame(header_frame, bg=self.BG)
+        btn_row.pack(side=tk.RIGHT, padx=(0, 10))
+        RoundedButton(btn_row, text="Capture",
                       bg_color=self.BORDER, fg_color=self.TEXT,
                       hover_color="#2A3A50",
                       command=self._capture_screenshot,
-                      width=110, height=38, radius=10,
+                      width=100, height=40, radius=10,
                       font=("Segoe UI Variable", 10)).pack(side=tk.RIGHT)
 
-        list_container = tk.Frame(view, bg=self.BG)
-        list_container.pack(fill=tk.BOTH, expand=True)
+        # ── Divider ──────────────────────────────────────
+        tk.Frame(view, bg=self.BORDER_SUBTLE, height=1).pack(fill=tk.X, pady=(10, 14))
 
-        self.img_canvas = tk.Canvas(list_container, bg=self.BG,
+        # ── Scrollable card grid ──────────────────────────
+        grid_container = tk.Frame(view, bg=self.BG)
+        grid_container.pack(fill=tk.BOTH, expand=True)
+
+        self.img_canvas = tk.Canvas(grid_container, bg=self.BG,
                                      highlightthickness=0, bd=0)
-        scrollbar = SmoothScrollbar(list_container, target_canvas=self.img_canvas)
+        scrollbar = SmoothScrollbar(grid_container, target_canvas=self.img_canvas)
         self.img_scroll_frame = tk.Frame(self.img_canvas, bg=self.BG, bd=0)
 
         def _update_img_scrollregion(e=None):
@@ -895,71 +910,159 @@ class MacroApp:
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.img_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.image_status_labels = {}
+        self._grid_images = []
 
     def _refresh_image_list(self):
         for widget in self.img_scroll_frame.winfo_children():
             widget.destroy()
         self.image_status_labels.clear()
-        if not hasattr(self, '_grid_images'):
-            self._grid_images = []
         self._grid_images.clear()
 
-        def create_action_btn(parent, text, default_fg, hover_fg, command, px):
-            btn = tk.Button(parent, text=text, font=("Segoe UI Variable", 10),
-                            bg=self.CARD, fg=default_fg,
-                            activebackground=self.CARD_RAISED, activeforeground=hover_fg,
-                            bd=0, cursor="hand2", command=command)
-            btn.bind("<Enter>", lambda e, b=btn, c=hover_fg: b.config(fg=c))
-            btn.bind("<Leave>", lambda e, b=btn, c=default_fg: b.config(fg=c))
-            btn.pack(side=tk.LEFT, padx=px)
-            return btn
+        if not state.IMAGE_FILES:
+            # Empty state with illustration
+            empty = tk.Frame(self.img_scroll_frame, bg=self.BG)
+            empty.pack(pady=(60, 20))
 
-        for i, img_name in enumerate(state.IMAGE_FILES):
-            card = tk.Frame(self.img_scroll_frame, bg=self.CARD, pady=10, padx=14)
-            card.pack(fill=tk.X, pady=(6, 0))
+            icon = tk.Canvas(empty, width=64, height=64, bg=self.BG, highlightthickness=0)
+            icon.pack(pady=(0, 14))
+            icon.create_oval(8, 8, 40, 40, outline=self.TEXT_DIM, width=1.5, dash=(3, 3))
+            icon.create_rectangle(8, 20, 56, 56, outline=self.TEXT_DIM, width=1.5, dash=(3, 3))
+            icon.create_line(20, 38, 36, 38, fill=self.TEXT_DIM, width=1.5)
+            icon.create_line(20, 46, 44, 46, fill=self.TEXT_DIM, width=1.5)
 
-            img_path = os.path.join(IMAGE_DIR, img_name)
-            lbl_preview = tk.Label(card, bg=self.BORDER, width=36, height=36)
-            if os.path.isfile(img_path):
-                try:
-                    pil_img = Image.open(img_path)
-                    pil_img.thumbnail((36, 36))
-                    tk_img = ImageTk.PhotoImage(pil_img)
-                    self._grid_images.append(tk_img)
-                    lbl_preview.config(image=tk_img, width=0, height=0)
-                except Exception:
-                    lbl_preview.config(text="Err", fg=self.ERROR)
-            lbl_preview.pack(side=tk.LEFT, padx=(0, 14))
+            tk.Label(empty, text="No images yet",
+                     font=("Segoe UI Variable", 14, "bold"),
+                     bg=self.BG, fg=self.TEXT_DIM).pack()
+            tk.Label(empty, text="Add images to get started with your macro.",
+                     font=("Segoe UI Variable", 11), bg=self.BG,
+                     fg=self.TEXT_DIM).pack(pady=(4, 0))
+            return
 
-            details = tk.Frame(card, bg=self.CARD)
-            details.pack(side=tk.LEFT, fill=tk.Y)
-            tk.Label(details, text=img_name, font=("Segoe UI Variable", 11, "bold"),
-                     bg=self.CARD, fg=self.TEXT).pack(anchor="w")
+        # Calculate cards per row from canvas width
+        canvas_width = self.img_canvas.winfo_width()
+        if canvas_width < 50:
+            canvas_width = 800  # fallback before widget is realized
+        cell_w = self.CARD_W + self.CARD_PAD
+        cols = max(1, canvas_width // cell_w)
 
-            status_frame = tk.Frame(details, bg=self.CARD)
-            status_frame.pack(fill=tk.X)
-            indicator = tk.Canvas(status_frame, width=8, height=8, bg=self.CARD,
-                                    highlightthickness=0)
-            indicator.pack(side=tk.LEFT, pady=2)
-            lbl_status = tk.Label(status_frame, text="Checking...",
-                                   font=("Segoe UI Variable", 9),
-                                   bg=self.CARD, fg=self.TEXT_SEC)
-            lbl_status.pack(side=tk.LEFT, padx=6)
-            self.image_status_labels[img_name] = (indicator, lbl_status)
+        # Use grid layout — fixed-size cards, no column weight
+        for col in range(cols):
+            self.img_scroll_frame.columnconfigure(col, weight=0)
 
-            actions = tk.Frame(card, bg=self.CARD)
-            actions.pack(side=tk.RIGHT, fill=tk.Y)
-            create_action_btn(actions, "✏ Rename", "#7A8BA0", "#D1D5DB",
-                               lambda n=img_name: self._rename_image(n), (0, 12))
-            create_action_btn(actions, "🔄 Replace", "#FF8A3D", "#FF9D5C",
-                               lambda n=img_name: self._upload_image(n), (0, 12))
-            create_action_btn(actions, "🗑 Delete", "#E05252", "#EF4444",
-                               lambda n=img_name: self._delete_image(n), (0, 4))
+        for idx, img_name in enumerate(state.IMAGE_FILES):
+            row = idx // cols
+            col = idx % cols
+            self._create_image_card(self.img_scroll_frame, img_name, row, col)
 
         self._update_image_statuses()
         _bind_mousewheel(self.img_canvas, self.img_scroll_frame)
         self.img_canvas.bind("<MouseWheel>",
             lambda e: self.img_canvas.yview_scroll(int(-1 * (e.delta / 120)), "units"))
+
+    def _create_image_card(self, parent, img_name, row, col):
+        """Create a single image card placed with grid()."""
+        cw = self.CARD_W
+
+        # ── Shadow layer (fixed-size card) ──
+        card_shadow = tk.Frame(parent, bg=self.SHADOW,
+                                width=cw, height=self.CARD_H)
+        card_shadow.pack_propagate(False)
+        card_shadow.grid(row=row, column=col, padx=self.CARD_PAD // 2,
+                          pady=self.CARD_PAD // 2, sticky="nsew")
+
+        # ── Card with border ──
+        card = tk.Frame(card_shadow, bg=self.CARD,
+                         highlightthickness=1, highlightbackground=self.BORDER)
+        card.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
+
+        # ── Thumbnail area ──
+        thumb_h = self.CARD_THUMB
+        thumb_frame = tk.Frame(card, bg="#080E1A", height=thumb_h)
+        thumb_frame.pack(fill=tk.X, padx=0, pady=0)
+        thumb_frame.pack_propagate(False)
+
+        img_path = os.path.join(IMAGE_DIR, img_name)
+        thumb_label = tk.Label(thumb_frame, bg="#080E1A")
+        thumb_label.place(relx=0.5, rely=0.5, anchor="center")
+
+        if os.path.isfile(img_path):
+            try:
+                pil_img = Image.open(img_path)
+                pil_img.thumbnail((cw - 4, thumb_h - 4), Image.LANCZOS)
+                tk_img = ImageTk.PhotoImage(pil_img)
+                self._grid_images.append(tk_img)
+                thumb_label.config(image=tk_img)
+            except Exception:
+                thumb_label.config(text="Err", fg=self.ERROR,
+                                    font=("Segoe UI Variable", 10))
+
+        # ── Action icons on top-right of thumbnail ──
+        actions_frame = tk.Frame(thumb_frame, bg="#0A0F1C", highlightthickness=0)
+
+        # Replace button (small icon)
+        rep_btn = tk.Button(actions_frame, text="⟳", font=("Segoe UI", 9),
+                              bg="#0A0F1C", fg="#FF8A3D", bd=0, cursor="hand2",
+                              activebackground="#14203A", activeforeground="#FF9D5C",
+                              padx=3, pady=0,
+                              command=lambda n=img_name: self._upload_image(n))
+        rep_btn.pack(side=tk.LEFT, padx=1)
+        rep_btn.bind("<Enter>", lambda e, b=rep_btn: b.config(fg="#FF9D5C", bg="#14203A"))
+        rep_btn.bind("<Leave>", lambda e, b=rep_btn: b.config(fg="#FF8A3D", bg="#0A0F1C"))
+
+        # Delete button (small icon)
+        del_btn = tk.Button(actions_frame, text="✕", font=("Segoe UI", 9, "bold"),
+                             bg="#0A0F1C", fg="#7A4A4A", bd=0, cursor="hand2",
+                             activebackground="#2A1215", activeforeground=self.ERROR,
+                             padx=3, pady=0,
+                             command=lambda n=img_name: self._delete_image(n))
+        del_btn.pack(side=tk.LEFT, padx=1)
+        del_btn.bind("<Enter>", lambda e, b=del_btn: b.config(fg=self.ERROR, bg="#2A1215"))
+        del_btn.bind("<Leave>", lambda e, b=del_btn: b.config(fg="#7A4A4A", bg="#0A0F1C"))
+
+        # Place action icons at top-right
+        actions_frame.place(relx=1.0, rely=0.0, x=-4, y=4, anchor="ne")
+
+        # ── Status badge (top-left of thumbnail) ──
+        badge = tk.Canvas(thumb_frame, width=18, height=18, bg="#080E1A",
+                           highlightthickness=0)
+        badge.place(relx=0.0, rely=0.0, x=4, y=4, anchor="nw")
+        self.image_status_labels[img_name] = (badge,)
+
+        # ── Info section ──
+        info = tk.Frame(card, bg=self.CARD)
+        info.pack(fill=tk.X, padx=12, pady=(8, 10))
+
+        # Filename (truncated if too long)
+        display_name = img_name if len(img_name) <= 22 else img_name[:19] + "..."
+        name_lbl = tk.Label(info, text=display_name, font=("Segoe UI Variable", 11, "bold"),
+                             bg=self.CARD, fg=self.TEXT, anchor="w")
+        name_lbl.pack(fill=tk.X)
+
+        # Resolution & size
+        detail_text = ""
+        if os.path.isfile(img_path):
+            try:
+                pimg = Image.open(img_path)
+                fsize = os.path.getsize(img_path)
+                fsize_str = f"{fsize // 1024}KB" if fsize > 1024 else f"{fsize}B"
+                detail_text = f"{pimg.width}×{pimg.height}  ·  {fsize_str}"
+            except Exception:
+                detail_text = "Error"
+        tk.Label(info, text=detail_text, font=("Segoe UI Variable", 9),
+                 bg=self.CARD, fg=self.TEXT_DIM, anchor="w").pack(fill=tk.X, pady=(2, 0))
+
+        # ── Hover behavior (orange border glow) ──
+        def on_enter(e, c=card, cs=card_shadow):
+            c.configure(highlightbackground=self.PRIMARY, bg=self.CARD_RAISED)
+            cs.configure(bg=self.CARD_RAISED)
+
+        def on_leave(e, c=card, cs=card_shadow):
+            c.configure(highlightbackground=self.BORDER, bg=self.CARD)
+            cs.configure(bg=self.SHADOW)
+
+        for w in (card_shadow, card, info, thumb_label, thumb_frame, actions_frame):
+            w.bind("<Enter>", on_enter)
+            w.bind("<Leave>", on_leave)
 
     # ──────────────────────────────────────────────────────
     #  CORE LOGIC
@@ -1213,13 +1316,17 @@ class MacroApp:
         ScreenshotOverlay(self.root, on_capture, on_cancel)
 
     def _update_image_statuses(self):
-        for img_name, (indicator, label) in self.image_status_labels.items():
+        for img_name, badge_data in self.image_status_labels.items():
+            badge = badge_data[0] if isinstance(badge_data, tuple) else badge_data
+            badge.delete("all")
             if os.path.isfile(os.path.join(IMAGE_DIR, img_name)):
-                indicator.create_oval(1, 1, 7, 7, fill=self.SUCCESS, outline=self.SUCCESS)
-                label.config(text="Found", fg=self.SUCCESS)
+                badge.create_oval(3, 3, 15, 15, fill=self.SUCCESS, outline=self.SUCCESS)
+                badge.create_line(6, 9, 9, 12, fill="#FFFFFF", width=1.5)
+                badge.create_line(9, 12, 14, 5, fill="#FFFFFF", width=1.5)
             else:
-                indicator.create_oval(1, 1, 7, 7, fill=self.ERROR, outline=self.ERROR)
-                label.config(text="Missing", fg=self.ERROR)
+                badge.create_oval(3, 3, 15, 15, fill=self.ERROR, outline=self.ERROR)
+                badge.create_line(6, 6, 12, 12, fill="#FFFFFF", width=1.5)
+                badge.create_line(12, 6, 6, 12, fill="#FFFFFF", width=1.5)
 
     def _upload_image(self, target_name):
         path = filedialog.askopenfilename(
