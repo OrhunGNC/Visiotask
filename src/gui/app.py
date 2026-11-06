@@ -41,7 +41,7 @@ class MacroApp:
     INPUT_FOCUS = "#FF7A1A"          # Input focus border
 
     # Sequence table column widths (header + rows must match exactly)
-    COL_DRAG = 36
+    COL_DRAG = 64
     COL_DEL = 50
     COL_SKIP = 80
     COL_DC = 80
@@ -239,6 +239,7 @@ class MacroApp:
         }
 
     def _show_view(self, name):
+        self._cancel_seq_drag()
         self.current_view = name
         for v in self.views.values():
             v.pack_forget()
@@ -620,6 +621,11 @@ class MacroApp:
     # ──────────────────────────────────────────────────────
 
     def _build_sequence_view(self):
+        self._seq_rows = []
+        self._seq_drag_index = None
+        self._seq_drag_after_id = None
+        self._seq_drop_indicator = None
+        self.root.bind("<Escape>", self._cancel_seq_drag, add="+")
         view = tk.Frame(self.main_content, bg=self.BG)
         self.views["Macro Sequence"] = view
 
@@ -628,7 +634,7 @@ class MacroApp:
         tk.Label(header_frame, text="Macro Sequence",
                  font=("Segoe UI Variable", 20, "bold"),
                  bg=self.BG, fg=self.TEXT).pack(anchor="w")
-        tk.Label(header_frame, text="Arrange image checks, wait times, and conditions.",
+        tk.Label(header_frame, text="Drag the handle or use ▲/▼ to reorder image checks.",
                  font=("Segoe UI Variable", 11), bg=self.BG,
                  fg=self.TEXT_SEC).pack(anchor="w", pady=(2, 0))
 
@@ -692,8 +698,11 @@ class MacroApp:
             window=self.seq_scroll_frame, anchor="nw")
 
     def _refresh_sequence_list(self):
+        self._cancel_seq_drag()
+        scroll_position = self.seq_canvas.yview()[0]
         for widget in self.seq_scroll_frame.winfo_children():
             widget.destroy()
+        self._seq_rows = []
         if not hasattr(self, '_seq_images'):
             self._seq_images = []
         self._seq_images.clear()
@@ -711,6 +720,7 @@ class MacroApp:
             row_outer = tk.Frame(self.seq_scroll_frame, bg=self.CARD, height=58)
             row_outer.pack_propagate(False)
             row_outer.pack(fill=tk.X, pady=(4, 0))
+            self._seq_rows.append(row_outer)
 
             row = tk.Frame(row_outer, bg=self.CARD, padx=10,
                            highlightthickness=1, highlightbackground=self.BORDER)
@@ -797,15 +807,31 @@ class MacroApp:
 
             # ── Left columns ──
 
-            # Drag handle column (36px)
+            # Reorder controls share the fixed-width header column.
             drag_col = tk.Frame(row, bg=self.CARD, width=self.COL_DRAG)
             drag_col.pack_propagate(False)
             drag_col.pack(side=tk.LEFT, fill=tk.Y, pady=4)
+            arrows = tk.Frame(drag_col, bg=self.CARD)
+            arrows.pack(side=tk.LEFT)
+            for text, direction in [("▲", -1), ("▼", 1)]:
+                move_btn = tk.Button(
+                    arrows, text=text, font=("Segoe UI", 10),
+                    bg=self.CARD, fg=self.TEXT_SEC, bd=0, padx=3, pady=0,
+                    activebackground=self.CARD_RAISED, activeforeground=self.PRIMARY,
+                    disabledforeground=self.TEXT_DIM, cursor="hand2",
+                    command=lambda idx=i, d=direction: self._move_seq(idx, d),
+                    state=tk.NORMAL if 0 <= i + direction < len(state.MACRO_SEQUENCE)
+                    else tk.DISABLED)
+                move_btn.pack()
             drag_lbl = tk.Label(drag_col, text="⠿", font=("Segoe UI", 10),
-                                bg=self.CARD, fg=self.TEXT_DIM, cursor="hand2")
-            drag_lbl.pack(expand=True)
+                                bg=self.CARD, fg=self.TEXT_SEC, cursor="fleur")
+            drag_lbl.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
             drag_lbl.bind("<Enter>", on_row_enter)
             drag_lbl.bind("<Leave>", on_row_leave)
+            drag_lbl.bind("<ButtonPress-1>",
+                          lambda e, idx=i: self._start_seq_drag(e, idx))
+            drag_lbl.bind("<B1-Motion>", self._drag_seq)
+            drag_lbl.bind("<ButtonRelease-1>", self._end_seq_drag)
 
             # Image column (flexible, expand)
             img_col = tk.Frame(row, bg=self.CARD)
@@ -841,6 +867,83 @@ class MacroApp:
         _bind_mousewheel(self.seq_canvas, self.seq_scroll_frame)
         self.seq_canvas.bind("<MouseWheel>",
             lambda e: self.seq_canvas.yview_scroll(int(-1 * (e.delta / 120)), "units"))
+        self.seq_canvas.update_idletasks()
+        self.seq_canvas.yview_moveto(scroll_position)
+
+    def _start_seq_drag(self, event, idx):
+        self._cancel_seq_drag()
+        if len(state.MACRO_SEQUENCE) < 2 or not 0 <= idx < len(self._seq_rows):
+            return "break"
+        self.root.focus_set()
+        self._seq_drag_index = idx
+        self._seq_drop_indicator = tk.Frame(self.seq_scroll_frame, bg=self.PRIMARY)
+        self._drag_seq(event)
+        self._seq_drag_after_id = self.root.after(80, self._seq_drag_scroll)
+        return "break"
+
+    def _drag_seq(self, event):
+        if self._seq_drag_index is not None:
+            self._seq_drag_x = event.x_root
+            self._seq_drag_y = event.y_root
+            self._update_seq_drag_target()
+        return "break"
+
+    def _update_seq_drag_target(self):
+        # Use screen coordinates so a scrolled list has the same drop semantics.
+        rows = [row for i, row in enumerate(self._seq_rows)
+                if i != self._seq_drag_index]
+        self._seq_drop_index = sum(
+            self._seq_drag_y >= row.winfo_rooty() + row.winfo_height() / 2
+            for row in rows)
+        if self._seq_drop_index == self._seq_drag_index:
+            self._seq_drop_indicator.place_forget()
+            return
+        if self._seq_drop_index < len(rows):
+            y = rows[self._seq_drop_index].winfo_y() - 2
+        else:
+            y = rows[-1].winfo_y() + rows[-1].winfo_height()
+        self._seq_drop_indicator.place(x=0, y=max(0, y), relwidth=1, height=2)
+        self._seq_drop_indicator.lift()
+
+    def _seq_drag_scroll(self):
+        self._seq_drag_after_id = None
+        if self._seq_drag_index is None:
+            return
+        canvas = self.seq_canvas
+        if canvas.winfo_rootx() <= self._seq_drag_x < canvas.winfo_rootx() + canvas.winfo_width():
+            y = self._seq_drag_y - canvas.winfo_rooty()
+            first, last = canvas.yview()
+            if y < 24 and first > 0:
+                canvas.yview_scroll(-1, "units")
+            elif y > canvas.winfo_height() - 24 and last < 1:
+                canvas.yview_scroll(1, "units")
+            self._update_seq_drag_target()
+        self._seq_drag_after_id = self.root.after(80, self._seq_drag_scroll)
+
+    def _end_seq_drag(self, event):
+        if self._seq_drag_index is None:
+            return "break"
+        self._drag_seq(event)
+        source, target = self._seq_drag_index, self._seq_drop_index
+        canvas = self.seq_canvas
+        inside = (canvas.winfo_rootx() <= event.x_root < canvas.winfo_rootx() + canvas.winfo_width()
+                  and canvas.winfo_rooty() <= event.y_root < canvas.winfo_rooty() + canvas.winfo_height())
+        self._cancel_seq_drag()
+        if inside:
+            self._reorder_seq(source, target)
+        return "break"
+
+    def _cancel_seq_drag(self, event=None):
+        active = getattr(self, "_seq_drag_index", None) is not None
+        if getattr(self, "_seq_drag_after_id", None) is not None:
+            self.root.after_cancel(self._seq_drag_after_id)
+            self._seq_drag_after_id = None
+        if getattr(self, "_seq_drop_indicator", None) is not None:
+            self._seq_drop_indicator.destroy()
+            self._seq_drop_indicator = None
+        self._seq_drag_index = None
+        if active:
+            return "break"
 
     # ──────────────────────────────────────────────────────
     #  MANAGE IMAGES VIEW
@@ -1077,6 +1180,7 @@ class MacroApp:
     # ──────────────────────────────────────────────────────
 
     def _close_window(self):
+        self._cancel_seq_drag()
         self.stop_event.set()
         self.root.destroy()
 
@@ -1400,12 +1504,17 @@ class MacroApp:
             messagebox.showerror("Error", str(e))
 
     def _move_seq(self, idx, dir):
-        nx = idx + dir
-        if 0 <= nx < len(state.MACRO_SEQUENCE):
-            state.MACRO_SEQUENCE[idx], state.MACRO_SEQUENCE[nx] = \
-                state.MACRO_SEQUENCE[nx], state.MACRO_SEQUENCE[idx]
-            state.save_config()
-            self._refresh_sequence_list()
+        self._reorder_seq(idx, idx + dir)
+
+    def _reorder_seq(self, source_idx, target_idx):
+        sequence = state.MACRO_SEQUENCE
+        if not (0 <= source_idx < len(sequence) and 0 <= target_idx < len(sequence)):
+            return
+        if source_idx == target_idx:
+            return
+        sequence.insert(target_idx, sequence.pop(source_idx))
+        state.save_config()
+        self._refresh_sequence_list()
 
     def _update_seq_wait(self, idx, var):
         try:
